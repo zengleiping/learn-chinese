@@ -822,6 +822,10 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
   function renderPeerCursor(c){
     var el = ensurePeerCursorEl();
     if(!c || c.on === false || c.x == null || c.y == null){ el.classList.remove("show"); return; }
+    var targetBoard = stageEl.querySelector(".match-cols") || stageEl.querySelector(".circle-choices") || stageEl;
+    if (el.parentNode !== targetBoard) {
+      targetBoard.appendChild(el);
+    }
     el.style.left = c.x + "%";
     el.style.top = c.y + "%";
     el.classList.add("show");
