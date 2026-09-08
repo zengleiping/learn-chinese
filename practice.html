@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>生詞練習台 - 1對1即時同步版</title>
+<title>生詞練習台</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Public+Sans:wght@400;500;600;700&display=swap">
 <!-- SheetJS: 支援 Excel 匯入與匯出 -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -41,7 +41,7 @@
     min-height:100vh; display:flex; flex-direction:column;
   }
   h1,h2,h3,.zh{ font-family:"LXGW WenKai TC","Noto Serif TC",serif; }
-  button, input, textarea{font-family:inherit;}
+  button, input, textarea, select{font-family:inherit;}
   button:focus-visible{outline:2.5px solid var(--seal); outline-offset:2px;}
 
   /* topbar */
@@ -50,7 +50,7 @@
     padding:14px 24px;background:var(--surface);
     border-bottom:1px solid var(--grid-line); gap:16px; flex-wrap:wrap;
   }
-  .brand{display:flex;align-items:center;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;cursor:pointer;}
   .stamp{
     width:34px;height:34px;flex:none; background:var(--seal);color:#fff;
     display:flex;align-items:center;justify-content:center;
@@ -85,6 +85,41 @@
   .toggle.on .toggle-track{background:var(--bamboo);border-color:var(--bamboo);}
   .toggle.on .toggle-track::after{transform:translateX(16px);}
 
+  /* 專案大廳 (封面首頁) */
+  .lobby-wrap{
+    flex:1;padding:36px clamp(16px, 5vw, 64px);
+    max-width:1120px;margin:0 auto;width:100%;
+  }
+  .lobby-header{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    margin-bottom:28px;gap:16px;flex-wrap:wrap;border-bottom:1.5px solid var(--grid-line);padding-bottom:18px;
+  }
+  .lobby-header h2{margin:0;font-size:24px;font-weight:700;}
+  .lobby-header p{margin:4px 0 0;font-size:14px;color:var(--ink-soft);}
+  .project-grid{
+    display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:20px;
+  }
+  .project-card{
+    background:var(--surface);border:1.5px solid var(--grid-line);border-radius:14px;
+    padding:20px;display:flex;flex-direction:column;justify-content:space-between;
+    min-height:180px;box-shadow:var(--shadow);transition:transform .15s ease, border-color .15s ease;
+    position:relative;
+  }
+  .project-card:hover{transform:translateY(-3px);border-color:var(--seal);}
+  .project-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .project-title{font-size:17px;font-weight:700;margin:0 0 6px;line-height:1.4;}
+  .project-desc{font-size:13px;color:var(--ink-soft);margin:0;line-height:1.5;}
+  .project-card-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:20px;padding-top:14px;border-top:1px solid var(--grid-line);
+  }
+  .project-badge{
+    font-size:11.5px;font-weight:700;background:var(--surface-2);color:var(--ink-soft);
+    padding:3px 8px;border-radius:6px;
+  }
+  .project-actions-btns{display:flex;gap:6px;}
+
+  /* 教學主舞台佈局 */
   .layout{flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0;}
   .app.student-mode .layout, .app.present .layout{grid-template-columns:1fr;}
   .app.student-mode .sidebar, .app.present .sidebar{display:none;}
@@ -126,7 +161,7 @@
   .stage-sub{font-size:13px;color:var(--ink-soft);margin:0;}
   .stage-actions{display:flex;gap:8px;}
 
-  /* 連連看樣式 */
+  /* 連連看樣式與對錯動畫 */
   .match-board{position:relative;}
   .match-cols{display:flex;justify-content:space-between;gap:clamp(20px,6vw,100px);position:relative;z-index:1;}
   .match-col{flex:1;display:flex;flex-direction:column;gap:12px;max-width:340px;}
@@ -143,7 +178,12 @@
     border-color:var(--bamboo);background:var(--bamboo-soft);color:var(--bamboo);
     font-weight:700;cursor:default;animation:popSuccess .3s ease;
   }
-  .match-item.wrong{border-color:var(--seal) !important;background:var(--seal-soft) !important;animation:shakeWrong .45s ease;}
+  .match-item.wrong{
+    border-color:var(--seal) !important;
+    background:var(--seal-soft) !important;
+    color:var(--seal) !important;
+    animation:shakeWrong .45s ease;
+  }
 
   /* 選擇題與圈選題 */
   .circle-prompt{font-family:"LXGW WenKai TC",serif;font-size:20px;margin:0 0 18px;line-height:1.6;}
@@ -167,7 +207,7 @@
   .mc-option-btn:hover:not(:disabled){border-color:var(--ink-soft);background:var(--surface);}
   .mc-option-btn.selected{border-color:var(--seal);background:var(--seal-soft);color:var(--seal);}
   .mc-option-btn.correct{border-color:var(--bamboo);background:var(--bamboo-soft);color:var(--bamboo);font-weight:700;animation:popSuccess .3s ease;}
-  .mc-option-btn.wrong{border-color:var(--seal);background:var(--seal-soft);color:var(--seal);animation:shakeWrong .45s ease;}
+  .mc-option-btn.wrong{border-color:var(--seal) !important;background:var(--seal-soft) !important;color:var(--seal) !important;animation:shakeWrong .45s ease;}
   .mc-opt-prefix{
     width:28px;height:28px;border-radius:50%;background:var(--surface-2);
     display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
@@ -176,10 +216,10 @@
   .mc-option-btn.wrong .mc-opt-prefix{background:var(--seal);color:#fff;}
 
   @keyframes shakeWrong{
-    10%, 90% { transform: translate3d(-2px, 0, 0); }
-    20%, 80% { transform: translate3d(4px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
-    40%, 60% { transform: translate3d(6px, 0, 0); }
+    10%, 90% { transform: translate3d(-3px, 0, 0); }
+    20%, 80% { transform: translate3d(5px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-7px, 0, 0); }
+    40%, 60% { transform: translate3d(7px, 0, 0); }
   }
   @keyframes popSuccess{
     0%{ transform:scale(0.96); } 50%{ transform:scale(1.04); } 100%{ transform:scale(1); }
@@ -246,11 +286,14 @@
   canvas#paint-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;touch-action:none;cursor:crosshair;}
   
   .text-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
+  
+  /* 關鍵對準修復：加入 translate(-50%, -50%) 將文字錨點鎖定於中心，且字體依比例等比縮放 */
   .movable-text{
     position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif;
     font-weight:700;line-height:1.2;color:var(--ink);user-select:none;
     padding:4px 8px;border:2px dashed transparent;border-radius:6px;white-space:pre;
-    cursor:grab;transition:border-color .15s ease, background .15s ease;
+    cursor:grab;transform:translate(-50%, -50%);
+    transition:border-color .15s ease, background .15s ease;
   }
   .movable-text:hover{
     border:2px solid #1E88E5 !important;background:rgba(255,255,255,0.92);
@@ -266,6 +309,7 @@
   .peer-cursor-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 1px 6px rgba(0,0,0,.35);}
   .peer-cursor-label{color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
 
+  /* 彈窗設計 */
   .dialog-modal{border:none;border-radius:16px;padding:0;background:var(--surface);color:var(--ink);box-shadow:var(--shadow);width:min(580px,92vw);max-height:86vh;}
   .dialog-modal::backdrop{background:rgba(20,20,18,0.45);}
   .dialog-head{padding:20px 24px 4px;}
@@ -290,17 +334,30 @@
 
 <div class="app" id="app">
   <header class="topbar">
-    <div class="brand">
+    <div class="brand" id="brand-logo" title="點擊返回課程大廳">
       <div class="stamp">好</div>
       <div class="brand-text">
         <h1 id="brand-title">生詞練習台</h1>
-        <p id="brand-sub">1對1 即時互動教學系統</p>
+        <p id="brand-sub">專案課次大廳</p>
       </div>
     </div>
     <div class="topbar-actions" id="topbar-actions"></div>
   </header>
 
-  <div class="layout">
+  <!-- 專案大廳 (封面首頁) -->
+  <div class="lobby-wrap" id="lobby-view">
+    <div class="lobby-header">
+      <div>
+        <h2>📚 我的課次與教學專案</h2>
+        <p>點選課次進入互動教學台，或自由新增、編輯與刪除課次</p>
+      </div>
+      <button type="button" class="btn btn-primary" id="btn-create-project">＋ 新增課次專案</button>
+    </div>
+    <div class="project-grid" id="project-grid"></div>
+  </div>
+
+  <!-- 教學主舞台 -->
+  <div class="layout" id="classroom-view" style="display:none;">
     <aside class="sidebar" id="sidebar">
       <button class="btn btn-primary btn-new" id="btn-new" type="button">＋ 新增題目</button>
 
@@ -320,6 +377,25 @@
     </main>
   </div>
 </div>
+
+<!-- 課次專案 編輯／新增彈窗 -->
+<dialog class="dialog-modal" id="project-dialog">
+  <form id="project-form">
+    <div class="dialog-head">
+      <h2 id="project-dialog-title">新增課次專案</h2>
+    </div>
+    <div class="dialog-body">
+      <label for="f-proj-title">課次／專案名稱</label>
+      <input type="text" id="f-proj-title" placeholder="例如：115-1 對泰華語轉銜線上華語課" required>
+      <label for="f-proj-desc">簡介／說明備註</label>
+      <textarea id="f-proj-desc" rows="3" placeholder="例如：包含見面問好、學校生活生詞配對與生字書寫練習"></textarea>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" class="btn btn-ghost" id="btn-cancel-project">取消</button>
+      <button type="submit" class="btn btn-primary">儲存課次</button>
+    </div>
+  </form>
+</dialog>
 
 <!-- 設定彈窗：僅限老師使用 -->
 <dialog class="dialog-modal" id="settings-dialog">
@@ -526,8 +602,62 @@
     }catch(e){}
   }
 
-  var STORAGE_KEY = "hanyu-practice-v1";
+  /* ================== 專案/課次 資料管理 ================== */
+  var PROJECTS_KEY = "hanyu-practice-projects-v3";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
+
+  var DEFAULT_PROJECTS = {
+    "proj_thai": {
+      id: "proj_thai",
+      title: "115-1 對泰華語轉銜線上華語課",
+      desc: "專為轉銜設計：包含問候生詞配對、語意單選題與生字田字格手寫示範",
+      currentSetId: "sample_match",
+      sets: {
+        sample_match: {
+          id:"sample_match", type:"match", title:"生詞配對：你好！（範例）",
+          leftLabel:"生詞", rightLabel:"拼音",
+          pairs:{
+            p1:{id:"p1", left:"你好", right:"nǐ hǎo"},
+            p2:{id:"p2", left:"謝謝", right:"xièxie"},
+            p3:{id:"p3", left:"再見", right:"zàijiàn"},
+            p4:{id:"p4", left:"老師", right:"lǎoshī"},
+            p5:{id:"p5", left:"學生", right:"xuéshēng"}
+          }
+        },
+        sample_choice: {
+          id:"sample_choice", type:"choice", title:"生詞語意選擇（範例）",
+          prompt:"請選出「學生」的拼音與英文意思：",
+          choices:{
+            c1:{id:"c1", text:"老師 (lǎoshī / Teacher)"},
+            c2:{id:"c2", text:"學生 (xuéshēng / Student)"},
+            c3:{id:"c3", text:"朋友 (péngyǒu / Friend)"}
+          },
+          answerId:"c2"
+        },
+        sample_board: {
+          id:"sample_board", type:"board", title:"生字書寫教學：『好』",
+          desc:"靠近文字框變成實線即可自由移動，可自訂字號大小並點選聲調。",
+          bgImage:"", gridType:"jiu"
+        }
+      }
+    }
+  };
+
+  function loadProjects(){
+    try{
+      var raw = localStorage.getItem(PROJECTS_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed && Object.keys(parsed).length) return parsed;
+      }
+    }catch(e){}
+    return JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+  }
+
+  var projects = loadProjects();
+  function saveProjects(){
+    try{ localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects)); }catch(e){}
+  }
 
   var params = new URLSearchParams(location.search);
   var urlRoom = params.get("room");
@@ -546,6 +676,8 @@
 
   var roomData = null;
   var cursorOn = true;
+  var activeProjectId = null;
+  var editingProjectId = null;
 
   var CURSOR_COLORS = ["#1E88E5", "#4C7A5E", "#FB8C00", "#8E24AA", "#00897B", "#D81B60"];
   function getColorForStudent(nameOrId, role){
@@ -555,53 +687,19 @@
     return CURSOR_COLORS[sum % CURSOR_COLORS.length];
   }
 
-  var SAMPLE_SETS = {
-    sample_match: {
-      id:"sample_match", type:"match", title:"生詞配對：你好！（範例）",
-      leftLabel:"生詞", rightLabel:"拼音",
-      pairs:{
-        p1:{id:"p1", left:"你好", right:"nǐ hǎo"},
-        p2:{id:"p2", left:"謝謝", right:"xièxie"},
-        p3:{id:"p3", left:"再見", right:"zàijiàn"},
-        p4:{id:"p4", left:"老師", right:"lǎoshī"},
-        p5:{id:"p5", left:"學生", right:"xuéshēng"}
-      }
-    },
-    sample_choice: {
-      id:"sample_choice", type:"choice", title:"生詞語意選擇（範例）",
-      prompt:"請選出「學生」的拼音與英文意思：",
-      choices:{
-        c1:{id:"c1", text:"老師 (lǎoshī / Teacher)"},
-        c2:{id:"c2", text:"學生 (xuéshēng / Student)"},
-        c3:{id:"c3", text:"朋友 (péngyǒu / Friend)"}
-      },
-      answerId:"c2"
-    },
-    sample_board: {
-      id:"sample_board", type:"board", title:"生字書寫教學：『好』",
-      desc:"靠近文字框變成實線即可自由移動，可自訂字號大小並點選聲調。",
-      bgImage:"",
-      gridType:"jiu"
-    }
-  };
-
-  function loadLocal(){
-    try{
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if(raw){
-        var parsed = JSON.parse(raw);
-        if(parsed && parsed.sets && Object.keys(parsed.sets).length) return parsed;
-      }
-    }catch(e){}
-    return { sets: JSON.parse(JSON.stringify(SAMPLE_SETS)), currentId:"sample_match", progress:{} };
-  }
-  var local = loadLocal();
-  if(!local.progress) local.progress = {};
-  function saveLocal(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(local)); }catch(e){} }
-
   function inRoom(){ return !!activeRoomId; }
-  function getSets(){ return inRoom() ? (roomData && roomData.sets || {}) : local.sets; }
-  function getCurrentId(){ return inRoom() ? (roomData && roomData.currentSetId) : local.currentId; }
+  function getActiveProject(){
+    if(inRoom()) return roomData && roomData.project;
+    return activeProjectId ? projects[activeProjectId] : null;
+  }
+  function getSets(){ 
+    var proj = getActiveProject();
+    return (proj && proj.sets) || {};
+  }
+  function getCurrentId(){ 
+    var proj = getActiveProject();
+    return (proj && proj.currentSetId) || Object.keys(getSets())[0];
+  }
   function getCurrentSet(){ return getSets()[getCurrentId()] || null; }
   function isOpenForStudent(){ return inRoom() ? (roomData && roomData.isOpen !== undefined ? !!roomData.isOpen : true) : true; }
   
@@ -610,29 +708,43 @@
     return isOpenForStudent();
   }
 
-  /* 核心：1對1即時共用進度 (shared)，確保師生雙方畫面、連線與寫字板完全同步 */
+  /* 核心：1對1即時共用進度 (shared) */
   function getProgress(setId){
     if(inRoom()){
       return (roomData && roomData.sharedProgress && roomData.sharedProgress[setId]) || {};
     }
-    if(!local.progress[setId]) local.progress[setId] = {};
-    return local.progress[setId];
+    var proj = getActiveProject();
+    if(proj){
+      if(!proj.progress) proj.progress = {};
+      if(!proj.progress[setId]) proj.progress[setId] = {};
+      return proj.progress[setId];
+    }
+    return {};
   }
 
   function writeSets(newSets, newCurrentId){
     if(inRoom()){
-      var patch = { sets: newSets };
-      if(newCurrentId !== undefined) patch.currentSetId = newCurrentId;
+      var patch = { "project/sets": newSets };
+      if(newCurrentId !== undefined) patch["project/currentSetId"] = newCurrentId;
       update(ref(db, "rooms/" + activeRoomId), patch);
     } else {
-      local.sets = newSets;
-      if(newCurrentId !== undefined) local.currentId = newCurrentId;
-      saveLocal(); renderSidebar(); renderStage();
+      var proj = getActiveProject();
+      if(proj){
+        proj.sets = newSets;
+        if(newCurrentId !== undefined) proj.currentSetId = newCurrentId;
+        saveProjects(); renderSidebar(); renderStage();
+      }
     }
   }
+
   function setCurrent(id){
-    if(inRoom()){ update(ref(db, "rooms/" + activeRoomId), { currentSetId: id }); }
-    else { local.currentId = id; saveLocal(); renderSidebar(); renderStage(); }
+    if(inRoom()){ update(ref(db, "rooms/" + activeRoomId + "/project"), { currentSetId: id }); }
+    else { 
+      var proj = getActiveProject();
+      if(proj){
+        proj.currentSetId = id; saveProjects(); renderSidebar(); renderStage(); 
+      }
+    }
   }
 
   function writeProgress(setId, patch){
@@ -640,15 +752,151 @@
       update(ref(db, "rooms/" + activeRoomId + "/sharedProgress/" + setId), patch); 
     } else { 
       Object.assign(getProgress(setId), patch); 
-      saveLocal(); 
+      saveProjects(); 
       renderStage(); 
     }
   }
+
+  /* ================== 大廳／主舞台 切換邏輯 ================== */
+  var lobbyView = document.getElementById("lobby-view");
+  var classroomView = document.getElementById("classroom-view");
+
+  function showLobby(){
+    activeProjectId = null;
+    lobbyView.style.display = "block";
+    classroomView.style.display = "none";
+    document.getElementById("brand-sub").textContent = "專案課次大廳";
+    renderLobbyGrid();
+    renderTopbar();
+  }
+
+  function openProject(projId){
+    activeProjectId = projId;
+    var proj = projects[projId];
+    lobbyView.style.display = "none";
+    classroomView.style.display = "grid";
+    document.getElementById("brand-sub").textContent = proj.title;
+    renderTopbar();
+    renderSidebar();
+    renderStage();
+  }
+
+  document.getElementById("brand-logo").onclick = function(){
+    if(isStudent) return;
+    if(inRoom()){
+      if(confirm("目前正在進行線上連線，確定要結束連線並返回課次大廳嗎？")){
+        leaveRoom();
+        showLobby();
+      }
+    } else {
+      showLobby();
+    }
+  };
+
+  /* 渲染專案卡片清單（封面） */
+  var projectGrid = document.getElementById("project-grid");
+  function renderLobbyGrid(){
+    projectGrid.innerHTML = "";
+    var keys = Object.keys(projects);
+    keys.forEach(function(pid){
+      var proj = projects[pid];
+      var count = Object.keys(proj.sets || {}).length;
+
+      var card = document.createElement("div");
+      card.className = "project-card";
+      card.innerHTML = `
+        <div>
+          <div class="project-card-head">
+            <h3 class="project-title zh">${proj.title}</h3>
+          </div>
+          <p class="project-desc">${proj.desc || "點擊進入開始備課或線上教學練習"}</p>
+        </div>
+        <div class="project-card-foot">
+          <span class="project-badge">📦 ${count} 組練習</span>
+          <div class="project-actions-btns">
+            <button type="button" class="btn btn-sm btn-ghost btn-edit-proj" title="編輯課次名稱">✏️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-del-proj" title="刪除課次" style="color:var(--seal);">🗑️</button>
+            <button type="button" class="btn btn-sm btn-primary btn-enter-proj">進入上課 →</button>
+          </div>
+        </div>
+      `;
+
+      card.querySelector(".btn-enter-proj").onclick = function(){ openProject(pid); };
+      card.querySelector(".btn-edit-proj").onclick = function(e){
+        e.stopPropagation();
+        openProjectDialog(pid);
+      };
+      card.querySelector(".btn-del-proj").onclick = function(e){
+        e.stopPropagation();
+        if(Object.keys(projects).length <= 1){
+          alert("至少要保留一個課次專案喔！");
+          return;
+        }
+        if(confirm(`確定要刪除「${proj.title}」專案嗎？裡面的所有題目將被清除。`)){
+          delete projects[pid];
+          saveProjects();
+          renderLobbyGrid();
+        }
+      };
+
+      projectGrid.appendChild(card);
+    });
+  }
+
+  /* 課次專案新增／編輯彈窗 */
+  var projectDialog = document.getElementById("project-dialog");
+  function openProjectDialog(editId){
+    editingProjectId = editId || null;
+    document.getElementById("project-dialog-title").textContent = editingProjectId ? "編輯課次專案" : "新增課次專案";
+    if(editingProjectId){
+      var p = projects[editingProjectId];
+      document.getElementById("f-proj-title").value = p.title;
+      document.getElementById("f-proj-desc").value = p.desc || "";
+    } else {
+      document.getElementById("f-proj-title").value = "";
+      document.getElementById("f-proj-desc").value = "";
+    }
+    projectDialog.showModal();
+  }
+
+  document.getElementById("btn-create-project").onclick = function(){ openProjectDialog(null); };
+  document.getElementById("btn-cancel-project").onclick = function(){ projectDialog.close(); };
+
+  document.getElementById("project-form").onsubmit = function(e){
+    e.preventDefault();
+    var title = document.getElementById("f-proj-title").value.trim();
+    var desc = document.getElementById("f-proj-desc").value.trim();
+    if(!title) return;
+
+    if(editingProjectId){
+      projects[editingProjectId].title = title;
+      projects[editingProjectId].desc = desc;
+    } else {
+      var newId = uid("proj");
+      projects[newId] = {
+        id: newId, title: title, desc: desc,
+        currentSetId: "sample_match",
+        sets: JSON.parse(JSON.stringify(DEFAULT_PROJECTS["proj_thai"].sets))
+      };
+    }
+    saveProjects();
+    projectDialog.close();
+    renderLobbyGrid();
+  };
 
   /* 頂部控制列 */
   var topbarActions = document.getElementById("topbar-actions");
   function renderTopbar(){
     topbarActions.innerHTML = "";
+
+    if(!isStudent && activeProjectId && !inRoom()){
+      var backBtn = document.createElement("button");
+      backBtn.className = "btn btn-sm btn-ghost";
+      backBtn.textContent = "◀ 課次大廳";
+      backBtn.onclick = showLobby;
+      topbarActions.appendChild(backBtn);
+    }
+
     if(inRoom()){
       var c2 = document.createElement("div"); c2.className = "room-cluster";
       var onlineCount = 0;
@@ -688,7 +936,7 @@
         var shareBtn = document.createElement("button"); shareBtn.className = "btn btn-sm btn-primary"; shareBtn.textContent = "🔗 複製學生連結";
         shareBtn.onclick = function(){
           var link = location.origin + location.pathname + "?room=" + activeRoomId + "&role=student";
-          navigator.clipboard.writeText(link).then(function(){ alert("✅ 學生連結已複製！傳給學生點開即可加入。"); });
+          navigator.clipboard.writeText(link).then(function(){ alert("✅ 學生連結已複製！傳給學生點開即可加入這課。"); });
         };
         topbarActions.appendChild(shareBtn);
 
@@ -696,8 +944,8 @@
         leaveBtn.onclick = leaveRoom;
         topbarActions.appendChild(leaveBtn);
       }
-    } else {
-      var btn = document.createElement("button"); btn.className = "btn btn-primary"; btn.textContent = "🔗 開新房間";
+    } else if(activeProjectId){
+      var btn = document.createElement("button"); btn.className = "btn btn-primary"; btn.textContent = "🔗 開新房間（上這課）";
       btn.onclick = createRoom;
       topbarActions.appendChild(btn);
     }
@@ -712,8 +960,11 @@
   async function createRoom(){
     var rId = String(Math.floor(1000 + Math.random() * 9000));
     activeRoomId = rId;
+    var currentProj = projects[activeProjectId];
+
     await set(ref(db, "rooms/" + rId), {
-      currentSetId: local.currentId, sets: local.sets, sharedProgress: {},
+      project: currentProj,
+      sharedProgress: {},
       isOpen: true,
       presence: { teacher: { online:true, name:"老師" } }
     });
@@ -722,7 +973,7 @@
     history.replaceState(null, "", "?room=" + rId);
     renderTopbar();
     var link = location.origin + location.pathname + "?room=" + rId + "&role=student";
-    navigator.clipboard.writeText(link).then(function(){ alert("✅ 房間已開好！\n學生連結已複製到剪貼簿，傳給學生即可加入。"); });
+    navigator.clipboard.writeText(link).then(function(){ alert("✅ 房間已開好！\n學生連結已複製到剪貼簿，傳給學生點開即可加入。"); });
   }
 
   function leaveRoom(){
@@ -731,7 +982,12 @@
     }
     activeRoomId = null; roomData = null;
     history.replaceState(null, "", location.pathname);
-    renderTopbar(); renderSidebar(); renderStage();
+    renderTopbar();
+    if(activeProjectId) {
+      renderSidebar(); renderStage();
+    } else {
+      showLobby();
+    }
   }
 
   function attachPresence(rId, id, name){
@@ -744,6 +1000,13 @@
     activeRoomId = rId; roomRole = role;
     onValue(ref(db, "rooms/" + rId), function(snap){
       roomData = snap.val() || {};
+      if(isStudent){
+        lobbyView.style.display = "none";
+        classroomView.style.display = "grid";
+        if(roomData.project){
+          document.getElementById("brand-sub").textContent = roomData.project.title;
+        }
+      }
       renderTopbar(); renderSidebar(); renderStage();
     });
     onValue(ref(db, "roomCursors/" + rId), function(snap){
@@ -793,7 +1056,7 @@
       var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.onclick = function(){
-        writeProgress(s.id, { matched:{}, selected:{}, choicePick:null, revealed:false, strokes:[], texts:[] });
+        writeProgress(s.id, { matched:{}, selected:{}, choicePick:null, revealed:false, strokes:[], texts:[], lastWrong:null });
       };
       actWrap.appendChild(resetBtn);
 
@@ -820,7 +1083,7 @@
     else if(s.type === "board") renderDrawBoard(s);
   }
 
-  /* 選擇題 */
+  /* 選擇題（含雙向答錯即時廣播） */
   function renderChoiceBoard(s){
     var progress = getProgress(s.id);
     var interactive = canInteract();
@@ -841,6 +1104,7 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "mc-option-btn";
+      btn.dataset.cid = cid;
 
       var isThisPicked = currentPick === cid;
       var isCorrect = s.answerId === cid;
@@ -862,9 +1126,16 @@
 
       btn.onclick = function(){
         if(!interactive || isRevealed) return;
-        if(isCorrect) playCorrectSound();
-        else playWrongSound();
-        writeProgress(s.id, { choicePick: cid });
+        if(isCorrect){
+          playCorrectSound();
+          writeProgress(s.id, { choicePick: cid, lastChoiceWrong: null });
+        } else {
+          playWrongSound();
+          writeProgress(s.id, { 
+            choicePick: cid, 
+            lastChoiceWrong: { cid: cid, t: Date.now(), who: myName } 
+          });
+        }
       };
 
       cBox.appendChild(btn);
@@ -880,9 +1151,21 @@
     }
 
     stageEl.appendChild(wrap);
+
+    var lastChoiceWrong = progress.lastChoiceWrong;
+    if(lastChoiceWrong && lastChoiceWrong.t && (Date.now() - lastChoiceWrong.t < 1200)){
+      var wBtn = cBox.querySelector(`.mc-option-btn[data-cid="${lastChoiceWrong.cid}"]`);
+      if(wBtn && !wBtn.classList.contains("wrong")){
+        wBtn.classList.add("wrong");
+        playWrongSound();
+        setTimeout(function(){
+          if(wBtn) wBtn.classList.remove("wrong");
+        }, 500);
+      }
+    }
   }
 
-  /* 寫字板功能 */
+  /* 寫字板功能（精準中心錨點對齊 + 等比字體筆觸縮放） */
   function renderDrawBoard(s){
     var progress = getProgress(s.id);
     var strokes = progress.strokes || [];
@@ -953,11 +1236,18 @@
     var currentPath = [];
     var activeSelectedTextId = null;
 
+    // 關鍵計算：取得相對於基準 500px 畫布的縮放比率
+    function getScaleRatio(){
+      var w = cWrap.clientWidth || canvas.width || 500;
+      return Math.max(0.4, w / 500);
+    }
+
     function resizeCanvas(){
       var r = cWrap.getBoundingClientRect();
       if(r.width > 0 && r.height > 0){
         canvas.width = r.width; canvas.height = r.height;
         redrawStrokes();
+        renderTexts(); // 尺寸變動時，文字圖層自動以等比字級重畫，防止排版跑位
       }
     }
     requestAnimationFrame(resizeCanvas);
@@ -965,16 +1255,17 @@
 
     function redrawStrokes(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
+      var scale = getScaleRatio();
       strokes.forEach(function(st){
         if(!st.points || st.points.length < 2) return;
         ctx.save();
         if(st.isEraser){
           ctx.globalCompositeOperation = "destination-out";
-          ctx.lineWidth = st.size * 2.5;
+          ctx.lineWidth = Math.max(2, st.size * 2.5 * scale);
         } else {
           ctx.globalCompositeOperation = "source-over";
           ctx.strokeStyle = st.color;
-          ctx.lineWidth = st.size;
+          ctx.lineWidth = Math.max(1, st.size * scale);
         }
         ctx.lineCap = "round"; ctx.lineJoin = "round";
         ctx.beginPath();
@@ -985,11 +1276,12 @@
         ctx.stroke();
         ctx.restore();
       });
-      renderTexts();
     }
 
     function renderTexts(){
       textLayer.innerHTML = "";
+      var scale = getScaleRatio();
+
       texts.forEach(function(t, idx){
         var div = document.createElement("div");
         div.className = "movable-text" + (t.id === activeSelectedTextId ? " active" : "");
@@ -997,7 +1289,10 @@
         div.style.left = t.x + "%";
         div.style.top = t.y + "%";
         div.style.color = t.color || "#2A333C";
-        div.style.fontSize = (t.fontSize || 28) + "px";
+        
+        // 核心對齊修復：字級大小依畫布寬度等比計算，確保在大小螢幕視覺比例完全一致
+        var baseSize = t.fontSize || 36;
+        div.style.fontSize = Math.round(baseSize * scale) + "px";
 
         div.onmousedown = function(e){
           e.stopPropagation();
@@ -1018,8 +1313,8 @@
           function onMove(ev){
             var dx = (ev.clientX - startX) / rect.width * 100;
             var dy = (ev.clientY - startY) / rect.height * 100;
-            t.x = Math.max(0, Math.min(95, origX + dx));
-            t.y = Math.max(0, Math.min(95, origY + dy));
+            t.x = Math.max(5, Math.min(95, origX + dx));
+            t.y = Math.max(5, Math.min(95, origY + dy));
             div.style.left = t.x + "%";
             div.style.top = t.y + "%";
           }
@@ -1076,10 +1371,11 @@
       if(activeTool === "text"){
         var txt = prompt("請輸入文字內容（漢字或拼音）：");
         if(txt && txt.trim()){
-          var sizeChoice = prompt("請輸入字體大小 (例如 24, 32, 48, 64)：", "36");
+          var sizeChoice = prompt("請輸入字體大小 (例如 24, 36, 48, 64)：", "36");
           var fSize = parseInt(sizeChoice, 10);
           if(isNaN(fSize) || fSize < 12) fSize = 36;
 
+          // 核心對齊修復：點擊位置 p.x, p.y 即為文字的中心點
           texts.push({ 
             id: uid("t"), 
             text: txt.trim(), 
@@ -1102,14 +1398,15 @@
       var p = getPos(e);
       currentPath.push(p);
 
+      var scale = getScaleRatio();
       ctx.save();
       if(activeTool === "pixel-eraser"){
         ctx.globalCompositeOperation = "destination-out";
-        ctx.lineWidth = activeSize * 2.5;
+        ctx.lineWidth = Math.max(2, activeSize * 2.5 * scale);
       } else {
         ctx.globalCompositeOperation = "source-over";
         ctx.strokeStyle = activeColor;
-        ctx.lineWidth = activeSize;
+        ctx.lineWidth = Math.max(1, activeSize * scale);
       }
       ctx.lineCap = "round"; ctx.lineJoin = "round";
       ctx.beginPath();
@@ -1172,8 +1469,8 @@
         texts.push({
           id: uid("t"),
           text: tone,
-          x: 48,
-          y: 45,
+          x: 50,
+          y: 50,
           color: activeColor,
           fontSize: 38
         });
@@ -1205,7 +1502,7 @@
     };
   }
 
-  /* 連連看：強制一致排序、如實呈現老師故意寫錯的狀態 */
+  /* 連連看：強制一致排序、雙向即時同步答錯狀態 */
   function renderMatchBoard(s){
     var progress = getProgress(s.id);
     var matched = progress.matched || {};
@@ -1265,19 +1562,16 @@
         if(selL === selR){
           playCorrectSound();
           matched[selL] = true;
-          writeProgress(s.id, { matched: matched });
+          writeProgress(s.id, { matched: matched, lastWrong: null });
 
           if(Object.keys(matched).length === pIds.length){
             setTimeout(playVictorySound, 400);
           }
         } else {
           playWrongSound();
-          if(leftBtn) leftBtn.classList.add("wrong");
-          if(rightBtn) rightBtn.classList.add("wrong");
-          setTimeout(function(){
-            if(leftBtn){ leftBtn.classList.remove("wrong", "selected"); }
-            if(rightBtn){ rightBtn.classList.remove("wrong", "selected"); }
-          }, 450);
+          writeProgress(s.id, { 
+            lastWrong: { left: selL, right: selR, t: Date.now(), who: myName } 
+          });
         }
         selL = null; selR = null;
       }
@@ -1286,6 +1580,21 @@
     cols.appendChild(lCol); cols.appendChild(rCol);
     wrap.appendChild(cols);
     stageEl.appendChild(wrap);
+
+    var lastWrong = progress.lastWrong;
+    if(lastWrong && lastWrong.t && (Date.now() - lastWrong.t < 1200)){
+      var wLeft = lCol.querySelector(`.match-item[data-id="${lastWrong.left}"]`);
+      var wRight = rCol.querySelector(`.match-item[data-id="${lastWrong.right}"]`);
+      if(wLeft && wRight && !wLeft.classList.contains("wrong")){
+        wLeft.classList.add("wrong");
+        wRight.classList.add("wrong");
+        playWrongSound();
+        setTimeout(function(){
+          if(wLeft) wLeft.classList.remove("wrong", "selected");
+          if(wRight) wRight.classList.remove("wrong", "selected");
+        }, 500);
+      }
+    }
 
     function drawLines(){
       var rect = wrap.getBoundingClientRect();
@@ -1410,44 +1719,6 @@
       role: roomRole 
     });
   });
-
-  /* 設定面板 */
-  var soundSelect = document.getElementById("setting-sound-style");
-  soundSelect.value = currentSoundStyle;
-
-  soundSelect.onchange = function(){
-    currentSoundStyle = soundSelect.value;
-    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
-  };
-
-  document.getElementById("btn-test-sound").onclick = function(){
-    playCorrectSound();
-    setTimeout(playWrongSound, 600);
-  };
-
-  document.querySelectorAll("[data-theme-color]").forEach(function(tb){
-    tb.onclick = function(){
-      var col = tb.dataset.themeColor;
-      var root = document.documentElement;
-      if(col === "bamboo"){
-        root.style.setProperty("--seal", "#4C7A5E");
-        root.style.setProperty("--seal-soft", "#DEEBE3");
-      } else if(col === "blue"){
-        root.style.setProperty("--seal", "#1E88E5");
-        root.style.setProperty("--seal-soft", "#E3F2FD");
-      } else if(col === "amber"){
-        root.style.setProperty("--seal", "#E65100");
-        root.style.setProperty("--seal-soft", "#FFE0B2");
-      } else {
-        root.style.setProperty("--seal", "#B23B32");
-        root.style.setProperty("--seal-soft", "#F5DFDB");
-      }
-    };
-  });
-
-  document.getElementById("btn-close-settings").onclick = function(){
-    document.getElementById("settings-dialog").close();
-  };
 
   /* 題目手動編輯彈窗 */
   var dialog = document.getElementById("editor-dialog");
@@ -1745,14 +2016,14 @@
         exportRows.push({ "題型": "choice", "題目名稱": s.title, "左欄生詞": "", "右欄拼音或意思": "", "題目說明": s.prompt || "", "選項(逗號分開)": cTexts, "正確答案": ansText });
       }
     });
-    if(exportRows.length === 0){ alert("Let's export correct questions."); return; }
+    if(exportRows.length === 0){ alert("目前沒有可匯出的題目。"); return; }
     var ws = XLSX.utils.json_to_sheet(exportRows);
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "題庫備份");
     XLSX.writeFile(wb, "生詞題庫備份_" + new Date().toISOString().slice(0,10) + ".xlsx");
   };
 
-  /* 學生加入引導 */
+  /* 學生自填姓名引導 */
   function handleStudentJoin(){
     if(!isStudent || !urlRoom) return;
     if(urlName){
@@ -1773,19 +2044,16 @@
     };
   }
 
-  /* 初始化 */
-  renderTopbar(); renderSidebar();
-  if(urlRoom){
+  /* 初始化流程 */
+  if(isStudent){
+    window.addEventListener("firebase-bridge-ready", handleStudentJoin);
+  } else if(urlRoom){
     window.addEventListener("firebase-bridge-ready", function(){
-      if(isStudent){
-        handleStudentJoin();
-      } else {
-        attachPresence(urlRoom, "teacher", "老師");
-        startRoom(urlRoom, "teacher");
-      }
+      attachPresence(urlRoom, "teacher", "老師");
+      startRoom(urlRoom, "teacher");
     });
   } else {
-    renderStage();
+    showLobby();
   }
 })();
 </script>
