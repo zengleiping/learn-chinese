@@ -857,9 +857,10 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     stageEl.addEventListener("mousemove", function(ev){
       if(!inRoom() || !cursorOn) return;
       var now = Date.now();
-      if(now - cursorThrottleAt < 80) return;
+      if(now - cursorThrottleAt < 50) return;
       cursorThrottleAt = now;
-      var rect = stageEl.getBoundingClientRect();
+      var targetBoard = stageEl.querySelector(".match-cols") || stageEl.querySelector(".circle-choices") || stageEl;
+      var rect = targetBoard.getBoundingClientRect();
       if(!rect.width || !rect.height) return;
       var x = Math.max(0, Math.min(100, ((ev.clientX - rect.left) / rect.width) * 100));
       var y = Math.max(0, Math.min(100, ((ev.clientY - rect.top) / rect.height) * 100));
@@ -873,9 +874,10 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     stageEl.addEventListener("mousemove", function(ev){
       if(!inRoom()) return;
       var now = Date.now();
-      if(now - cursorThrottleAt < 80) return;
+      if(now - cursorThrottleAt < 50) return;
       cursorThrottleAt = now;
-      var rect = stageEl.getBoundingClientRect();
+      var targetBoard = stageEl.querySelector(".match-cols") || stageEl.querySelector(".circle-choices") || stageEl;
+      var rect = targetBoard.getBoundingClientRect();
       if(!rect.width || !rect.height) return;
       var x = Math.max(0, Math.min(100, ((ev.clientX - rect.left) / rect.width) * 100));
       var y = Math.max(0, Math.min(100, ((ev.clientY - rect.top) / rect.height) * 100));
