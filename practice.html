@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>生詞練習台</title>
+<title>生詞練習台 - 1對1即時同步版</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Public+Sans:wght@400;500;600;700&display=swap">
 <!-- SheetJS: 支援 Excel 匯入與匯出 -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -84,18 +84,6 @@
   .toggle-track::after{content:"";position:absolute;top:1px;left:1px;width:14px;height:14px;border-radius:50%;background:var(--surface);transition:transform .15s ease;}
   .toggle.on .toggle-track{background:var(--bamboo);border-color:var(--bamboo);}
   .toggle.on .toggle-track::after{transform:translateX(16px);}
-
-  /* 教師端：小班學生分頁列 */
-  .students-bar{
-    background:var(--surface-2);border-bottom:1px solid var(--grid-line);
-    padding:6px 20px;display:flex;align-items:center;gap:8px;overflow-x:auto;
-  }
-  .student-tab-btn{
-    padding:6px 14px;border-radius:20px;border:1px solid var(--grid-line);
-    background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;
-    display:inline-flex;align-items:center;gap:6px;color:var(--ink);white-space:nowrap;
-  }
-  .student-tab-btn.active{background:var(--seal);color:#fff;border-color:var(--seal);}
 
   .layout{flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0;}
   .app.student-mode .layout, .app.present .layout{grid-template-columns:1fr;}
@@ -296,7 +284,6 @@
   .row-del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:15px;padding:4px 7px;}
   .add-row-btn{font-size:12.5px;color:var(--seal);background:none;border:none;cursor:pointer;font-weight:600;padding:4px 0;}
   .upload-box{border:2px dashed var(--grid-line);padding:14px;border-radius:10px;text-align:center;cursor:pointer;background:var(--paper);}
-  .student-link-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--paper);border:1px solid var(--grid-line);border-radius:8px;margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -307,16 +294,11 @@
       <div class="stamp">好</div>
       <div class="brand-text">
         <h1 id="brand-title">生詞練習台</h1>
-        <p id="brand-sub">多學生課堂儀表板系統</p>
+        <p id="brand-sub">1對1 即時互動教學系統</p>
       </div>
     </div>
     <div class="topbar-actions" id="topbar-actions"></div>
   </header>
-
-  <div class="students-bar" id="students-bar" style="display:none;">
-    <span style="font-size:12px;font-weight:700;color:var(--ink-soft);">學生視角:</span>
-    <div id="student-tabs-list" style="display:inline-flex;gap:6px;"></div>
-  </div>
 
   <div class="layout">
     <aside class="sidebar" id="sidebar">
@@ -342,25 +324,9 @@
 <!-- 設定彈窗：僅限老師使用 -->
 <dialog class="dialog-modal" id="settings-dialog">
   <div class="dialog-head">
-    <h2>⚙️ 課堂與多學生設定</h2>
+    <h2>⚙️ 課堂與音效設定</h2>
   </div>
   <div class="dialog-body">
-    <label>👥 這堂課有多少位學生？</label>
-    <div style="display:flex;gap:10px;align-items:center;">
-      <input type="number" id="setting-student-count" min="1" max="20" value="1" style="width:90px;padding:8px;border-radius:8px;border:1.5px solid var(--grid-line);">
-      <span style="font-size:13px;color:var(--ink-soft);">位學生</span>
-    </div>
-
-    <label style="margin-top:16px;">✏️ 預先輸入學生姓名（選填）</label>
-    <div id="student-names-container" style="display:flex;flex-direction:column;gap:6px;"></div>
-
-    <div id="student-links-section" style="margin-top:16px;display:none;">
-      <label>🔗 學生專屬連結清單（複製個別傳送）：</label>
-      <div id="student-links-list"></div>
-    </div>
-
-    <hr style="border:none;border-top:1px solid var(--grid-line);margin:20px 0;">
-
     <label>🔊 作答音效風格</label>
     <select id="setting-sound-style" style="width:100%;padding:9px;border-radius:8px;border:1.5px solid var(--grid-line);font-size:14px;background:var(--paper);color:var(--ink);">
       <option value="bell">清脆鈴聲 (Ding-Dong / 推薦)</option>
@@ -580,7 +546,6 @@
 
   var roomData = null;
   var cursorOn = true;
-  var currentViewingStudentId = "all";
 
   var CURSOR_COLORS = ["#1E88E5", "#4C7A5E", "#FB8C00", "#8E24AA", "#00897B", "#D81B60"];
   function getColorForStudent(nameOrId, role){
@@ -645,12 +610,10 @@
     return isOpenForStudent();
   }
 
+  /* 核心：1對1即時共用進度 (shared)，確保師生雙方畫面、連線與寫字板完全同步 */
   function getProgress(setId){
     if(inRoom()){
-      var s = getCurrentSet();
-      // 關鍵修復：如果是寫字板（board），全班與老師強制共用同一張白板進度（shared），確保雙方筆跡即時同步！
-      var targetScope = (s && s.type === "board") ? "shared" : ((!isStudent && currentViewingStudentId !== "all") ? currentViewingStudentId : "shared");
-      return (roomData && roomData.studentProgress && roomData.studentProgress[targetScope] && roomData.studentProgress[targetScope][setId]) || {};
+      return (roomData && roomData.sharedProgress && roomData.sharedProgress[setId]) || {};
     }
     if(!local.progress[setId]) local.progress[setId] = {};
     return local.progress[setId];
@@ -674,9 +637,7 @@
 
   function writeProgress(setId, patch){
     if(inRoom()){ 
-      var s = getCurrentSet();
-      var targetScope = (s && s.type === "board") ? "shared" : ((!isStudent && currentViewingStudentId !== "all") ? currentViewingStudentId : "shared");
-      update(ref(db, "rooms/" + activeRoomId + "/studentProgress/" + targetScope + "/" + setId), patch); 
+      update(ref(db, "rooms/" + activeRoomId + "/sharedProgress/" + setId), patch); 
     } else { 
       Object.assign(getProgress(setId), patch); 
       saveLocal(); 
@@ -724,10 +685,10 @@
       topbarActions.appendChild(c2);
 
       if(!isStudent){
-        var shareBtn = document.createElement("button"); shareBtn.className = "btn btn-sm btn-primary"; shareBtn.textContent = "🔗 發送學生連結";
+        var shareBtn = document.createElement("button"); shareBtn.className = "btn btn-sm btn-primary"; shareBtn.textContent = "🔗 複製學生連結";
         shareBtn.onclick = function(){
-          updateStudentLinksUI();
-          document.getElementById("settings-dialog").showModal();
+          var link = location.origin + location.pathname + "?room=" + activeRoomId + "&role=student";
+          navigator.clipboard.writeText(link).then(function(){ alert("✅ 學生連結已複製！傳給學生點開即可加入。"); });
         };
         topbarActions.appendChild(shareBtn);
 
@@ -743,72 +704,16 @@
 
     if(!isStudent){
       var setBtn = document.createElement("button"); setBtn.className = "btn btn-sm btn-ghost"; setBtn.textContent = "⚙️ 設定";
-      setBtn.onclick = function(){ 
-        updateStudentLinksUI();
-        document.getElementById("settings-dialog").showModal(); 
-      };
+      setBtn.onclick = function(){ document.getElementById("settings-dialog").showModal(); };
       topbarActions.appendChild(setBtn);
     }
-  }
-
-  /* 教師端：小班學生分頁列 */
-  var studentsBar = document.getElementById("students-bar");
-  var studentTabsList = document.getElementById("student-tabs-list");
-  function renderStudentsBar(){
-    if(isStudent || !inRoom()){
-      studentsBar.style.display = "none";
-      return;
-    }
-    // 只有當前題目是連連看或選擇題時才顯示學生分頁（寫字板預設全班共用）
-    var s = getCurrentSet();
-    if(s && s.type === "board"){
-      studentsBar.style.display = "none";
-      return;
-    }
-
-    studentsBar.style.display = "flex";
-    studentTabsList.innerHTML = "";
-
-    var sharedBtn = document.createElement("button");
-    sharedBtn.type = "button";
-    sharedBtn.className = "student-tab-btn" + (currentViewingStudentId === "all" ? " active" : "");
-    sharedBtn.innerHTML = "👑 全體共用視角";
-    sharedBtn.onclick = function(){
-      currentViewingStudentId = "all";
-      renderStudentsBar();
-      renderStage();
-    };
-    studentTabsList.appendChild(sharedBtn);
-
-    var studentList = [];
-    if(roomData && roomData.presence){
-      Object.keys(roomData.presence).forEach(function(pid){
-        if(pid !== "teacher"){
-          studentList.push({ id: pid, name: roomData.presence[pid].name || "未命名學生" });
-        }
-      });
-    }
-
-    studentList.forEach(function(stu){
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "student-tab-btn" + (currentViewingStudentId === stu.id ? " active" : "");
-      btn.style.borderColor = getColorForStudent(stu.name, "student");
-      btn.innerHTML = `🎓 ${stu.name}`;
-      btn.onclick = function(){
-        currentViewingStudentId = stu.id;
-        renderStudentsBar();
-        renderStage();
-      };
-      studentTabsList.appendChild(btn);
-    });
   }
 
   async function createRoom(){
     var rId = String(Math.floor(1000 + Math.random() * 9000));
     activeRoomId = rId;
     await set(ref(db, "rooms/" + rId), {
-      currentSetId: local.currentId, sets: local.sets, studentProgress: {},
+      currentSetId: local.currentId, sets: local.sets, sharedProgress: {},
       isOpen: true,
       presence: { teacher: { online:true, name:"老師" } }
     });
@@ -816,8 +721,8 @@
     startRoom(rId, "teacher");
     history.replaceState(null, "", "?room=" + rId);
     renderTopbar();
-    updateStudentLinksUI();
-    document.getElementById("settings-dialog").showModal();
+    var link = location.origin + location.pathname + "?room=" + rId + "&role=student";
+    navigator.clipboard.writeText(link).then(function(){ alert("✅ 房間已開好！\n學生連結已複製到剪貼簿，傳給學生即可加入。"); });
   }
 
   function leaveRoom(){
@@ -839,7 +744,7 @@
     activeRoomId = rId; roomRole = role;
     onValue(ref(db, "rooms/" + rId), function(snap){
       roomData = snap.val() || {};
-      renderTopbar(); renderSidebar(); renderStudentsBar(); renderStage();
+      renderTopbar(); renderSidebar(); renderStage();
     });
     onValue(ref(db, "roomCursors/" + rId), function(snap){
       renderMultiCursors(snap.val());
@@ -882,8 +787,7 @@
     if(!s) return;
 
     var head = document.createElement("div"); head.className = "stage-head";
-    var scopeLabel = (!isStudent && s.type !== "board" && currentViewingStudentId !== "all") ? ` <span style="font-size:13px;color:var(--seal);">(目前正在觀看：${getStudentNameById(currentViewingStudentId)})</span>` : "";
-    head.innerHTML = '<div><h2 class="stage-title zh">' + s.title + scopeLabel + '</h2><p class="stage-sub">' + (s.desc || "即時互動練習") + '</p></div>';
+    head.innerHTML = '<div><h2 class="stage-title zh">' + s.title + '</h2><p class="stage-sub">' + (s.desc || "1對1 即時互動練習") + '</p></div>';
     
     if(!isStudent){
       var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
@@ -914,11 +818,6 @@
     else if(s.type === "choice") renderChoiceBoard(s);
     else if(s.type === "circle") renderCircleBoard(s);
     else if(s.type === "board") renderDrawBoard(s);
-  }
-
-  function getStudentNameById(sid){
-    if(roomData && roomData.presence && roomData.presence[sid]) return roomData.presence[sid].name;
-    return sid;
   }
 
   /* 選擇題 */
@@ -1306,7 +1205,7 @@
     };
   }
 
-  /* 連連看：強制一致排序、如實呈現老師的故意錯誤與紅線提示 */
+  /* 連連看：強制一致排序、如實呈現老師故意寫錯的狀態 */
   function renderMatchBoard(s){
     var progress = getProgress(s.id);
     var matched = progress.matched || {};
@@ -1464,7 +1363,7 @@
     stageEl.appendChild(wrap);
   }
 
-  /* ================== 多人即時游標渲染 ================== */
+  /* 遠端游標 */
   function renderMultiCursors(cursorData){
     var container = document.getElementById("multi-cursor-box");
     if(!container) return;
@@ -1513,75 +1412,40 @@
   });
 
   /* 設定面板 */
-  var studentCountInput = document.getElementById("setting-student-count");
-  var studentNamesContainer = document.getElementById("student-names-container");
+  var soundSelect = document.getElementById("setting-sound-style");
+  soundSelect.value = currentSoundStyle;
 
-  function renderStudentNameInputs(){
-    var count = parseInt(studentCountInput.value, 10) || 1;
-    studentNamesContainer.innerHTML = "";
-    var savedNames = JSON.parse(localStorage.getItem("hanyu_pre_names") || "[]");
+  soundSelect.onchange = function(){
+    currentSoundStyle = soundSelect.value;
+    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
+  };
 
-    for(var i=0; i<count; i++){
-      var row = document.createElement("div");
-      row.style.display = "flex"; row.style.gap = "8px"; row.style.alignItems = "center";
-      var defaultVal = savedNames[i] || (i === 0 ? "愛黛 (Adele)" : `學生 ${i+1}`);
-      row.innerHTML = `
-        <span style="font-size:12px;font-weight:700;width:55px;">學生 ${i+1}:</span>
-        <input type="text" class="setting-stu-name" value="${defaultVal}" placeholder="輸入學生名字" style="padding:7px;flex:1;">
-      `;
-      studentNamesContainer.appendChild(row);
-    }
-    updateStudentLinksUI();
-  }
+  document.getElementById("btn-test-sound").onclick = function(){
+    playCorrectSound();
+    setTimeout(playWrongSound, 600);
+  };
 
-  studentCountInput.onchange = renderStudentNameInputs;
-
-  function updateStudentLinksUI(){
-    var linksSec = document.getElementById("student-links-section");
-    var linksList = document.getElementById("student-links-list");
-    if(!activeRoomId){
-      linksSec.style.display = "none";
-      return;
-    }
-    linksSec.style.display = "block";
-    linksList.innerHTML = "";
-
-    var universalUrl = `${location.origin}${location.pathname}?room=${activeRoomId}&role=student`;
-    var uRow = document.createElement("div");
-    uRow.className = "student-link-item";
-    uRow.innerHTML = `
-      <span style="font-size:12.5px;font-weight:700;">🌐 通用連結（發全班／學生點開自打名字）：</span>
-      <button type="button" class="btn btn-sm btn-primary">複製通用連結</button>
-    `;
-    uRow.querySelector("button").onclick = function(){
-      navigator.clipboard.writeText(universalUrl).then(function(){ alert("✅ 通用連結已複製！發送後學生點開會自行輸入姓名。"); });
+  document.querySelectorAll("[data-theme-color]").forEach(function(tb){
+    tb.onclick = function(){
+      var col = tb.dataset.themeColor;
+      var root = document.documentElement;
+      if(col === "bamboo"){
+        root.style.setProperty("--seal", "#4C7A5E");
+        root.style.setProperty("--seal-soft", "#DEEBE3");
+      } else if(col === "blue"){
+        root.style.setProperty("--seal", "#1E88E5");
+        root.style.setProperty("--seal-soft", "#E3F2FD");
+      } else if(col === "amber"){
+        root.style.setProperty("--seal", "#E65100");
+        root.style.setProperty("--seal-soft", "#FFE0B2");
+      } else {
+        root.style.setProperty("--seal", "#B23B32");
+        root.style.setProperty("--seal-soft", "#F5DFDB");
+      }
     };
-    linksList.appendChild(uRow);
-
-    var nameInputs = studentNamesContainer.querySelectorAll(".setting-stu-name");
-    nameInputs.forEach(function(inp, idx){
-      var sName = inp.value.trim() || `學生${idx+1}`;
-      var personalUrl = `${location.origin}${location.pathname}?room=${activeRoomId}&role=student&name=${encodeURIComponent(sName)}`;
-
-      var pRow = document.createElement("div");
-      pRow.className = "student-link-item";
-      pRow.innerHTML = `
-        <span style="font-size:12.5px;">🎓 <b>${sName}</b> 的專屬連結</span>
-        <button type="button" class="btn btn-sm btn-ghost" style="border:1px solid var(--grid-line);">複製專屬連結</button>
-      `;
-      pRow.querySelector("button").onclick = function(){
-        navigator.clipboard.writeText(personalUrl).then(function(){ alert(`✅ 已複製【${sName}】的專屬連結！傳給他點開免輸入名字直接加入。`); });
-      };
-      linksList.appendChild(pRow);
-    });
-  }
+  });
 
   document.getElementById("btn-close-settings").onclick = function(){
-    var names = [];
-    studentNamesContainer.querySelectorAll(".setting-stu-name").forEach(function(i){ names.push(i.value.trim()); });
-    localStorage.setItem("hanyu_pre_names", JSON.stringify(names));
-    currentSoundStyle = document.getElementById("setting-sound-style").value;
-    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
     document.getElementById("settings-dialog").close();
   };
 
@@ -1881,27 +1745,24 @@
         exportRows.push({ "題型": "choice", "題目名稱": s.title, "左欄生詞": "", "右欄拼音或意思": "", "題目說明": s.prompt || "", "選項(逗號分開)": cTexts, "正確答案": ansText });
       }
     });
-    if(exportRows.length === 0){ alert("目前沒有可匯出的題目。"); return; }
+    if(exportRows.length === 0){ alert("Let's export correct questions."); return; }
     var ws = XLSX.utils.json_to_sheet(exportRows);
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "題庫備份");
     XLSX.writeFile(wb, "生詞題庫備份_" + new Date().toISOString().slice(0,10) + ".xlsx");
   };
 
-  /* 學生自填姓名引導 */
+  /* 學生加入引導 */
   function handleStudentJoin(){
     if(!isStudent || !urlRoom) return;
-
     if(urlName){
       myName = decodeURIComponent(urlName);
       attachPresence(urlRoom, myId, myName);
       startRoom(urlRoom, "student");
       return;
     }
-
     var nameDialog = document.getElementById("student-name-dialog");
     nameDialog.showModal();
-
     document.getElementById("btn-submit-student-name").onclick = function(){
       var entered = document.getElementById("input-student-name").value.trim();
       if(!entered) entered = "學生 " + Math.floor(10 + Math.random()*90);
@@ -1913,7 +1774,7 @@
   }
 
   /* 初始化 */
-  renderTopbar(); renderSidebar(); renderStudentNameInputs();
+  renderTopbar(); renderSidebar();
   if(urlRoom){
     window.addEventListener("firebase-bridge-ready", function(){
       if(isStudent){
