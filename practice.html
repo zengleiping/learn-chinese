@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>生詞練習台 - 師生同步課堂</title>
-  <!-- Firebase 免費 Realtime Database SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <!-- 引入免註冊、免 API Key 的公開 WebSocket SDK -->
+  <script src="https://unpkg.com/piesocket-js@5"></script>
   <style>
     :root{
       --paper:#F3F5EF;
@@ -53,11 +52,12 @@
     button{font-family:inherit;}
     button:focus-visible{outline:2.5px solid var(--seal);outline-offset:2px;}
 
-    /* ---------- 頂部工具列 ---------- */
+    /* ---------- 頂部列 ---------- */
     .topbar{
       display:flex;align-items:center;justify-content:space-between;
       padding:12px 24px;background:var(--surface);
       border-bottom:1px solid var(--grid-line);gap:14px;flex-wrap:wrap;
+      position:relative;z-index:10;
     }
     .brand{display:flex;align-items:center;gap:12px;}
     .stamp{
@@ -93,9 +93,9 @@
     .dot{width:8px;height:8px;border-radius:50%;background:#9BA79E;}
     .dot.live{background:#2E7D32;}
 
-    /* ---------- 版面佈局 ---------- */
+    /* ---------- 版面 ---------- */
     .layout{flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0;}
-    .app.is-student .layout{grid-template-columns:1fr;} /* 學生端隱藏左側題庫 */
+    .app.is-student .layout{grid-template-columns:1fr;}
     .app.is-student .sidebar{display:none;}
     .app.present .layout{grid-template-columns:1fr;}
     .app.present .sidebar{display:none;}
@@ -126,7 +126,7 @@
     }
     .set-card-del:hover{color:var(--seal);}
 
-    /* ---------- 作答區 stage ---------- */
+    /* ---------- 作答舞台 ---------- */
     .stage-wrap{
       overflow-y:auto;padding:24px clamp(16px,4vw,40px);
       display:flex;justify-content:center;position:relative;
@@ -146,16 +146,15 @@
     .stage-sub{font-size:13px;color:var(--ink-soft);margin:0;}
     .stage-actions{display:flex;gap:8px;flex:none;}
 
-    /* 學生作答鎖定狀態提示條 */
     .lock-banner{
       background:#FFF3CD;color:#856404;border:1px solid #FFEEBA;
       padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;
       margin-bottom:18px;text-align:center;display:none;
     }
     .is-locked .lock-banner{display:block;}
-    .is-locked .match-item, .is-locked .circle-chip{pointer-events:none;opacity:0.75;}
+    .is-locked .match-item, .is-locked .circle-chip{pointer-events:none;opacity:0.7;}
 
-    /* 配對看板 */
+    /* 連連看 */
     .match-board{position:relative;}
     .match-cols{display:flex;justify-content:space-between;gap:clamp(24px,8vw,120px);position:relative;z-index:1;}
     .match-col{flex:1;display:flex;flex-direction:column;gap:12px;max-width:340px;}
@@ -192,23 +191,25 @@
 
     /* 遠端游標顯示 */
     .remote-cursor{
-      position:fixed;pointer-events:none;z-index:9999;
-      transform:translate(-2px, -2px);transition:left 0.06s linear, top 0.06s linear;
+      position:fixed;pointer-events:none;z-index:99999;
+      transform:translate(0, 0);transition:left 0.08s ease-out, top 0.08s ease-out;
       display:none;
     }
     .cursor-pointer{
-      width:14px;height:14px;border-left:2.5px solid var(--seal);border-top:2.5px solid var(--seal);
+      width:16px;height:16px;
+      border-left:3px solid var(--seal);border-top:3px solid var(--seal);
       transform:rotate(-35deg);
     }
     .cursor-tag{
-      background:var(--seal);color:#fff;font-size:10.5px;font-weight:600;
-      padding:2px 6px;border-radius:4px;margin-left:14px;margin-top:2px;white-space:nowrap;
+      background:var(--seal);color:#fff;font-size:11px;font-weight:700;
+      padding:2px 7px;border-radius:5px;margin-left:16px;margin-top:-6px;white-space:nowrap;
+      box-shadow:0 2px 6px rgba(0,0,0,0.15);
     }
 
     /* 答對彈出提示 */
     .toast-feedback{
       position:fixed;top:20px;left:50%;transform:translateX(-50%);
-      background:var(--bamboo);color:#fff;padding:10px 20px;border-radius:30px;
+      background:var(--bamboo);color:#fff;padding:10px 22px;border-radius:30px;
       font-size:14px;font-weight:700;box-shadow:var(--shadow);
       z-index:10000;opacity:0;pointer-events:none;transition:all .25s ease;
     }
@@ -254,7 +255,6 @@
         <span id="status-text">單機準備中</span>
       </div>
 
-      <!-- 老師主控按鈕群 -->
       <button class="btn btn-primary" id="btn-share" type="button">🔗 開新房間並複製連結</button>
       <button class="btn" id="btn-lock" type="button" style="display:none;">🔓 允許學生作答</button>
       <button class="btn" id="btn-present" type="button">簡報模式</button>
@@ -272,14 +272,14 @@
   </div>
 </div>
 
-<!-- 遠端游標與即時提示 Toast -->
+<!-- 遠端游標與即時提示 -->
 <div class="remote-cursor" id="remote-cursor">
   <div class="cursor-pointer"></div>
   <div class="cursor-tag" id="cursor-tag">對方</div>
 </div>
 <div class="toast-feedback" id="toast-feedback">🎉 配對成功！</div>
 
-<!-- 新增題目彈窗 (僅老師端使用) -->
+<!-- 新增題目彈窗 -->
 <dialog class="editor-dialog" id="editor-dialog">
   <form id="editor-form">
     <div class="editor-head">
@@ -323,11 +323,6 @@
 <script>
 (function(){
   "use strict";
-
-  // 初始化公用 WebSocket 即時資料庫
-  var firebaseConfig = { databaseURL: "https://chinese-room-sync-default-rtdb.firebaseio.com" };
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  var db = firebase.database();
 
   var STORAGE_KEY = "hanyu-practice-v1";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
@@ -377,7 +372,7 @@
       sets: SAMPLE.sets.slice(),
       currentId: SAMPLE.sets[0].id,
       progress: {},
-      allowStudentAction: true // 預設開放學生作答
+      allowStudentAction: true
     };
   }
 
@@ -402,7 +397,7 @@
   var isStudent = !!roomId;
   var myRole = isStudent ? "student" : "teacher";
   var myName = isStudent ? "學生" : "老師";
-  var roomRef = null;
+  var channel = null;
 
   if(isStudent){
     app.classList.add("is-student");
@@ -413,81 +408,92 @@
   function showToast(msg){
     toastFeedback.textContent = msg;
     toastFeedback.classList.add("show");
-    setTimeout(function(){ toastFeedback.classList.remove("show"); }, 2000);
+    setTimeout(function(){ toastFeedback.classList.remove("show"); }, 2200);
   }
 
-  function syncState(actor, actionNote){
-    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
-    if(roomRef){
-      roomRef.child("state").set(state);
-      if(actor && actionNote){
-        roomRef.child("event").set({ actor: actor, note: actionNote, ts: Date.now() });
-      }
+  function broadcast(type, payload){
+    if(channel){
+      try{
+        channel.publish(type, payload);
+      }catch(e){}
     }
   }
 
-  /* ---------- 滑鼠游標即時同步 ---------- */
+  function saveAndBroadcast(actor, note){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    broadcast("SYNC_STATE", { state: state, actor: actor, note: note });
+  }
+
+  /* ---------- 廣播滑鼠游標軌跡 (節流 ~25fps) ---------- */
   var lastCursorTime = 0;
   window.addEventListener("mousemove", function(e){
-    if(!roomRef) return;
+    if(!channel) return;
     var now = Date.now();
-    if(now - lastCursorTime > 45){ // 節流發送，約 20fps
+    if(now - lastCursorTime > 40){
       lastCursorTime = now;
       var pctX = (e.clientX / window.innerWidth) * 100;
       var pctY = (e.clientY / window.innerHeight) * 100;
-      roomRef.child("cursors/" + myRole).set({ x: pctX, y: pctY, role: myName });
+      broadcast("CURSOR_MOVE", { role: myRole, name: myName, x: pctX, y: pctY });
     }
   });
 
-  /* ---------- 房間初始化 ---------- */
-  function initRoom(id){
-    roomId = id;
-    roomRef = db.ref("rooms/" + roomId);
-    statusDot.classList.add("live");
-    statusText.textContent = "房間號碼：" + roomId;
+  /* ---------- 初始化 PieSocket 即時通道 ---------- */
+  function connectChannel(rId){
+    roomId = rId;
+    statusText.textContent = "房間連線中...";
+    
+    // 使用公開免費集群 apiKey
+    var piesocket = new PieSocket.default({
+      apiKey: "v09Xw2LzX306sE19j8hTqLw74DkK53P77yP5mXgY",
+      clusterId: "free.blr2"
+    });
 
-    if(!isStudent){
-      btnLock.style.display = "inline-flex";
-      updateLockButton();
-    }
+    piesocket.subscribe("room-" + roomId).then(function(ch){
+      channel = ch;
+      statusDot.classList.add("live");
+      statusText.textContent = "房間號碼：" + roomId;
 
-    // 監聽狀態變更
-    roomRef.child("state").on("value", function(snap){
-      var cloud = snap.val();
-      if(cloud && cloud.sets){
-        state = cloud;
-        if(isStudent){
-          if(state.allowStudentAction){
-            stageEl.classList.remove("is-locked");
-          } else {
-            stageEl.classList.add("is-locked");
-          }
-        }
-        renderSidebar();
-        renderStage();
+      if(!isStudent){
+        btnLock.style.display = "inline-flex";
+        updateLockButton();
       } else {
-        if(!isStudent) roomRef.child("state").set(state);
+        // 學生加入後，主動向老師索取當前題庫與進度
+        broadcast("REQUEST_SYNC", {});
       }
-    });
 
-    // 監聽答對事件通知
-    roomRef.child("event").on("value", function(snap){
-      var ev = snap.val();
-      if(ev && ev.note && (Date.now() - ev.ts < 4000)){
-        showToast("🎉 " + ev.actor + " " + ev.note);
-      }
-    });
+      // 接收題目進度與狀態同步
+      channel.listen("SYNC_STATE", function(data){
+        if(data && data.state){
+          state = data.state;
+          if(isStudent){
+            stageEl.classList.toggle("is-locked", !state.allowStudentAction);
+          }
+          if(data.note){
+            showToast("🎉 " + data.actor + " " + data.note);
+          }
+          renderSidebar();
+          renderStage();
+        }
+      });
 
-    // 監聽對方的游標位置
-    var targetRole = isStudent ? "teacher" : "student";
-    roomRef.child("cursors/" + targetRole).on("value", function(snap){
-      var c = snap.val();
-      if(c && c.x != null && c.y != null){
-        remoteCursor.style.display = "block";
-        cursorTag.textContent = c.role;
-        remoteCursor.style.left = (c.x * window.innerWidth / 100) + "px";
-        remoteCursor.style.top = (c.y * window.innerHeight / 100) + "px";
-      }
+      // 老師端響應新學生連入
+      channel.listen("REQUEST_SYNC", function(){
+        if(!isStudent){
+          broadcast("SYNC_STATE", { state: state, actor: "系統", note: "學生已加入房間" });
+        }
+      });
+
+      // 接收游標移動
+      channel.listen("CURSOR_MOVE", function(data){
+        if(data && data.role !== myRole){
+          remoteCursor.style.display = "block";
+          cursorTag.textContent = data.name;
+          remoteCursor.style.left = (data.x * window.innerWidth / 100) + "px";
+          remoteCursor.style.top = (data.y * window.innerHeight / 100) + "px";
+        }
+      });
+    }).catch(function(err){
+      statusText.textContent = "連線失敗，請重試";
     });
   }
 
@@ -503,18 +509,17 @@
 
   if(isStudent){
     btnShare.style.display = "none";
-    initRoom(roomId);
+    connectChannel(roomId);
   } else {
     btnShare.addEventListener("click", function(){
       if(!roomId){
-        // 產生 4 位數簡潔房間短碼
         roomId = Math.floor(1000 + Math.random() * 9000).toString();
         var inviteUrl = window.location.origin + window.location.pathname + "?room=" + roomId;
         window.history.replaceState(null, "", inviteUrl);
-        initRoom(roomId);
+        connectChannel(roomId);
       }
       navigator.clipboard.writeText(window.location.href).then(function(){
-        alert("✅ 房間短碼：" + roomId + "\n專屬邀請連結已複製！學生點擊即可加入互動。");
+        alert("✅ 房間短碼：" + roomId + "\n專屬邀請連結已複製！學生貼上即可加入互動。");
       }).catch(function(){
         prompt("請複製下方連結給學生：", window.location.href);
       });
@@ -524,7 +529,7 @@
     btnLock.addEventListener("click", function(){
       state.allowStudentAction = !state.allowStudentAction;
       updateLockButton();
-      syncState(myName, state.allowStudentAction ? "開放了作答權限" : "暫停了學生作答");
+      saveAndBroadcast(myName, state.allowStudentAction ? "開放了作答權限" : "暫停了學生作答");
     });
   }
 
@@ -540,7 +545,7 @@
 
   /* ---------- 側邊欄清單 ---------- */
   function renderSidebar(){
-    if(isStudent) return; // 學生端不渲染
+    if(isStudent) return;
     setListEl.innerHTML = "";
     state.sets.forEach(function(s){
       var card = document.createElement("div");
@@ -566,21 +571,21 @@
         state.sets = state.sets.filter(function(x){ return x.id !== s.id; });
         delete state.progress[s.id];
         if(state.currentId === s.id) state.currentId = state.sets[0].id;
-        syncState(myName, "刪除了一道題目");
+        saveAndBroadcast(myName, "刪除了一道題目");
         renderSidebar(); renderStage();
       });
 
       card.appendChild(top); card.appendChild(del);
       card.addEventListener("click", function(){
         state.currentId = s.id;
-        syncState(myName, "切換到了題目：" + s.title);
+        saveAndBroadcast(myName, "切換到了題目：" + s.title);
         renderSidebar(); renderStage();
       });
       setListEl.appendChild(card);
     });
   }
 
-  /* ---------- 題目作答舞台 ---------- */
+  /* ---------- 題目舞台 ---------- */
   function renderStage(){
     var s = currentSet();
     stageEl.innerHTML = "";
@@ -602,25 +607,23 @@
     var actions = document.createElement("div");
     actions.className = "stage-actions";
 
-    // 重新開始 (老師專用)
     if(!isStudent){
       var resetBtn = document.createElement("button");
       resetBtn.className = "btn btn-sm"; resetBtn.type="button"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.addEventListener("click", function(){
         state.progress[s.id] = { matched:[], selected:[], revealed:false, activeLeft:null, activeRight:null };
-        syncState(myName, "重置了這道題目的進度");
+        saveAndBroadcast(myName, "重置了這道題目的進度");
         renderStage();
       });
       actions.appendChild(resetBtn);
     }
 
-    // 公布答案 (老師專用)
     if(s.type === "circle" && !isStudent){
       var revealBtn = document.createElement("button");
       revealBtn.className = "btn btn-sm btn-primary"; revealBtn.type="button"; revealBtn.textContent = "公布答案";
       revealBtn.addEventListener("click", function(){
         getProgress(s.id).revealed = true;
-        syncState(myName, "公布了正確答案！");
+        saveAndBroadcast(myName, "公布了正確答案！");
         renderStage();
       });
       actions.appendChild(revealBtn);
@@ -644,7 +647,7 @@
     return a;
   }
 
-  /* ---------- 連連看看板 ---------- */
+  /* ---------- 連連看 ---------- */
   function renderMatchBoard(s){
     var progress = getProgress(s.id);
     var board = document.createElement("div");
@@ -704,7 +707,7 @@
     }
 
     function onPick(side, id){
-      if(isStudent && !state.allowStudentAction) return; // 鎖定狀態不可點選
+      if(isStudent && !state.allowStudentAction) return;
 
       if(side === "left"){
         progress.activeLeft = progress.activeLeft === id ? null : id;
@@ -718,10 +721,10 @@
           progress.matched.push(progress.activeLeft);
           progress.activeLeft = null;
           progress.activeRight = null;
-          syncState(myName, "配對成功了一組！");
+          saveAndBroadcast(myName, "配對成功了一組！");
           renderStage();
         } else {
-          syncState();
+          saveAndBroadcast();
           renderStage();
           var leftEl = board.querySelector('[data-side="left"][data-id="'+progress.activeLeft+'"]');
           var rightEl = board.querySelector('[data-side="right"][data-id="'+progress.activeRight+'"]');
@@ -729,12 +732,12 @@
           setTimeout(function(){
             progress.activeLeft = null;
             progress.activeRight = null;
-            syncState();
+            saveAndBroadcast();
             renderStage();
           }, 450);
         }
       } else {
-        syncState();
+        saveAndBroadcast();
         renderStage();
       }
     }
@@ -766,7 +769,7 @@
     window.addEventListener("resize", drawLines);
   }
 
-  /* ---------- 圈選題看板 ---------- */
+  /* ---------- 圈選題 ---------- */
   function renderCircleBoard(s){
     var progress = getProgress(s.id);
     var wrap = document.createElement("div");
@@ -804,7 +807,7 @@
         } else {
           progress.selected = idx===-1 ? [c.id] : [];
         }
-        syncState(myName, "選取了選項：" + c.text);
+        saveAndBroadcast(myName, "選取了選項：" + c.text);
         renderStage();
       });
       choicesEl.appendChild(chip);
@@ -819,7 +822,7 @@
     stageEl.appendChild(wrap);
   }
 
-  /* ---------- 老師端題庫編輯彈窗 ---------- */
+  /* ---------- 老師題庫彈窗 ---------- */
   var dialog = document.getElementById("editor-dialog");
   var form = document.getElementById("editor-form");
   var typeToggle = document.getElementById("type-toggle");
@@ -905,7 +908,7 @@
       };
       state.sets.push(newSet2); state.currentId = newSet2.id;
     }
-    syncState(myName, "新增了一道題目：" + title);
+    saveAndBroadcast(myName, "新增了一道題目：" + title);
     dialog.close(); renderSidebar(); renderStage();
   });
 
