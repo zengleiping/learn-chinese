@@ -76,41 +76,63 @@
   .toggle.on .toggle-track{background:var(--bamboo);border-color:var(--bamboo);}
   .toggle.on .toggle-track::after{transform:translateX(16px);}
 
-  /* 專案大廳 (封面首頁) */
+  /* 專案大廳 (含資料夾階層收納) */
   .lobby-wrap{
     flex:1;padding:36px clamp(16px, 5vw, 64px);
     max-width:1120px;margin:0 auto;width:100%;
   }
   .lobby-header{
     display:flex;align-items:flex-end;justify-content:space-between;
-    margin-bottom:28px;gap:16px;flex-wrap:wrap;border-bottom:1.5px solid var(--grid-line);padding-bottom:18px;
+    margin-bottom:20px;gap:16px;flex-wrap:wrap;border-bottom:1.5px solid var(--grid-line);padding-bottom:18px;
   }
   .lobby-header h2{margin:0;font-size:24px;font-weight:700;}
   .lobby-header p{margin:4px 0 0;font-size:14px;color:var(--ink-soft);}
+  .lobby-header-btns{display:flex;gap:10px;}
+
+  .breadcrumb-bar{
+    display:flex;align-items:center;gap:6px;margin-bottom:22px;
+    font-size:13.5px;font-weight:600;color:var(--ink-soft);flex-wrap:wrap;
+    background:var(--surface);padding:8px 14px;border-radius:10px;border:1px solid var(--grid-line);
+  }
+  .breadcrumb-item{
+    cursor:pointer;color:var(--ink);display:inline-flex;align-items:center;gap:4px;
+    padding:3px 6px;border-radius:6px;transition:background .12s ease;
+  }
+  .breadcrumb-item:hover{background:var(--surface-2);color:var(--seal);}
+  .breadcrumb-item.active{color:var(--seal);font-weight:700;cursor:default;}
+  .breadcrumb-sep{color:var(--ink-soft);opacity:0.5;font-size:11px;}
+
   .project-grid{
     display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:20px;
   }
-  .project-card{
+  
+  .item-card{
     background:var(--surface);border:1.5px solid var(--grid-line);border-radius:14px;
     padding:20px;display:flex;flex-direction:column;justify-content:space-between;
     min-height:180px;box-shadow:var(--shadow);transition:transform .15s ease, border-color .15s ease;
     position:relative;
   }
-  .project-card:hover{transform:translateY(-3px);border-color:var(--seal);}
-  .project-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-  .project-title{font-size:17px;font-weight:700;margin:0 0 6px;line-height:1.4;}
-  .project-desc{font-size:13px;color:var(--ink-soft);margin:0;line-height:1.5;}
-  .project-card-foot{
+  .item-card:hover{transform:translateY(-3px);border-color:var(--seal);}
+  .item-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .item-title{font-size:17px;font-weight:700;margin:0 0 6px;line-height:1.4;display:flex;align-items:center;gap:8px;}
+  .item-desc{font-size:13px;color:var(--ink-soft);margin:0;line-height:1.5;}
+  .item-card-foot{
     display:flex;align-items:center;justify-content:space-between;
     margin-top:20px;padding-top:14px;border-top:1px solid var(--grid-line);
   }
-  .project-badge{
+  .item-badge{
     font-size:11.5px;font-weight:700;background:var(--surface-2);color:var(--ink-soft);
     padding:3px 8px;border-radius:6px;
   }
-  .project-actions-btns{display:flex;gap:6px;}
+  .item-actions-btns{display:flex;gap:6px;}
 
-  /* 教學主舞台佈局 */
+  .item-card.is-folder{
+    background:var(--surface);
+    border-left:5px solid var(--bamboo);
+  }
+  .item-card.is-folder:hover{border-color:var(--bamboo);}
+
+  /* 教學主舞台佈局：統一步調與居中設定 */
   .layout{flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0;}
   .app.student-mode .layout, .app.present .layout{grid-template-columns:1fr;}
   .app.student-mode .sidebar, .app.present .sidebar{display:none;}
@@ -136,26 +158,47 @@
   .set-card-del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:12px;padding:2px 4px;border-radius:5px;align-self:flex-end;}
   .set-card-del:hover{color:var(--seal);}
 
-  .stage-wrap{overflow-y:auto;padding:24px clamp(16px,4vw,40px);display:flex;justify-content:center;}
+  .stage-wrap{overflow-y:auto;padding:24px clamp(16px,3vw,32px);display:flex;justify-content:center;}
+  
+  /* 關鍵一致性：師生雙方統一 max-width 為 840px，不再因模式產生縮放形變 */
   .stage{
-    width:100%;max-width:880px;background:
+    width:100%;max-width:840px;background:
       linear-gradient(var(--grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
       var(--surface);
     background-size:28px 28px;border:1px solid var(--grid-line);border-radius:16px;
-    padding:clamp(18px,3vw,32px); box-shadow:var(--shadow); min-height:450px; position:relative;
+    padding:clamp(18px,3vw,28px); box-shadow:var(--shadow); min-height:480px; position:relative;
   }
-  .app.student-mode .stage, .app.present .stage{max-width:1040px;}
 
   .stage-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
   .stage-title{font-size:21px;font-weight:700;margin:0 0 4px;}
   .stage-sub{font-size:13px;color:var(--ink-soft);margin:0;}
   .stage-actions{display:flex;gap:8px;}
 
-  /* 連連看樣式與對錯動畫 */
-  .match-board{position:relative;}
-  .match-cols{display:flex;justify-content:space-between;gap:clamp(20px,6vw,100px);position:relative;z-index:1;}
-  .match-col{flex:1;display:flex;flex-direction:column;gap:12px;max-width:340px;}
+  /* 核心互動容器：游標與題目統一對齊錨點 */
+  .board-area{
+    position:relative;
+    width:100%;
+    max-width:720px;
+    margin:0 auto;
+  }
+
+  /* 連連看：強制居中對齊與一致比例欄寬 */
+  .match-board{position:relative; width:100%;}
+  .match-cols{
+    display:flex;
+    justify-content:center;
+    gap:clamp(30px, 8vw, 70px);
+    position:relative;
+    z-index:1;
+  }
+  .match-col{
+    flex:1;
+    max-width:320px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
   .match-col-label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
   .match-item{
     font-family:"LXGW WenKai TC",serif;font-size:18px;text-align:center;padding:12px 16px;
@@ -217,7 +260,7 @@
   }
   .match-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 
-  /* 寫字畫布白板：強制 1:1 正方形且水平置中 */
+  /* 寫字畫布白板：1:1 正方形且水平置中 */
   .draw-board-container{display:flex;flex-direction:column;gap:12px;position:relative;}
   .draw-toolbar{
     display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;
@@ -278,7 +321,6 @@
   
   .text-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
   
-  /* 文字物件層：translate(-50%, -50%) 將文字錨點鎖定於中心，支援藍框縮放控制點 */
   .movable-text{
     position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif;
     font-weight:700;line-height:1.2;color:var(--ink);user-select:none;
@@ -297,7 +339,6 @@
     cursor:grabbing !important;
   }
 
-  /* 縮放控制手把 (藍色框框右下角圓點) */
   .resize-handle{
     display:none;position:absolute;right:-6px;bottom:-6px;width:12px;height:12px;
     background:#1E88E5;border:2px solid #FFFFFF;border-radius:50%;
@@ -308,7 +349,8 @@
     display:block;
   }
 
-  .multi-cursor-container{position:absolute;inset:0;pointer-events:none;z-index:99999;overflow:hidden;}
+  /* 游標容器定位於 board-area，保證與題目邊界等比對齊 */
+  .multi-cursor-container{position:absolute;inset:0;pointer-events:none;z-index:99999;overflow:visible;}
   .peer-cursor{
     position:absolute;pointer-events:none;display:flex;align-items:center;gap:5px;
     transform:translate(-50%,-50%);transition:left .06s linear, top .06s linear;
@@ -328,7 +370,7 @@
   .type-toggle button{flex:1;padding:9px;border-radius:9px;border:1.5px solid var(--grid-line);background:var(--paper);color:var(--ink-soft);font-weight:600;font-size:13px;cursor:pointer;}
   .type-toggle button.active{border-color:var(--seal);color:var(--seal);background:var(--seal-soft);}
   label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:14px 0 5px;}
-  input[type="text"], textarea{width:100%;border:1.5px solid var(--grid-line);background:var(--paper);color:var(--ink);border-radius:8px;padding:9px 11px;font-size:14px;}
+  input[type="text"], textarea, select{width:100%;border:1.5px solid var(--grid-line);background:var(--paper);color:var(--ink);border-radius:8px;padding:9px 11px;font-size:14px;}
   .row-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .pair-row, .choice-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
   .pair-row input, .choice-row input[type="text"]{flex:1;}
@@ -336,7 +378,6 @@
   .add-row-btn{font-size:12.5px;color:var(--seal);background:none;border:none;cursor:pointer;font-weight:600;padding:4px 0;}
   .upload-box{border:2px dashed var(--grid-line);padding:14px;border-radius:10px;text-align:center;cursor:pointer;background:var(--paper);}
 
-  /* 主題模式按鈕高亮狀態 */
   .btn-theme-bg.active, .btn-theme-accent.active{
     outline: 2.5px solid var(--ink) !important;
     outline-offset: 2px;
@@ -358,15 +399,22 @@
     <div class="topbar-actions" id="topbar-actions"></div>
   </header>
 
-  <!-- 專案大廳 (封面首頁) -->
+  <!-- 專案大廳 (含資料夾階層收納) -->
   <div class="lobby-wrap" id="lobby-view">
     <div class="lobby-header">
       <div>
         <h2>📚 我的課次與教學專案</h2>
-        <p>點選課次進入互動教學台，或自由新增、編輯與刪除課次</p>
+        <p>支援以資料夾分冊、分班收納，資料夾內可建立子資料夾！</p>
       </div>
-      <button type="button" class="btn btn-primary" id="btn-create-project">＋ 新增課次專案</button>
+      <div class="lobby-header-btns">
+        <button type="button" class="btn" id="btn-create-folder" style="border:1.5px solid var(--bamboo); color:var(--bamboo); font-weight:700;">📁 ＋ 新增資料夾</button>
+        <button type="button" class="btn btn-primary" id="btn-create-project">📦 ＋ 新增課次專案</button>
+      </div>
     </div>
+
+    <!-- 麵包屑導航路徑 -->
+    <div class="breadcrumb-bar" id="breadcrumb-bar"></div>
+
     <div class="project-grid" id="project-grid"></div>
   </div>
 
@@ -392,6 +440,27 @@
   </div>
 </div>
 
+<!-- 資料夾 編輯／新增彈窗 -->
+<dialog class="dialog-modal" id="folder-dialog">
+  <form id="folder-form">
+    <div class="dialog-head">
+      <h2 id="folder-dialog-title">新增資料夾</h2>
+    </div>
+    <div class="dialog-body">
+      <label for="f-folder-title">資料夾名稱</label>
+      <input type="text" id="f-folder-title" placeholder="例如：115-1 對泰華語轉銜線上華語課 或 第一冊" required>
+      <label for="f-folder-parent">所屬上層資料夾</label>
+      <select id="f-folder-parent"></select>
+      <label for="f-folder-desc">說明備註（選填）</label>
+      <textarea id="f-folder-desc" rows="2" placeholder="例如：班級轉銜進度或第一冊生活華語"></textarea>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" class="btn btn-ghost" id="btn-cancel-folder">取消</button>
+      <button type="submit" class="btn btn-primary">儲存資料夾</button>
+    </div>
+  </form>
+</dialog>
+
 <!-- 課次專案 編輯／新增彈窗 -->
 <dialog class="dialog-modal" id="project-dialog">
   <form id="project-form">
@@ -400,9 +469,11 @@
     </div>
     <div class="dialog-body">
       <label for="f-proj-title">課次／專案名稱</label>
-      <input type="text" id="f-proj-title" placeholder="例如：115-1 對泰華語轉銜線上華語課" required>
+      <input type="text" id="f-proj-title" placeholder="例如：第一課：見面問好" required>
+      <label for="f-proj-parent">收納在資料夾</label>
+      <select id="f-proj-parent"></select>
       <label for="f-proj-desc">簡介／說明備註</label>
-      <textarea id="f-proj-desc" rows="3" placeholder="例如：包含見面問好、學校生活生詞配對與生字書寫練習"></textarea>
+      <textarea id="f-proj-desc" rows="3" placeholder="例如：包含見面問好生詞配對、語意單選題與生字書寫練習"></textarea>
     </div>
     <div class="dialog-foot">
       <button type="button" class="btn btn-ghost" id="btn-cancel-project">取消</button>
@@ -417,15 +488,13 @@
     <h2>⚙️ 課堂環境與外觀設定</h2>
   </div>
   <div class="dialog-body">
-    <!-- 背景底色模式 -->
-    <label>🎨 網站主視覺模式（底色風格）</label>
+    <label>🎨 網站主視覺模式（切換後全房即時同步）</label>
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
       <button type="button" class="btn btn-sm btn-theme-bg" data-bg="light">☀️ 雅致米白 (預設)</button>
       <button type="button" class="btn btn-sm btn-theme-bg" data-bg="eyecare" style="background:#E8EFE6; color:#243328; border-color:#5C6B60;">🌿 溫和護眼 (豆沙綠)</button>
       <button type="button" class="btn btn-sm btn-theme-bg" data-bg="dark" style="background:#191C1B; color:#E5EAE6; border-color:#444;">🌙 深色黑底 (夜間模式)</button>
     </div>
 
-    <!-- 強調重點色彩 -->
     <label style="margin-top:18px;">🖌️ 按鈕與標記重點色</label>
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
       <button type="button" class="btn btn-sm btn-theme-accent" data-accent="seal" style="background:#B23B32; color:#fff;">朱砂紅 (經典)</button>
@@ -565,14 +634,14 @@
 (function(){
   "use strict";
 
-  /* ================== 主題引擎（徹底解決主視覺換色、護眼與黑底） ================== */
+  /* ================== 主題引擎（支援全房 Firebase 即時同步） ================== */
   var currentBgMode = localStorage.getItem("hanyu_theme_bg") || "light";
   var currentAccentColor = localStorage.getItem("hanyu_theme_accent") || "seal";
 
-  function applyTheme(bgMode, accentColor){
+  function applyTheme(bgMode, accentColor, syncToFirebase){
+    if(syncToFirebase === undefined) syncToFirebase = true;
     var root = document.documentElement;
 
-    // 1. 底色模式更換 (含護眼模式與夜間黑底)
     if(bgMode === "dark"){
       root.style.setProperty("--paper", "#191C1B");
       root.style.setProperty("--surface", "#242826");
@@ -596,7 +665,6 @@
       root.style.setProperty("--grid-line", "rgba(42,51,60,0.08)");
     }
 
-    // 2. 重點主色更換
     if(accentColor === "bamboo"){
       root.style.setProperty("--seal", "#4C7A5E");
       root.style.setProperty("--seal-soft", bgMode === "dark" ? "#223229" : "#DEEBE3");
@@ -615,13 +683,11 @@
       root.style.setProperty("--seal-ring", "rgba(178,59,50,0.38)");
     }
 
-    // 儲存狀態
     localStorage.setItem("hanyu_theme_bg", bgMode);
     localStorage.setItem("hanyu_theme_accent", accentColor);
     currentBgMode = bgMode;
     currentAccentColor = accentColor;
 
-    // 同步按鈕的高亮外框狀態
     document.querySelectorAll(".btn-theme-bg").forEach(function(b){
       if(b.dataset.bg === bgMode) b.classList.add("active");
       else b.classList.remove("active");
@@ -630,11 +696,18 @@
       if(b.dataset.accent === accentColor) b.classList.add("active");
       else b.classList.remove("active");
     });
-  }
-  // 網頁開啟即時套用上次設定的主視覺
-  applyTheme(currentBgMode, currentAccentColor);
 
-  /* ================== 音效引擎（5 種立體風格） ================== */
+    // 關鍵同步：如果老師在房間內改顏色，立即推送給全房所有學生
+    if(syncToFirebase && inRoom() && roomRole === "teacher"){
+      update(ref(db, "rooms/" + activeRoomId), {
+        "theme/bgMode": bgMode,
+        "theme/accent": accentColor
+      });
+    }
+  }
+  applyTheme(currentBgMode, currentAccentColor, false);
+
+  /* ================== 音效引擎 ================== */
   var audioCtx = null;
   var currentSoundStyle = localStorage.getItem("hanyu_sound_style") || "magic";
 
@@ -777,61 +850,78 @@
     fontSize: 36
   };
 
-  /* ================== 專案/課次 資料管理 ================== */
-  var PROJECTS_KEY = "hanyu-practice-projects-v3";
+  /* ================== 階層式資料夾與專案資料庫 ================== */
+  var STORAGE_FS_KEY = "hanyu-practice-fs-v1";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
-  var DEFAULT_PROJECTS = {
-    "proj_thai": {
-      id: "proj_thai",
-      title: "115-1 對泰華語轉銜線上華語課",
-      desc: "專為轉銜設計：包含問候生詞配對、語意單選題與生字田字格手寫示範",
-      currentSetId: "sample_match",
-      sets: {
-        sample_match: {
-          id:"sample_match", type:"match", title:"生詞配對：你好！（範例）",
-          leftLabel:"生詞", rightLabel:"拼音",
-          pairs:{
-            p1:{id:"p1", left:"你好", right:"nǐ hǎo"},
-            p2:{id:"p2", left:"謝謝", right:"xièxie"},
-            p3:{id:"p3", left:"再見", right:"zàijiàn"},
-            p4:{id:"p4", left:"老師", right:"lǎoshī"},
-            p5:{id:"p5", left:"學生", right:"xuéshēng"}
-          }
-        },
-        sample_choice: {
-          id:"sample_choice", type:"choice", title:"生詞語意選擇（範例）",
-          prompt:"請選出「學生」的拼音與英文意思：",
-          choices:{
-            c1:{id:"c1", text:"老師 (lǎoshī / Teacher)"},
-            c2:{id:"c2", text:"學生 (xuéshēng / Student)"},
-            c3:{id:"c3", text:"朋友 (péngyǒu / Friend)"}
+  var DEFAULT_FS = {
+    folders: {
+      "f_thai": {
+        id: "f_thai",
+        parentId: null,
+        title: "115-1 對泰華語轉銜線上華語課",
+        desc: "泰國學生轉銜華語專案班級資料夾"
+      },
+      "f_book1": {
+        id: "f_book1",
+        parentId: null,
+        title: "第一冊 基礎生活華語",
+        desc: "第一冊課文與進度練習"
+      }
+    },
+    projects: {
+      "proj_thai_l1": {
+        id: "proj_thai_l1",
+        folderId: "f_thai",
+        title: "第一課：見面問好",
+        desc: "包含問候生詞配對、語意單選題與生字田字格手寫示範",
+        currentSetId: "sample_match",
+        sets: {
+          sample_match: {
+            id:"sample_match", type:"match", title:"生詞配對：你好！（範例）",
+            leftLabel:"生詞", rightLabel:"拼音",
+            pairs:{
+              p1:{id:"p1", left:"你好", right:"nǐ hǎo"},
+              p2:{id:"p2", left:"謝謝", right:"xièxie"},
+              p3:{id:"p3", left:"再見", right:"zàijiàn"},
+              p4:{id:"p4", left:"老師", right:"lǎoshī"},
+              p5:{id:"p5", left:"學生", right:"xuéshēng"}
+            }
           },
-          answerId:"c2"
-        },
-        sample_board: {
-          id:"sample_board", type:"board", title:"生字書寫教學：『好』",
-          desc:"靠近文字框變成實線即可自由移動，可自訂字號大小並點選聲調。",
-          bgImage:"", gridType:"jiu"
+          sample_choice: {
+            id:"sample_choice", type:"choice", title:"生詞語意選擇（範例）",
+            prompt:"請選出「學生」的拼音與英文意思：",
+            choices:{
+              c1:{id:"c1", text:"老師 (lǎoshī / Teacher)"},
+              c2:{id:"c2", text:"學生 (xuéshēng / Student)"},
+              c3:{id:"c3", text:"朋友 (péngyǒu / Friend)"}
+            },
+            answerId:"c2"
+          },
+          sample_board: {
+            id:"sample_board", type:"board", title:"生字書寫教學：『好』",
+            desc:"靠近文字框變成實線即可自由移動，可自訂字號大小並點選聲調。",
+            bgImage:"", gridType:"jiu"
+          }
         }
       }
     }
   };
 
-  function loadProjects(){
+  function loadFS(){
     try{
-      var raw = localStorage.getItem(PROJECTS_KEY);
+      var raw = localStorage.getItem(STORAGE_FS_KEY);
       if(raw){
         var parsed = JSON.parse(raw);
-        if(parsed && Object.keys(parsed).length) return parsed;
+        if(parsed && parsed.folders && parsed.projects) return parsed;
       }
     }catch(e){}
-    return JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+    return JSON.parse(JSON.stringify(DEFAULT_FS));
   }
 
-  var projects = loadProjects();
-  function saveProjects(){
-    try{ localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects)); }catch(e){}
+  var fsData = loadFS();
+  function saveFS(){
+    try{ localStorage.setItem(STORAGE_FS_KEY, JSON.stringify(fsData)); }catch(e){}
   }
 
   var params = new URLSearchParams(location.search);
@@ -851,7 +941,9 @@
 
   var roomData = null;
   var cursorOn = true;
+  var currentFolderId = null;
   var activeProjectId = null;
+  var editingFolderId = null;
   var editingProjectId = null;
 
   var CURSOR_COLORS = ["#1E88E5", "#4C7A5E", "#FB8C00", "#8E24AA", "#00897B", "#D81B60"];
@@ -865,7 +957,7 @@
   function inRoom(){ return !!activeRoomId; }
   function getActiveProject(){
     if(inRoom()) return roomData && roomData.project;
-    return activeProjectId ? projects[activeProjectId] : null;
+    return activeProjectId ? fsData.projects[activeProjectId] : null;
   }
   function getSets(){ 
     var proj = getActiveProject();
@@ -906,7 +998,7 @@
       if(proj){
         proj.sets = newSets;
         if(newCurrentId !== undefined) proj.currentSetId = newCurrentId;
-        saveProjects(); renderSidebar(); renderStage();
+        saveFS(); renderSidebar(); renderStage();
       }
     }
   }
@@ -916,7 +1008,7 @@
     else { 
       var proj = getActiveProject();
       if(proj){
-        proj.currentSetId = id; saveProjects(); renderSidebar(); renderStage(); 
+        proj.currentSetId = id; saveFS(); renderSidebar(); renderStage(); 
       }
     }
   }
@@ -926,12 +1018,12 @@
       update(ref(db, "rooms/" + activeRoomId + "/sharedProgress/" + setId), patch); 
     } else { 
       Object.assign(getProgress(setId), patch); 
-      saveProjects(); 
+      saveFS(); 
       renderStage(); 
     }
   }
 
-  /* ================== 大廳／主舞台 切換邏輯 ================== */
+  /* 大廳／主舞台 切換邏輯 */
   var lobbyView = document.getElementById("lobby-view");
   var classroomView = document.getElementById("classroom-view");
 
@@ -940,13 +1032,14 @@
     lobbyView.style.display = "block";
     classroomView.style.display = "none";
     document.getElementById("brand-sub").textContent = "專案課次大廳";
+    renderBreadcrumb();
     renderLobbyGrid();
     renderTopbar();
   }
 
   function openProject(projId){
     activeProjectId = projId;
-    var proj = projects[projId];
+    var proj = fsData.projects[projId];
     lobbyView.style.display = "none";
     classroomView.style.display = "grid";
     document.getElementById("brand-sub").textContent = proj.title;
@@ -967,47 +1060,164 @@
     }
   };
 
+  /* 麵包屑導航路徑 */
+  var breadcrumbBar = document.getElementById("breadcrumb-bar");
+  function renderBreadcrumb(){
+    breadcrumbBar.innerHTML = "";
+    var path = [];
+    var cur = currentFolderId;
+
+    while(cur){
+      var f = fsData.folders[cur];
+      if(f){
+        path.unshift(f);
+        cur = f.parentId;
+      } else {
+        break;
+      }
+    }
+
+    var rootItem = document.createElement("span");
+    rootItem.className = "breadcrumb-item" + (currentFolderId === null ? " active" : "");
+    rootItem.innerHTML = "🏠 全部專案大廳";
+    rootItem.onclick = function(){
+      if(currentFolderId !== null){
+        currentFolderId = null;
+        renderBreadcrumb();
+        renderLobbyGrid();
+      }
+    };
+    breadcrumbBar.appendChild(rootItem);
+
+    path.forEach(function(folder, idx){
+      var sep = document.createElement("span");
+      sep.className = "breadcrumb-sep";
+      sep.textContent = "/";
+      breadcrumbBar.appendChild(sep);
+
+      var item = document.createElement("span");
+      var isLast = (idx === path.length - 1);
+      item.className = "breadcrumb-item" + (isLast ? " active" : "");
+      item.innerHTML = `📁 ${folder.title}`;
+      if(!isLast){
+        item.onclick = function(){
+          currentFolderId = folder.id;
+          renderBreadcrumb();
+          renderLobbyGrid();
+        };
+      }
+      breadcrumbBar.appendChild(item);
+    });
+  }
+
+  /* 渲染大廳卡片 */
   var projectGrid = document.getElementById("project-grid");
   function renderLobbyGrid(){
     projectGrid.innerHTML = "";
-    var keys = Object.keys(projects);
-    keys.forEach(function(pid){
-      var proj = projects[pid];
-      var count = Object.keys(proj.sets || {}).length;
+
+    var subFolders = Object.keys(fsData.folders)
+      .map(function(k){ return fsData.folders[k]; })
+      .filter(function(f){ return f.parentId === currentFolderId; });
+
+    var subProjects = Object.keys(fsData.projects)
+      .map(function(k){ return fsData.projects[k]; })
+      .filter(function(p){ return (p.folderId || null) === currentFolderId; });
+
+    if(subFolders.length === 0 && subProjects.length === 0){
+      projectGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align:center; padding: 48px 20px; color:var(--ink-soft); background:var(--surface); border: 2px dashed var(--grid-line); border-radius:14px;">
+          <p style="font-size:16px; margin:0 0 6px;">📂 這裡目前還是空的喔！</p>
+          <p style="font-size:13px; margin:0;">可以點擊右上角按鈕建立「子資料夾」或「課次專案」</p>
+        </div>
+      `;
+      return;
+    }
+
+    subFolders.forEach(function(folder){
+      var childF = Object.keys(fsData.folders).filter(function(k){ return fsData.folders[k].parentId === folder.id; }).length;
+      var childP = Object.keys(fsData.projects).filter(function(k){ return fsData.projects[k].folderId === folder.id; }).length;
 
       var card = document.createElement("div");
-      card.className = "project-card";
+      card.className = "item-card is-folder";
       card.innerHTML = `
         <div>
-          <div class="project-card-head">
-            <h3 class="project-title zh">${proj.title}</h3>
+          <div class="item-card-head">
+            <h3 class="item-title zh">📁 ${folder.title}</h3>
           </div>
-          <p class="project-desc">${proj.desc || "點擊進入開始備課或線上教學練習"}</p>
+          <p class="item-desc">${folder.desc || "資料夾類別，點擊開啟以查看內部課次"}</p>
         </div>
-        <div class="project-card-foot">
-          <span class="project-badge">📦 ${count} 組練習</span>
-          <div class="project-actions-btns">
-            <button type="button" class="btn btn-sm btn-ghost btn-edit-proj" title="編輯課次名稱">✏️</button>
-            <button type="button" class="btn btn-sm btn-ghost btn-del-proj" title="刪除課次" style="color:var(--seal);">🗑️</button>
-            <button type="button" class="btn btn-sm btn-primary btn-enter-proj">進入上課 →</button>
+        <div class="item-card-foot">
+          <span class="item-badge" style="background:var(--bamboo-soft); color:var(--bamboo);">
+            ${childF ? childF + ' 個子目錄 · ' : ''}${childP} 個課次
+          </span>
+          <div class="item-actions-btns">
+            <button type="button" class="btn btn-sm btn-ghost btn-edit-f" title="編輯資料夾">✏️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-del-f" title="刪除資料夾" style="color:var(--seal);">🗑️</button>
+            <button type="button" class="btn btn-sm btn-open-f" style="border:1px solid var(--bamboo); color:var(--bamboo); font-weight:700;">開啟 ➔</button>
           </div>
         </div>
       `;
 
-      card.querySelector(".btn-enter-proj").onclick = function(){ openProject(pid); };
-      card.querySelector(".btn-edit-proj").onclick = function(e){
-        e.stopPropagation();
-        openProjectDialog(pid);
+      card.querySelector(".btn-open-f").onclick = function(){
+        currentFolderId = folder.id;
+        renderBreadcrumb();
+        renderLobbyGrid();
       };
-      card.querySelector(".btn-del-proj").onclick = function(e){
+
+      card.querySelector(".btn-edit-f").onclick = function(e){
         e.stopPropagation();
-        if(Object.keys(projects).length <= 1){
-          alert("至少要保留一個課次專案喔！");
-          return;
+        openFolderDialog(folder.id);
+      };
+
+      card.querySelector(".btn-del-f").onclick = function(e){
+        e.stopPropagation();
+        var count = childF + childP;
+        var msg = count > 0 
+          ? `「${folder.title}」裡面還有 ${count} 個項目，刪除後內部所有內容將會一併清除，確定要刪除嗎？`
+          : `確定要刪除資料夾「${folder.title}」嗎？`;
+        
+        if(confirm(msg)){
+          deleteFolderRecursively(folder.id);
+          saveFS();
+          renderLobbyGrid();
         }
-        if(confirm(`確定要刪除「${proj.title}」專案嗎？裡面的所有題目將被清除。`)){
-          delete projects[pid];
-          saveProjects();
+      };
+
+      projectGrid.appendChild(card);
+    });
+
+    subProjects.forEach(function(proj){
+      var count = Object.keys(proj.sets || {}).length;
+
+      var card = document.createElement("div");
+      card.className = "item-card";
+      card.innerHTML = `
+        <div>
+          <div class="item-card-head">
+            <h3 class="item-title zh">📘 ${proj.title}</h3>
+          </div>
+          <p class="item-desc">${proj.desc || "點擊進入開始備課或線上教學練習"}</p>
+        </div>
+        <div class="item-card-foot">
+          <span class="item-badge">📦 ${count} 組練習</span>
+          <div class="item-actions-btns">
+            <button type="button" class="btn btn-sm btn-ghost btn-edit-p" title="編輯課次名稱與所屬資料夾">✏️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-del-p" title="刪除課次" style="color:var(--seal);">🗑️</button>
+            <button type="button" class="btn btn-sm btn-primary btn-enter-p">進入上課 →</button>
+          </div>
+        </div>
+      `;
+
+      card.querySelector(".btn-enter-p").onclick = function(){ openProject(proj.id); };
+      card.querySelector(".btn-edit-p").onclick = function(e){
+        e.stopPropagation();
+        openProjectDialog(proj.id);
+      };
+      card.querySelector(".btn-del-p").onclick = function(e){
+        e.stopPropagation();
+        if(confirm(`確定要刪除「${proj.title}」課次嗎？裡面的練習題將會被清除。`)){
+          delete fsData.projects[proj.id];
+          saveFS();
           renderLobbyGrid();
         }
       };
@@ -1016,17 +1226,118 @@
     });
   }
 
+  function deleteFolderRecursively(folderId){
+    Object.keys(fsData.projects).forEach(function(pid){
+      if(fsData.projects[pid].folderId === folderId){
+        delete fsData.projects[pid];
+      }
+    });
+    Object.keys(fsData.folders).forEach(function(fid){
+      if(fsData.folders[fid].parentId === folderId){
+        deleteFolderRecursively(fid);
+      }
+    });
+    delete fsData.folders[folderId];
+  }
+
+  function populateFolderSelect(selectEl, selectedFolderId, excludeFolderId){
+    selectEl.innerHTML = "";
+    var rootOpt = document.createElement("option");
+    rootOpt.value = "";
+    rootOpt.textContent = "📂 最外層 (專案大廳根目錄)";
+    selectEl.appendChild(rootOpt);
+
+    function appendChildren(parentId, indent){
+      var children = Object.keys(fsData.folders)
+        .map(function(k){ return fsData.folders[k]; })
+        .filter(function(f){ return f.parentId === parentId; });
+
+      children.forEach(function(f){
+        if(excludeFolderId && (f.id === excludeFolderId || isDescendantOf(f.id, excludeFolderId))) return;
+        var opt = document.createElement("option");
+        opt.value = f.id;
+        opt.textContent = indent + "📁 " + f.title;
+        selectEl.appendChild(opt);
+        appendChildren(f.id, indent + "  ");
+      });
+    }
+
+    appendChildren(null, " ");
+    selectEl.value = selectedFolderId || "";
+  }
+
+  function isDescendantOf(folderId, ancestorId){
+    var cur = fsData.folders[folderId];
+    while(cur && cur.parentId){
+      if(cur.parentId === ancestorId) return true;
+      cur = fsData.folders[cur.parentId];
+    }
+    return false;
+  }
+
+  var folderDialog = document.getElementById("folder-dialog");
+  function openFolderDialog(folderId){
+    editingFolderId = folderId || null;
+    document.getElementById("folder-dialog-title").textContent = editingFolderId ? "編輯資料夾" : "新增資料夾";
+    
+    var parentSelect = document.getElementById("f-folder-parent");
+    if(editingFolderId){
+      var f = fsData.folders[editingFolderId];
+      document.getElementById("f-folder-title").value = f.title;
+      document.getElementById("f-folder-desc").value = f.desc || "";
+      populateFolderSelect(parentSelect, f.parentId, editingFolderId);
+    } else {
+      document.getElementById("f-folder-title").value = "";
+      document.getElementById("f-folder-desc").value = "";
+      populateFolderSelect(parentSelect, currentFolderId, null);
+    }
+    folderDialog.showModal();
+  }
+
+  document.getElementById("btn-create-folder").onclick = function(){ openFolderDialog(null); };
+  document.getElementById("btn-cancel-folder").onclick = function(){ folderDialog.close(); };
+
+  document.getElementById("folder-form").onsubmit = function(e){
+    e.preventDefault();
+    var title = document.getElementById("f-folder-title").value.trim();
+    var desc = document.getElementById("f-folder-desc").value.trim();
+    var parentId = document.getElementById("f-folder-parent").value || null;
+    if(!title) return;
+
+    if(editingFolderId){
+      fsData.folders[editingFolderId].title = title;
+      fsData.folders[editingFolderId].desc = desc;
+      fsData.folders[editingFolderId].parentId = parentId;
+    } else {
+      var newFId = uid("f");
+      fsData.folders[newFId] = {
+        id: newFId,
+        parentId: parentId,
+        title: title,
+        desc: desc
+      };
+    }
+    saveFS();
+    folderDialog.close();
+    renderBreadcrumb();
+    renderLobbyGrid();
+  };
+
   var projectDialog = document.getElementById("project-dialog");
-  function openProjectDialog(editId){
-    editingProjectId = editId || null;
+  function openProjectDialog(projId){
+    editingProjectId = projId || null;
     document.getElementById("project-dialog-title").textContent = editingProjectId ? "編輯課次專案" : "新增課次專案";
+    var projParentSelect = document.getElementById("f-proj-parent");
+
     if(editingProjectId){
-      var p = projects[editingProjectId];
+      var p = fsData.projects[editingProjectId];
       document.getElementById("f-proj-title").value = p.title;
       document.getElementById("f-proj-desc").value = p.desc || "";
+      populateFolderSelect(projParentSelect, p.folderId || null, null);
     } else {
       document.getElementById("f-proj-title").value = "";
       document.getElementById("f-proj-desc").value = "";
+      populateFolderSelect(projParentSelect, currentFolderId, null);
     }
     projectDialog.showModal();
   }
@@ -1038,20 +1349,25 @@
     e.preventDefault();
     var title = document.getElementById("f-proj-title").value.trim();
     var desc = document.getElementById("f-proj-desc").value.trim();
+    var folderId = document.getElementById("f-proj-parent").value || null;
     if(!title) return;
 
     if(editingProjectId){
-      projects[editingProjectId].title = title;
-      projects[editingProjectId].desc = desc;
+      fsData.projects[editingProjectId].title = title;
+      fsData.projects[editingProjectId].desc = desc;
+      fsData.projects[editingProjectId].folderId = folderId;
     } else {
-      var newId = uid("proj");
-      projects[newId] = {
-        id: newId, title: title, desc: desc,
+      var newPId = uid("proj");
+      fsData.projects[newPId] = {
+        id: newPId,
+        folderId: folderId,
+        title: title,
+        desc: desc,
         currentSetId: "sample_match",
-        sets: JSON.parse(JSON.stringify(DEFAULT_PROJECTS["proj_thai"].sets))
+        sets: JSON.parse(JSON.stringify(DEFAULT_FS.projects["proj_thai_l1"].sets))
       };
     }
-    saveProjects();
+    saveFS();
     projectDialog.close();
     renderLobbyGrid();
   };
@@ -1132,12 +1448,16 @@
   async function createRoom(){
     var rId = String(Math.floor(1000 + Math.random() * 9000));
     activeRoomId = rId;
-    var currentProj = projects[activeProjectId];
+    var currentProj = fsData.projects[activeProjectId];
 
     await set(ref(db, "rooms/" + rId), {
       project: currentProj,
       sharedProgress: {},
       isOpen: true,
+      theme: {
+        bgMode: currentBgMode,
+        accent: currentAccentColor
+      },
       presence: { teacher: { online:true, name:"老師" } }
     });
     attachPresence(rId, "teacher", "老師");
@@ -1172,6 +1492,12 @@
     activeRoomId = rId; roomRole = role;
     onValue(ref(db, "rooms/" + rId), function(snap){
       roomData = snap.val() || {};
+
+      // 關鍵全房主題同步：當收到 Firebase 主題設定時，雙方立即同步更換底色與強調色
+      if(roomData.theme){
+        applyTheme(roomData.theme.bgMode || "light", roomData.theme.accent || "seal", false);
+      }
+
       if(isStudent){
         lobbyView.style.display = "none";
         classroomView.style.display = "grid";
@@ -1228,7 +1554,7 @@
       var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.onclick = function(){
-        writeProgress(s.id, { matched:{}, selected:{}, choicePick:null, revealed:false, strokes:[], texts:[], lastWrong:null });
+        writeProgress(s.id, { matched:{}, selected:{}, choicePick:null, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
       };
       actWrap.appendChild(resetBtn);
 
@@ -1244,19 +1570,25 @@
 
     stageEl.appendChild(head);
 
+    // 關鍵對齊容器：建立 board-area 並把游標盒放在裡面
+    var boardArea = document.createElement("div");
+    boardArea.className = "board-area";
+    boardArea.id = "board-area";
+    stageEl.appendChild(boardArea);
+
     var cursorBox = document.createElement("div");
     cursorBox.className = "multi-cursor-container";
     cursorBox.id = "multi-cursor-box";
-    stageEl.appendChild(cursorBox);
+    boardArea.appendChild(cursorBox);
 
-    if(s.type === "match") renderMatchBoard(s);
-    else if(s.type === "choice") renderChoiceBoard(s);
-    else if(s.type === "circle") renderCircleBoard(s);
-    else if(s.type === "board") renderDrawBoard(s);
+    if(s.type === "match") renderMatchBoard(s, boardArea);
+    else if(s.type === "choice") renderChoiceBoard(s, boardArea);
+    else if(s.type === "circle") renderCircleBoard(s, boardArea);
+    else if(s.type === "board") renderDrawBoard(s, boardArea);
   }
 
-  /* 選擇題（含雙向答錯即時廣播） */
-  function renderChoiceBoard(s){
+  /* 選擇題 */
+  function renderChoiceBoard(s, container){
     var progress = getProgress(s.id);
     var interactive = canInteract();
     var currentPick = progress.choicePick || null;
@@ -1322,7 +1654,7 @@
       wrap.appendChild(note);
     }
 
-    stageEl.appendChild(wrap);
+    container.appendChild(wrap);
 
     var lastChoiceWrong = progress.lastChoiceWrong;
     if(lastChoiceWrong && lastChoiceWrong.t && (Date.now() - lastChoiceWrong.t < 1200)){
@@ -1337,8 +1669,8 @@
     }
   }
 
-  /* 寫字板功能（精準中心錨點對齊 + 下拉選單選字號 + 藍框拉動縮放） */
-  function renderDrawBoard(s){
+  /* 寫字板功能 */
+  function renderDrawBoard(s, container){
     var progress = getProgress(s.id);
     var strokes = progress.strokes || [];
     var texts = progress.texts || [];
@@ -1409,7 +1741,7 @@
     cWrap.appendChild(canvas);
     cWrap.appendChild(textLayer);
     wrap.appendChild(cWrap);
-    stageEl.appendChild(wrap);
+    container.appendChild(wrap);
 
     var ctx = canvas.getContext("2d");
     var isDrawing = false;
@@ -1723,10 +2055,11 @@
     };
   }
 
-  /* 連連看：強制一致排序、雙向即時同步答錯狀態 */
-  function renderMatchBoard(s){
+  /* 連連看：強制一致排序、雙向即時同步選取狀態與答錯回饋 */
+  function renderMatchBoard(s, container){
     var progress = getProgress(s.id);
     var matched = progress.matched || {};
+    var selections = progress.selections || {};
     var interactive = canInteract();
 
     var wrap = document.createElement("div"); wrap.className = "match-board";
@@ -1746,15 +2079,35 @@
     pIds.forEach(function(pid){
       var p = s.pairs[pid];
       var btn = document.createElement("button"); btn.type="button"; 
-      btn.className = "match-item zh" + (matched[pid] ? " matched" : "");
+      var isMatched = !!matched[pid];
+      btn.className = "match-item zh" + (isMatched ? " matched" : "");
       btn.textContent = p.left; 
       btn.dataset.id = pid; btn.dataset.side = "left";
-      if(matched[pid] || !interactive) btn.disabled = true;
+
+      // 關鍵同步：檢查對方或自己是否有選取此項，顯示其專屬顏色框線
+      var userWhoSelectedL = Object.keys(selections).find(function(uid){
+        return selections[uid] && selections[uid].left === pid;
+      });
+      if(userWhoSelectedL && !isMatched){
+        btn.classList.add("selected");
+        var uInfoL = selections[userWhoSelectedL];
+        var uColorL = getColorForStudent(uInfoL.name || "學生", uInfoL.role);
+        btn.style.borderColor = uColorL;
+        btn.style.boxShadow = "0 0 0 3px " + uColorL + "44 inset";
+      } else if(!isMatched){
+        btn.style.boxShadow = "";
+      }
+
+      if(isMatched || !interactive) btn.disabled = true;
+
       btn.onclick = function(){
         if(matched[pid] || !interactive) return;
-        lCol.querySelectorAll(".match-item").forEach(function(el){ el.classList.remove("selected"); });
-        btn.classList.add("selected");
-        selL = pid; checkMatch();
+        selL = pid;
+        // 廣播選取狀態給對方端
+        var mySel = { left: selL, right: selR, name: myName, role: roomRole };
+        var newSelections = Object.assign({}, selections, { [myId]: mySel });
+        writeProgress(s.id, { selections: newSelections });
+        checkMatch();
       };
       lCol.appendChild(btn);
     });
@@ -1762,15 +2115,34 @@
     rOrder.forEach(function(pid){
       var p = s.pairs[pid];
       var btn = document.createElement("button"); btn.type="button"; 
-      btn.className = "match-item" + (matched[pid] ? " matched" : "");
+      var isMatched = !!matched[pid];
+      btn.className = "match-item" + (isMatched ? " matched" : "");
       btn.textContent = p.right; 
       btn.dataset.id = pid; btn.dataset.side = "right";
-      if(matched[pid] || !interactive) btn.disabled = true;
+
+      // 檢查對方或自己是否有選取此項
+      var userWhoSelectedR = Object.keys(selections).find(function(uid){
+        return selections[uid] && selections[uid].right === pid;
+      });
+      if(userWhoSelectedR && !isMatched){
+        btn.classList.add("selected");
+        var uInfoR = selections[userWhoSelectedR];
+        var uColorR = getColorForStudent(uInfoR.name || "學生", uInfoR.role);
+        btn.style.borderColor = uColorR;
+        btn.style.boxShadow = "0 0 0 3px " + uColorR + "44 inset";
+      } else if(!isMatched){
+        btn.style.boxShadow = "";
+      }
+
+      if(isMatched || !interactive) btn.disabled = true;
+
       btn.onclick = function(){
         if(matched[pid] || !interactive) return;
-        rCol.querySelectorAll(".match-item").forEach(function(el){ el.classList.remove("selected"); });
-        btn.classList.add("selected");
-        selR = pid; checkMatch();
+        selR = pid;
+        var mySel = { left: selL, right: selR, name: myName, role: roomRole };
+        var newSelections = Object.assign({}, selections, { [myId]: mySel });
+        writeProgress(s.id, { selections: newSelections });
+        checkMatch();
       };
       rCol.appendChild(btn);
     });
@@ -1780,10 +2152,13 @@
         var leftBtn = lCol.querySelector(`.match-item[data-id="${selL}"]`);
         var rightBtn = rCol.querySelector(`.match-item[data-id="${selR}"]`);
 
+        var newSelections = Object.assign({}, getProgress(s.id).selections || {});
+        delete newSelections[myId];
+
         if(selL === selR){
           playCorrectSound();
           matched[selL] = true;
-          writeProgress(s.id, { matched: matched, lastWrong: null });
+          writeProgress(s.id, { matched: matched, lastWrong: null, selections: newSelections });
 
           if(Object.keys(matched).length === pIds.length){
             setTimeout(playVictorySound, 400);
@@ -1791,7 +2166,8 @@
         } else {
           playWrongSound();
           writeProgress(s.id, { 
-            lastWrong: { left: selL, right: selR, t: Date.now(), who: myName } 
+            lastWrong: { left: selL, right: selR, t: Date.now(), who: myName },
+            selections: newSelections
           });
         }
         selL = null; selR = null;
@@ -1800,7 +2176,7 @@
 
     cols.appendChild(lCol); cols.appendChild(rCol);
     wrap.appendChild(cols);
-    stageEl.appendChild(wrap);
+    container.appendChild(wrap);
 
     var lastWrong = progress.lastWrong;
     if(lastWrong && lastWrong.t && (Date.now() - lastWrong.t < 1200)){
@@ -1841,7 +2217,7 @@
   }
 
   /* 圈選題 */
-  function renderCircleBoard(s){
+  function renderCircleBoard(s, container){
     var progress = getProgress(s.id);
     var selected = progress.selected || {};
     var interactive = canInteract();
@@ -1890,10 +2266,10 @@
       wrap.appendChild(note);
     }
 
-    stageEl.appendChild(wrap);
+    container.appendChild(wrap);
   }
 
-  /* 遠端游標 */
+  /* 遠端游標渲染 */
   function renderMultiCursors(cursorData){
     var container = document.getElementById("multi-cursor-box");
     if(!container) return;
@@ -1923,23 +2299,48 @@
     });
   }
 
+  /* 游標座標監聽：錨定於 boardArea 核心互動區，確保雙方百分比絕對一致 */
   var lastM = 0;
-  window.addEventListener("mousemove", function(e){
+  function handleCursorMove(clientX, clientY){
     if(!inRoom() || !cursorOn) return;
     var now = Date.now();
-    if(now - lastM < 45) return;
+    if(now - lastM < 40) return;
     lastM = now;
-    var r = stageEl.getBoundingClientRect();
+
+    var boardArea = document.getElementById("board-area");
+    if(!boardArea) return;
+    var r = boardArea.getBoundingClientRect();
     if(r.width === 0 || r.height === 0) return;
-    var x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
-    var y = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100));
+
+    var x = ((clientX - r.left) / r.width) * 100;
+    var y = ((clientY - r.top) / r.height) * 100;
+
+    // 移出過遠時隱藏游標
+    if(x < -10 || x > 110 || y < -10 || y > 110){
+      update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: null, y: null });
+      return;
+    }
+
+    x = Math.max(0, Math.min(100, x));
+    y = Math.max(0, Math.min(100, y));
+
     update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { 
       x: x, 
       y: y, 
       name: myName,
       role: roomRole 
     });
+  }
+
+  window.addEventListener("mousemove", function(e){
+    handleCursorMove(e.clientX, e.clientY);
   });
+
+  window.addEventListener("touchmove", function(e){
+    if(e.touches && e.touches[0]){
+      handleCursorMove(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
 
   /* ================== 設定面板操作與試聽 ================== */
   var soundSelect = document.getElementById("setting-sound-style");
@@ -1950,21 +2351,18 @@
     localStorage.setItem("hanyu_sound_style", currentSoundStyle);
   };
 
-  // 底色模式點擊切換
   document.querySelectorAll(".btn-theme-bg").forEach(function(b){
     b.onclick = function(){
-      applyTheme(b.dataset.bg, currentAccentColor);
+      applyTheme(b.dataset.bg, currentAccentColor, true);
     };
   });
 
-  // 重點色點擊切換
   document.querySelectorAll(".btn-theme-accent").forEach(function(b){
     b.onclick = function(){
-      applyTheme(currentBgMode, b.dataset.accent);
+      applyTheme(currentBgMode, b.dataset.accent, true);
     };
   });
 
-  // 試聽按鈕
   var testSoundBtn = document.getElementById("btn-test-sound");
   if(testSoundBtn){
     testSoundBtn.onclick = function(e){
