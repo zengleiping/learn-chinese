@@ -344,7 +344,7 @@
   </div>
 </div>
 
-<!-- 設定彈窗：支援小班學生名單、專屬連結、音效風格與外觀色彩 -->
+<!-- 設定彈窗：僅限老師使用 -->
 <dialog class="dialog-modal" id="settings-dialog">
   <div class="dialog-head">
     <h2>⚙️ 課堂與多學生設定</h2>
@@ -603,8 +603,9 @@
   var cursorOn = true;
   var currentViewingStudentId = "all";
 
-  var CURSOR_COLORS = ["#B23B32", "#1E88E5", "#4C7A5E", "#FB8C00", "#8E24AA", "#00897B", "#D81B60"];
-  function getColorForStudent(nameOrId){
+  var CURSOR_COLORS = ["#1E88E5", "#4C7A5E", "#FB8C00", "#8E24AA", "#00897B", "#D81B60"];
+  function getColorForStudent(nameOrId, role){
+    if(role === "teacher" || nameOrId === "teacher" || nameOrId === "老師") return "#B23B32";
     var sum = 0;
     for(var i=0; i<nameOrId.length; i++) sum += nameOrId.charCodeAt(i);
     return CURSOR_COLORS[sum % CURSOR_COLORS.length];
@@ -701,7 +702,7 @@
     }
   }
 
-  /* 頂部控制列 */
+  /* 頂部控制列（關鍵權限：設定按鈕僅限老師可見） */
   var topbarActions = document.getElementById("topbar-actions");
   function renderTopbar(){
     topbarActions.innerHTML = "";
@@ -758,12 +759,15 @@
       topbarActions.appendChild(btn);
     }
 
-    var setBtn = document.createElement("button"); setBtn.className = "btn btn-sm btn-ghost"; setBtn.textContent = "⚙️ 設定";
-    setBtn.onclick = function(){ 
-      updateStudentLinksUI();
-      document.getElementById("settings-dialog").showModal(); 
-    };
-    topbarActions.appendChild(setBtn);
+    // 🔒 學生端絕對不可看見與控制「⚙️ 設定」
+    if(!isStudent){
+      var setBtn = document.createElement("button"); setBtn.className = "btn btn-sm btn-ghost"; setBtn.textContent = "⚙️ 設定";
+      setBtn.onclick = function(){ 
+        updateStudentLinksUI();
+        document.getElementById("settings-dialog").showModal(); 
+      };
+      topbarActions.appendChild(setBtn);
+    }
   }
 
   /* 教師端：小班學生分頁標籤 */
@@ -801,7 +805,7 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "student-tab-btn" + (currentViewingStudentId === stu.id ? " active" : "");
-      btn.style.borderColor = getColorForStudent(stu.name);
+      btn.style.borderColor = getColorForStudent(stu.name, "student");
       btn.innerHTML = `🎓 ${stu.name}`;
       btn.onclick = function(){
         currentViewingStudentId = stu.id;
@@ -1476,7 +1480,7 @@
     stageEl.appendChild(wrap);
   }
 
-  /* ================== 多人即時游標渲染 ================== */
+  /* ================== 多人即時游標渲染（正確區分老師與學生名字） ================== */
   function renderMultiCursors(cursorData){
     var container = document.getElementById("multi-cursor-box");
     if(!container) return;
@@ -1489,7 +1493,11 @@
       var c = cursorData[peerId];
       if(!c || c.x == null) return;
 
-      var color = getColorForStudent(c.name || peerId);
+      // 關鍵區別：若對方是老師，強制顯示「👑 老師」與朱砂紅
+      var isTeacherCursor = (c.role === "teacher" || peerId === "teacher");
+      var displayName = isTeacherCursor ? "👑 老師" : (c.name || "學生");
+      var color = isTeacherCursor ? "#B23B32" : getColorForStudent(displayName, "student");
+
       var el = document.createElement("div");
       el.className = "peer-cursor";
       el.style.left = c.x + "%";
@@ -1497,7 +1505,7 @@
 
       el.innerHTML = `
         <span class="peer-cursor-dot" style="background:${color};"></span>
-        <span class="peer-cursor-label" style="background:${color};">${c.name || "學生"}</span>
+        <span class="peer-cursor-label" style="background:${color};">${displayName}</span>
       `;
       container.appendChild(el);
     });
@@ -1931,7 +1939,7 @@
     };
   });
 
-  /* 學生進入時自填姓名引導 */
+  /* 學生自填姓名引導 */
   function handleStudentJoin(){
     if(!isStudent || !urlRoom) return;
 
