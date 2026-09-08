@@ -261,7 +261,7 @@
   }
   .match-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 
-  /* 寫字畫布白板 */
+  /* 寫字板功能 */
   .draw-board-container{display:flex;flex-direction:column;gap:12px;position:relative;}
   .draw-toolbar{
     display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;
@@ -279,14 +279,6 @@
     border:1px solid var(--grid-line);background:var(--surface);cursor:pointer;color:var(--ink);
   }
   .grid-toggle-btn.active{background:var(--seal);color:#fff;border-color:var(--seal);}
-
-  .tone-group{display:inline-flex;align-items:center;gap:3px;background:var(--surface);padding:3px 6px;border-radius:8px;border:1px solid var(--grid-line);}
-  .tone-btn{
-    width:24px;height:24px;padding:0;border:1px solid transparent;border-radius:5px;
-    background:transparent;font-size:15px;font-weight:700;line-height:1;cursor:pointer;
-    display:inline-flex;align-items:center;justify-content:center;color:var(--ink);
-  }
-  .tone-btn:hover{background:var(--seal-soft);color:var(--seal);}
 
   .color-dot{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
   .color-dot.active{border-color:var(--ink);transform:scale(1.15);}
@@ -836,7 +828,8 @@
         var osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + idx * 0.12);
         g.gain.setValueAtTime(0.2, now + idx * 0.12); g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
-        osc.connect(g); g.connect(ctx.destination); osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
       });
     }catch(e){}
   }
@@ -899,7 +892,7 @@
           },
           sample_board: {
             id:"sample_board", type:"board", title:"生字書寫教學：『好』",
-            desc:"靠近文字框變成實線即可自由移動，可自訂字號大小並點選聲調。",
+            desc:"靠近文字框變成實線即可自由移動，可自訂字號大小。",
             bgImage:"", gridType:"jiu"
           }
         }
@@ -928,7 +921,8 @@
   var urlRole = params.get("role");
   var urlName = params.get("name");
 
-  var isStudent = (urlRole === "student") || (!!urlRoom && !urlRole);
+  // 關鍵修復：嚴格比對 role=student 才視為學生，老師重新整理或開啟房間時不再被誤認為學生要求輸入名字
+  var isStudent = (urlRole === "student");
   var app_ = document.getElementById("app");
   if(isStudent) app_.classList.add("student-mode");
 
@@ -1584,7 +1578,7 @@
     else if(s.type === "board") renderDrawBoard(s, boardArea);
   }
 
-  /* 選擇題（含高對比與雙向答錯廣播） */
+  /* 選擇題 */
   function renderChoiceBoard(s, container){
     var progress = getProgress(s.id);
     var interactive = canInteract();
@@ -1666,7 +1660,7 @@
     }
   }
 
-  /* 寫字板功能（透明背景、無干擾雙重框） */
+  /* 寫字板功能 */
   function renderDrawBoard(s, container){
     var progress = getProgress(s.id);
     var strokes = progress.strokes || [];
@@ -1698,16 +1692,6 @@
       <button type="button" class="grid-toggle-btn ${currentGrid==='none'?'active':''}" data-grid="none">無格</button>
       <button type="button" class="grid-toggle-btn ${currentGrid==='tian'?'active':''}" data-grid="tian">田字格</button>
       <button type="button" class="grid-toggle-btn ${currentGrid==='jiu'?'active':''}" data-grid="jiu">九宮格</button>
-      <div class="tool-sep"></div>
-      
-      <span style="font-size:12px;font-weight:700;color:var(--seal);">聲調:</span>
-      <div class="tone-group">
-        <button type="button" class="tone-btn" data-tone="ˉ">ˉ</button>
-        <button type="button" class="tone-btn" data-tone="ˊ">ˊ</button>
-        <button type="button" class="tone-btn" data-tone="ˇ">ˇ</button>
-        <button type="button" class="tone-btn" data-tone="ˋ">ˋ</button>
-        <button type="button" class="tone-btn" data-tone="˙">˙</button>
-      </div>
       <div class="tool-sep"></div>
 
       <span style="font-size:12px;color:var(--ink-soft);">顏色:</span>
@@ -2014,30 +1998,6 @@
         var gType = gb.dataset.grid;
         cWrap.className = "canvas-stage-wrap " + (gType === 'tian' ? 'grid-tian' : (gType === 'jiu' ? 'grid-jiu' : ''));
         writeProgress(s.id, { gridType: gType });
-      };
-    });
-
-    toolbar.querySelectorAll(".tone-btn").forEach(function(tb){
-      tb.onclick = function(e){
-        e.stopPropagation();
-        var tone = tb.dataset.tone;
-        if(activeSelectedTextId){
-          var selObj = texts.find(function(item){ return item.id === activeSelectedTextId; });
-          if(selObj){
-            selObj.text += tone;
-            writeProgress(s.id, { texts: texts });
-            return;
-          }
-        }
-        texts.push({
-          id: uid("t"),
-          text: tone,
-          x: 50,
-          y: 50,
-          color: boardState.color,
-          fontSize: boardState.fontSize || 36
-        });
-        writeProgress(s.id, { texts: texts });
       };
     });
 
@@ -2719,7 +2679,7 @@
     };
   }
 
-  /* 初始化流程 */
+  /* 初始化流程：嚴格依 role=student 判斷學生，老師不被強制要求輸入名字 */
   if(isStudent){
     window.addEventListener("firebase-bridge-ready", handleStudentJoin);
   } else if(urlRoom){
