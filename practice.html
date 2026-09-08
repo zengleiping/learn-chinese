@@ -135,10 +135,7 @@
     border:1px solid var(--grid-line);border-radius:16px;
     padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; position:relative;
   }
-padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; position:relative;
-}
- .match-board, .circle-board { position: relative; }
- .app.present .stage, .app.student-mode .stage{max-width:1040px;min-height:60vh;}
+  .match-board, .circle-board { position: relative; }
   .app.present .stage, .app.student-mode .stage{max-width:1040px;min-height:60vh;}
 
   .stage-empty{color:var(--ink-soft);text-align:center;padding:60px 20px;font-size:14px;}
@@ -148,7 +145,12 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
   .stage-sub-meta{font-size:12px;color:var(--bamboo);margin:5px 0 0;font-weight:600;}
   .stage-actions{display:flex;gap:8px;flex:none;}
 
-  .peer-cursor{position:absolute;left:0;top:0;pointer-events:none;z-index:60;display:none;align-items:center;gap:5px;transform:translate(-50%,-50%);transition:left .08s linear, top .08s linear;}
+  /* 遠端游標絕對定位，並置頂 */
+  .peer-cursor{
+    position:absolute;left:0;top:0;pointer-events:none;z-index:9999;
+    display:none;align-items:center;gap:5px;transform:translate(-50%,-50%);
+    transition:left .06s linear, top .06s linear;
+  }
   .peer-cursor.show{display:flex;}
   .peer-cursor-dot{width:14px;height:14px;border-radius:50%;background:var(--seal);border:2px solid var(--surface);box-shadow:0 1px 6px rgba(0,0,0,.35);flex:none;}
   .peer-cursor-label{background:var(--seal);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;box-shadow:0 1px 6px rgba(0,0,0,.25);}
@@ -193,7 +195,7 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
 
   /* ---------- circle board ---------- */
   .circle-prompt{font-family:"LXGW WenKai TC",serif;font-size:20px;margin:0 0 20px;line-height:1.6;}
-  .circle-choices{display:flex;flex-wrap:wrap;gap:14px;}
+  .circle-choices{display:flex;flex-wrap:wrap;gap:14px;position:relative;}
   .circle-chip{
     font-family:"Public Sans","Noto Sans TC",sans-serif;font-size:16px;font-weight:500;padding:12px 22px;
     border-radius:48% 52% 51% 49% / 53% 47% 53% 47%;border:2.5px solid var(--grid-line);
@@ -347,8 +349,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
 <div id="toast-wrap"></div>
 
 <script>
-  // 這個 <script> 是普通(非 module)腳本，一定會執行 —— 就算下面 Firebase 的
-  // 部分完全連不上網路，本機單人練習模式也不受影響。
   window.FIREBASE_CONFIG = {
     apiKey: "AIzaSyC6DjPDuRCdSKuZYKKiCSlbWI_eLVM05oc",
     authDomain: "chinese-onlineboard.firebaseapp.com",
@@ -361,19 +361,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
   window.__firebaseConfigured = !!(window.FIREBASE_CONFIG.apiKey && window.FIREBASE_CONFIG.apiKey.indexOf("貼上") === -1 && window.FIREBASE_CONFIG.databaseURL && window.FIREBASE_CONFIG.databaseURL.indexOf("貼上") === -1);
 </script>
 <script type="module">
-/* =========================================================================
-   FIREBASE 設定說明
-   1. https://console.firebase.google.com 建立一個新專案（免費 Spark 方案即可，
-      不需要信用卡）。
-   2. 專案總覽 → 新增應用程式 →「網頁」，複製它給你的 firebaseConfig 物件，
-      貼到上面那個 <script> 裡取代整個 window.FIREBASE_CONFIG。
-   3. 左側選單「Build → Realtime Database」→ 建立資料庫（測試模式即可）。
-      建好之後，把附上的 rules.json 內容貼到「規則」分頁並發布。
-   4. 左側選單「Build → Authentication」→ Sign-in method → 啟用「匿名」。
-   完整步驟請看附上的 README。這一段用「動態載入」的方式連線，就算網路
-   連不到 Firebase（例如學校網路擋住、或還沒設定），也只有房間功能會
-   不能用，本機單人練習模式完全不受影響。
-   ========================================================================= */
 (async function(){
   if(!window.__firebaseConfigured){ window.__firebaseReady = false; return; }
   try{
@@ -414,17 +401,15 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
   var app_ = document.getElementById("app");
   if(isStudent) app_.classList.add("student-mode");
 
-  var activeRoomId = null;     // set once a room is created/joined
+  var activeRoomId = null;
   var roomRole = isStudent ? "student" : "teacher";
-  var roomData = null;         // last known snapshot of rooms/{id}
-  var roomListenersAttached = false;
-  var studentStatus = "connecting"; // student-side header state: connecting | connected | error
-  var cursorOn = false;        // teacher-only: is "point for student" currently switched on
-  var lastPeerCursor = null;   // last known cursor snapshot from roomCursors/{id} for "the other side"
-  var lastPeerPick = null;     // last known connect-the-dots pick snapshot from roomPicks/{id} for "the other side"
-  var cursorThrottleAt = 0;    // last time we sent a cursor position update
+  var roomData = null;
+  var studentStatus = "connecting";
+  var cursorOn = false;
+  var lastPeerCursor = null;
+  var lastPeerPick = null;
+  var cursorThrottleAt = 0;
 
-  /* ---------------- sample content (local mode only) ---------------- */
   var SAMPLE_SETS = {
     sample_match: {
       id:"sample_match", type:"match", title:"生詞配對：你好！（範例）",
@@ -448,7 +433,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     }
   };
 
-  /* ---------------- local (offline) state ---------------- */
   function loadLocal(){
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -463,7 +447,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
   if(!local.progress) local.progress = {};
   function saveLocal(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(local)); }catch(e){} }
 
-  /* ---------------- unified data accessors ---------------- */
   function inRoom(){ return !!activeRoomId; }
   function getSets(){ return inRoom() ? (roomData && roomData.sets || {}) : local.sets; }
   function getCurrentId(){ return inRoom() ? (roomData && roomData.currentSetId) : local.currentId; }
@@ -493,9 +476,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     else { local.currentId = id; saveLocal(); renderSidebar(); renderStage(); }
   }
   function writeProgress(setId, patch, skipStamp){
-    // skipStamp：像「公布答案」這種老師專屬的動作，不算是「作答」，
-    // 不應該蓋掉學生上一次選擇時留下的 lastActor／lastActionAt，
-    // 不然老師端的「最後作答時間」統計會被自己按公布答案的時間取代。
     if(!skipStamp){
       patch.lastActor = roomRole;
       if(inRoom()) patch.lastActionAt = serverTimestamp();
@@ -515,7 +495,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     else { local.progress[setId] = blank; saveLocal(); renderStage(); }
   }
 
-  /* ---------------- toast ---------------- */
   window.showToast = function(msg){
     var wrap = document.getElementById("toast-wrap");
     var t = document.createElement("div");
@@ -525,12 +504,10 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     setTimeout(function(){ t.classList.remove("show"); setTimeout(function(){ t.remove(); }, 250); }, 2600);
   };
 
-  /* ---------------- topbar rendering ---------------- */
   var topbarActions = document.getElementById("topbar-actions");
   var setupBanner = document.getElementById("setup-banner");
   if(!window.__firebaseConfigured && !isStudent) setupBanner.classList.add("show");
 
-  /* ---------------- firebase bridge readiness ---------------- */
   function getFirebase(timeoutMs){
     timeoutMs = timeoutMs || 8000;
     if(window.__firebaseReady === true) return Promise.resolve(true);
@@ -628,20 +605,12 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
   }
   function promptLink(link){ window.prompt("複製這個連結給學生：", link); }
 
-  /* ---------------- 指標分享 ----------------
-     游標位置存在 roomCursors/{roomId}/teacher 和 .../student 這兩條路徑，
-     跟 rooms/{roomId} 是分開的，這樣滑鼠移動時的高頻寫入才不會觸發 rooms
-     的監聽器、拖累整個房間畫面的重新渲染。座標用「站台寬高的百分比」而
-     不是像素，這樣兩邊螢幕大小不一樣也能對得上同一個相對位置。
-     老師這邊要手動開關（避免沒事一直指給學生看，會分心）；學生這邊只要
-     人在房間裡、滑鼠在題目上，就一直讓老師看得到，不用另外開關。 */
   function setCursorOn(on){
     cursorOn = on;
     if(inRoom()) update(ref(db, "roomCursors/" + activeRoomId + "/teacher"), { on: on, ts: serverTimestamp() });
     renderTopbar();
   }
 
-  /* ---------------- room create / join / leave ---------------- */
   function genRoomId(){ return String(Math.floor(1000 + Math.random() * 9000)); }
 
   async function createRoom(){
@@ -687,30 +656,22 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     var pRef = ref(db, "rooms/" + roomId + "/presence/" + role);
     set(pRef, { online:true, lastSeen: serverTimestamp() });
     onDisconnect(pRef).set({ online:false, lastSeen: serverTimestamp() });
-    // 斷線的時候把自己的游標也一起藏起來，不然對方會看到一個定格不動的游標。
     if(role === "teacher") onDisconnect(ref(db, "roomCursors/" + roomId + "/teacher")).update({ on:false });
     else onDisconnect(ref(db, "roomCursors/" + roomId + "/student")).set({ x:null, y:null });
-    // 斷線的時候順便清掉「目前點到哪一個」的標示，不然對方會看到一個
-    // 停在半空中、其實已經沒人在點的標示。
     onDisconnect(ref(db, "roomPicks/" + roomId)).set(null);
   }
 
   function startRoom(roomId, role){
     activeRoomId = roomId; roomRole = role;
-    // 各自訂閱「對方」那一條游標路徑：老師端看學生的、學生端看老師的，
-    // 跟 rooms/{roomId} 分開監聽，游標移動才不會拖著整個房間畫面一起重畫。
     var peerCursorPath = role === "teacher" ? "student" : "teacher";
     onValue(ref(db, "roomCursors/" + roomId + "/" + peerCursorPath), function(snap){
       lastPeerCursor = snap.val();
       renderPeerCursor(lastPeerCursor);
     });
-    // 連連看「對方點到哪一個」也是跟 rooms/{roomId} 分開的獨立路徑，理由跟
-    // 游標一樣：避免高頻/中途狀態觸發整個房間畫面重畫。
     onValue(ref(db, "roomPicks/" + roomId), function(snap){
       lastPeerPick = snap.val();
       applyPeerPick(lastPeerPick);
     });
-    var lastMatchedCount = null, lastSelectedCount = null;
     onValue(ref(db, "rooms/" + roomId), function(snap){
       if(!snap.exists()){
         roomData = null;
@@ -725,7 +686,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
       if(!roomData.progress) roomData.progress = {};
       if(role === "student") studentStatus = "connected";
 
-      // "student got it right" toast, teacher side only
       if(role === "teacher" && prev){
         var curId = roomData.currentSetId;
         var pNow = roomData.progress[curId];
@@ -760,7 +720,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     renderTopbar(); renderSidebar(); renderStage();
   }
 
-  /* ---------------- sidebar ---------------- */
   var setListEl = document.getElementById("set-list");
   function renderSidebar(){
     if(isStudent) return;
@@ -794,17 +753,9 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     });
   }
 
-  /* ---------------- stage ---------------- */
   var stageEl = document.getElementById("stage");
   function escapeHtml(str){ var d = document.createElement("div"); d.textContent = str == null ? "" : str; return d.innerHTML; }
 
-  /* ---------------- 對方指標分享 ----------------
-     renderStage() 每次都會整個重畫 #stage 的內容，所以指標的 DOM 元素
-     沒辦法一直留著——改成每次重畫之後都呼叫 ensurePeerCursorEl() 把它
-     加回去，位置則用 rooms 以外的 roomCursors/{id}/teacher 或 .../student
-     這兩條獨立路徑同步，這樣游標移動不會觸發整個 rooms 監聽器、也就不會
-     害整塊練習畫面被重畫個不停。老師端看到的是學生的游標，學生端看到的
-     是老師的游標，標籤文字依 roomRole 自動決定，不用另外傳參數。 */
   function ensurePeerCursorEl(){
     var el = document.getElementById("peer-cursor");
     var label = roomRole === "teacher" ? "學生" : "老師";
@@ -816,9 +767,9 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
       var labelEl = el.querySelector(".peer-cursor-label");
       if(labelEl) labelEl.textContent = label;
     }
-    if(el.parentNode !== stageEl) stageEl.appendChild(el);
     return el;
   }
+
   function renderPeerCursor(c){
     var el = ensurePeerCursorEl();
     if(!c || c.on === false || c.x == null || c.y == null){ el.classList.remove("show"); return; }
@@ -830,13 +781,7 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     el.style.top = c.y + "%";
     el.classList.add("show");
   }
-  /* 對方在連連看上「單邊點了哪一個、還沒配對完成」的即時標示，走
-     roomPicks/{roomId} 這條單獨的路徑（跟 roomCursors 一樣跟 rooms/{roomId}
-     分開），所以不會觸發整個房間畫面重畫——這點很重要：如果借用
-     rooms/{roomId}/progress 來存這個，兩邊都會因為自己剛剛的點擊而觸發一次
-     全畫面重繪，把還沒點完第二下的本機選取狀態（selectedLeft/selectedRight）
-     沖掉，變成永遠配對不成功。這裡改成只在目前畫面上直接找對應的按鈕、
-     加減一個 class，不重畫整塊 board。 */
+
   function applyPeerPick(pick){
     stageEl.querySelectorAll(".match-item.peer-picked").forEach(function(el){
       el.classList.remove("peer-picked");
@@ -853,10 +798,8 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
       el.dataset.peerLabel = pick.by === "teacher" ? "老師" : "學生";
     }
   }
-  /* 把滑鼠位置換算成 #stage 寬高的百分比，節流後同步出去。放在這裡（而不是
-     檔案更前面）是因為要用到上面剛指定好的 stageEl。老師端要先打開「指給
-     學生看」才會送出去（避免沒事分心）；學生端沒有開關，人在房間裡、滑鼠
-     在題目上就一直讓老師看得到。 */
+
+  /* 游標座標以目標題型板 (match-cols / circle-choices) 寬高比例定位 */
   if(!isStudent){
     stageEl.addEventListener("mousemove", function(ev){
       if(!inRoom() || !cursorOn) return;
@@ -893,9 +836,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     });
   }
 
-  /* 老師端專用：把「最後作答時間／答錯次數／是否一次就答對」整理成一行文字，
-     只在房間模式、且最後一次動作是學生做的時候才顯示，避免老師自己按重置或
-     切題目時被無關的舊時間戳弄混。 */
   function progressMetaLine(s, progress){
     if(!inRoom() || isStudent || !progress || progress.lastActor !== "student") return null;
     var bits = [];
@@ -918,7 +858,7 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
         else if(isCorrect && editCount > 1) bits.push("🔁 想了 " + editCount + " 次才答對");
       }
     }
-    return bits.length ? bits.join("　·　") : null;
+    return bits.length ? bits.join(" · ") : null;
   }
 
   function renderStage(){
@@ -971,13 +911,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     renderPeerCursor(lastPeerCursor);
   }
 
-  function shuffledIds(idArr){
-    var a = idArr.slice();
-    for(var i=a.length-1;i>0;i--){ var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
-    return a;
-  }
-  var rightOrderCache = {};
-
   function renderMatchBoard(s){
     var progress = getProgress(s.id);
     var matched = progress.matched || {};
@@ -1016,9 +949,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     cols.appendChild(leftCol); cols.appendChild(rightCol);
     board.appendChild(cols); stageEl.appendChild(board);
 
-    // 對方目前點到哪一個（連連看還沒完成配對前的單邊點選），只顯示「對方」的，
-    // 自己點的那個已經用上面的 .selected 顯示了，不用重複標示。這條狀態走
-    // roomPicks/{roomId}（見 applyPeerPick），不是這裡自己讀 progress。
     applyPeerPick(lastPeerPick);
 
     if(Object.keys(matched).length === pairIds.length && pairIds.length > 0){
@@ -1057,8 +987,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
           var rightEl = board.querySelector('[data-side="right"][data-id="'+selectedRight+'"]');
           [leftEl,rightEl].forEach(function(e){ if(e){ e.classList.add("wrong"); setTimeout(function(){e.classList.remove("wrong");},400); } });
           setTimeout(clearSelection, 420);
-          // 只在房間模式記錄答錯次數：writeProgress 在房間模式下只會送出非同步的
-          // update()，不會馬上整個重畫畫面，所以不會打斷上面的搖動動畫。
           if(inRoom()) writeProgress(s.id, { wrongCount: (progress.wrongCount || 0) + 1 });
         }
       }
@@ -1136,7 +1064,7 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     stageEl.appendChild(wrap);
   }
 
-  /* ---------------- editor dialog (teacher, local or in-room) ---------------- */
+  /* ---------- editor dialog ---------- */
   if(!isStudent){
     var dialog = document.getElementById("editor-dialog");
     var form = document.getElementById("editor-form");
@@ -1233,14 +1161,12 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
     });
   }
 
-  /* ---------------- room dialog close ---------------- */
   document.getElementById("room-dialog-copy").addEventListener("click", function(){
     var link = document.getElementById("room-dialog-link").value;
     if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(function(){ showToast("已複製學生連結"); }); }
   });
   document.getElementById("room-dialog-close").addEventListener("click", function(){ document.getElementById("room-dialog").close(); });
 
-  /* ---------------- boot ---------------- */
   renderTopbar();
   renderSidebar();
 
@@ -1253,7 +1179,6 @@ padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; positi
       joinAsStudent(urlRoom);
     }
   } else if(urlRoom && window.__firebaseConfigured){
-    // teacher re-opening a link that already has ?room=xxxx (e.g. reloaded mid-class)
     stageEl.innerHTML = '<div class="stage-empty">連線中...</div>';
     getFirebase().then(function(ok){
       if(!ok){ stageEl.innerHTML = '<div class="stage-empty">無法連上連線服務，請檢查網路連線。</div>'; return; }
