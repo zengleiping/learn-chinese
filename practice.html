@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>生詞練習台</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Public+Sans:wght@400;500;600;700&display=swap">
+<!-- SheetJS: 支援 Excel 匯入與匯出 -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root{
     --paper:#F3F5EF;
@@ -71,11 +73,18 @@
   .btn-ghost{background:transparent;border-color:transparent;color:var(--ink-soft);}
   .btn-sm{padding:5px 10px;font-size:12px;border-radius:7px;}
 
+  /* room cluster 與 開關設計 */
   .room-cluster{display:flex;align-items:center;gap:10px;padding:6px 12px;border:1px solid var(--grid-line);border-radius:10px;background:var(--paper);}
   .room-code{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;}
   .room-code b{color:var(--seal);}
   .presence-dot{width:9px;height:9px;border-radius:50%;background:var(--ink-soft);flex:none;}
   .presence-dot.online{background:var(--bamboo);}
+  
+  .toggle{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-soft);cursor:pointer;user-select:none;}
+  .toggle-track{width:34px;height:18px;border-radius:99px;background:var(--surface-2);border:1px solid var(--grid-line);position:relative;transition:background .15s ease;}
+  .toggle-track::after{content:"";position:absolute;top:1px;left:1px;width:14px;height:14px;border-radius:50%;background:var(--surface);transition:transform .15s ease;}
+  .toggle.on .toggle-track{background:var(--bamboo);border-color:var(--bamboo);}
+  .toggle.on .toggle-track::after{transform:translateX(16px);}
 
   /* layout */
   .layout{flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0;}
@@ -84,9 +93,11 @@
 
   .sidebar{
     background:var(--surface); border-right:1px solid var(--grid-line); padding:16px;
-    display:flex;flex-direction:column;gap:12px;overflow-y:auto;
+    display:flex;flex-direction:column;gap:10px;overflow-y:auto;
   }
   .btn-new{width:100%;justify-content:center;padding:10px 14px;}
+  .sidebar-excel-group{display:flex;flex-direction:column;gap:6px;margin-bottom:4px;}
+  
   .set-list{display:flex;flex-direction:column;gap:8px;}
   .set-card{
     text-align:left;border:1.5px solid var(--grid-line);background:var(--paper);
@@ -117,7 +128,7 @@
   .stage-sub{font-size:13px;color:var(--ink-soft);margin:0;}
   .stage-actions{display:flex;gap:8px;}
 
-  /* 連連看與圈選面板 */
+  /* 連連看與圈選題 */
   .match-board{position:relative;}
   .match-cols{display:flex;justify-content:space-between;gap:clamp(20px,6vw,100px);position:relative;z-index:1;}
   .match-col{flex:1;display:flex;flex-direction:column;gap:12px;max-width:340px;}
@@ -232,6 +243,17 @@
   <div class="layout">
     <aside class="sidebar" id="sidebar">
       <button class="btn btn-primary btn-new" id="btn-new" type="button">＋ 新增題目</button>
+
+      <!-- Excel 批次操作區塊 -->
+      <div class="sidebar-excel-group">
+        <button type="button" class="btn btn-sm" id="btn-import-excel" style="width:100%; justify-content:center;">📊 匯入 Excel 題庫</button>
+        <div style="display:flex; gap:6px;">
+          <button type="button" class="btn btn-sm btn-ghost" id="btn-dl-template" style="flex:1; justify-content:center; border:1px solid var(--grid-line);" title="下載填題格式檔">📥 空白範本</button>
+          <button type="button" class="btn btn-sm btn-ghost" id="btn-export-excel" style="flex:1; justify-content:center; border:1px solid var(--grid-line);" title="匯出目前題庫成Excel">📤 匯出題目</button>
+        </div>
+        <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display:none;">
+      </div>
+
       <div class="set-list" id="set-list"></div>
     </aside>
     <main class="stage-wrap">
@@ -240,6 +262,7 @@
   </div>
 </div>
 
+<!-- 題目手動編輯彈窗 -->
 <dialog class="editor-dialog" id="editor-dialog">
   <form id="editor-form">
     <div class="editor-head">
@@ -342,6 +365,7 @@
   var activeRoomId = null;
   var roomRole = isStudent ? "student" : "teacher";
   var roomData = null;
+  var cursorOn = true; // 預設開啟指標
   var lastPeerCursor = null;
 
   var SAMPLE_SETS = {
@@ -381,6 +405,9 @@
   function getSets(){ return inRoom() ? (roomData && roomData.sets || {}) : local.sets; }
   function getCurrentId(){ return inRoom() ? (roomData && roomData.currentSetId) : local.currentId; }
   function getCurrentSet(){ return getSets()[getCurrentId()] || null; }
+  function isOpenForStudent(){ return inRoom() ? !!(roomData && roomData.isOpen) : true; }
+  function canInteract(){ return !inRoom() || roomRole === "teacher" || isOpenForStudent(); }
+
   function getProgress(setId){
     if(inRoom()){ return (roomData && roomData.progress && roomData.progress[setId]) || {}; }
     if(!local.progress[setId]) local.progress[setId] = {};
@@ -412,23 +439,53 @@
     }
   }
 
-  /* 頂部列 */
+  /* 頂部列：保留所有狀態與開關按鈕 */
   var topbarActions = document.getElementById("topbar-actions");
   function renderTopbar(){
     topbarActions.innerHTML = "";
     if(inRoom()){
       var c2 = document.createElement("div"); c2.className = "room-cluster";
       var online = !!(roomData && roomData.presence && roomData.presence[isStudent ? "teacher" : "student"] && roomData.presence[isStudent ? "teacher" : "student"].online);
-      c2.innerHTML = '<span class="room-code">房間 <b>' + activeRoomId + '</b></span><span class="presence-dot' + (online ? ' online' : '') + '"></span><span style="font-size:12px;">' + (online ? "已同步連線" : "等待對方...") + '</span>';
+      
+      c2.innerHTML = `
+        <span class="room-code">房間 <b>${activeRoomId}</b></span>
+        <span class="presence-dot ${online ? 'online' : ''}"></span>
+        <span style="font-size:12px;">${online ? (isStudent ? "老師已在線" : "學生已連線") : "等待連線..."}</span>
+      `;
+
+      if(!isStudent){
+        // 開放作答開關
+        var toggleOpen = document.createElement("label");
+        toggleOpen.className = "toggle" + (isOpenForStudent() ? " on" : "");
+        toggleOpen.innerHTML = '<span class="toggle-track"></span><span>' + (isOpenForStudent() ? "開放作答中" : "鎖定作答中") + '</span>';
+        toggleOpen.onclick = function(){
+          update(ref(db, "rooms/" + activeRoomId), { isOpen: !isOpenForStudent() });
+        };
+        c2.appendChild(toggleOpen);
+
+        // 指標分享開關
+        var toggleCursor = document.createElement("label");
+        toggleCursor.className = "toggle" + (cursorOn ? " on" : "");
+        toggleCursor.innerHTML = '<span class="toggle-track"></span><span>' + (cursorOn ? "指標分享中" : "指標已關閉") + '</span>';
+        toggleCursor.onclick = function(){
+          cursorOn = !cursorOn;
+          renderTopbar();
+        };
+        c2.appendChild(toggleCursor);
+      }
       topbarActions.appendChild(c2);
 
       if(!isStudent){
-        var copyBtn = document.createElement("button"); copyBtn.className = "btn btn-sm btn-primary"; copyBtn.textContent = "📋 複製學生連結";
+        var copyBtn = document.createElement("button"); copyBtn.className = "btn btn-sm btn-primary"; copyBtn.textContent = "🔗 複製學生連結";
         copyBtn.onclick = function(){
           var link = location.origin + location.pathname + "?room=" + activeRoomId + "&role=student";
           navigator.clipboard.writeText(link).then(function(){ alert("學生專屬連結已複製！"); });
         };
         topbarActions.appendChild(copyBtn);
+
+        var leaveBtn = document.createElement("button"); leaveBtn.className = "btn btn-sm btn-ghost"; leaveBtn.textContent = "結束連線";
+        leaveBtn.onclick = leaveRoom;
+        topbarActions.appendChild(leaveBtn);
       }
     } else {
       var btn = document.createElement("button"); btn.className = "btn btn-primary"; btn.textContent = "🔗 開新房間";
@@ -442,6 +499,7 @@
     activeRoomId = rId;
     await set(ref(db, "rooms/" + rId), {
       currentSetId: local.currentId, sets: local.sets, progress: {},
+      isOpen: true,
       presence: { teacher: { online:true } }
     });
     attachPresence(rId, "teacher");
@@ -449,7 +507,16 @@
     history.replaceState(null, "", "?room=" + rId);
     renderTopbar();
     var link = location.origin + location.pathname + "?room=" + rId + "&role=student";
-    navigator.clipboard.writeText(link).then(function(){ alert("✅ 房間已開好！\n學生連結已複製到剪貼簿，傳給學生點開即可加入。"); });
+    navigator.clipboard.writeText(link).then(function(){ alert("✅ 房間已開好！\n學生連結已複製到剪貼簿，傳給學生即可加入。"); });
+  }
+
+  function leaveRoom(){
+    if(activeRoomId){
+      set(ref(db, "rooms/" + activeRoomId + "/presence/teacher"), { online: false });
+    }
+    activeRoomId = null; roomData = null;
+    history.replaceState(null, "", location.pathname);
+    renderTopbar(); renderSidebar(); renderStage();
   }
 
   function attachPresence(rId, role){
@@ -482,7 +549,20 @@
       var card = document.createElement("div");
       card.className = "set-card" + (id === getCurrentId() ? " active" : "");
       var tag = s.type === "match" ? "連連看" : (s.type === "circle" ? "圈出來" : "寫字板");
-      card.innerHTML = '<div class="set-card-top"><span class="set-card-title">' + s.title + '</span><span class="badge">' + tag + '</span></div>';
+      card.innerHTML = `
+        <div class="set-card-top"><span class="set-card-title">${s.title}</span><span class="badge">${tag}</span></div>
+      `;
+      var del = document.createElement("button"); del.className = "set-card-del"; del.type = "button"; del.textContent = "刪除";
+      del.onclick = function(ev){
+        ev.stopPropagation();
+        var keys = Object.keys(sets);
+        if(keys.length <= 1) return;
+        var newSets = Object.assign({}, sets);
+        delete newSets[id];
+        var newCur = getCurrentId() === id ? Object.keys(newSets)[0] : undefined;
+        writeSets(newSets, newCur);
+      };
+      card.appendChild(del);
       card.onclick = function(){ setCurrent(id); };
       setListEl.appendChild(card);
     });
@@ -506,7 +586,7 @@
     renderPeerCursor(lastPeerCursor);
   }
 
-  /* 寫字板核心邏輯 */
+  /* 寫字板功能 */
   function renderDrawBoard(s){
     var progress = getProgress(s.id);
     var strokes = progress.strokes || [];
@@ -521,7 +601,7 @@
       <button type="button" class="tool-btn" data-tool="select">✋ 移動</button>
       <div class="tool-sep"></div>
       <button type="button" class="tool-btn" data-tool="stroke-eraser" title="點擊整條筆畫刪除">🪄 筆畫擦</button>
-      <button type="button" class="tool-btn" data-tool="pixel-eraser" title="局部橡皮擦">🧽 局部擦</button>
+      <button type="button" class="tool-btn" data-tool="pixel-eraser" title="局部擦除">🧽 局部擦</button>
       <div class="tool-sep"></div>
       <span style="font-size:12px;color:var(--ink-soft);">顏色:</span>
       <div class="color-dot active" data-color="#B23B32" style="background:#B23B32;"></div>
@@ -661,6 +741,7 @@
     }
 
     canvas.onmousedown = function(e){
+      if(!canInteract()) return;
       var p = getPos(e);
       if(activeTool === "stroke-eraser"){
         checkStrokeHit(p);
@@ -754,10 +835,12 @@
     };
   }
 
-  /* 連連看 */
+  /* 連連看（固定順序、支援鎖定作答） */
   function renderMatchBoard(s){
     var progress = getProgress(s.id);
     var matched = progress.matched || {};
+    var interactive = canInteract();
+
     var wrap = document.createElement("div"); wrap.className = "match-board";
     var svg = document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","match-svg");
     wrap.appendChild(svg);
@@ -773,10 +856,12 @@
 
     pIds.forEach(function(pid){
       var p = s.pairs[pid];
-      var btn = document.createElement("button"); btn.type="button"; btn.className = "match-item zh" + (matched[pid] ? " matched" : "");
-      btn.textContent = p.left; if(matched[pid]) btn.disabled = true;
+      var btn = document.createElement("button"); btn.type="button"; 
+      btn.className = "match-item zh" + (matched[pid] ? " matched" : "");
+      btn.textContent = p.left; 
+      if(matched[pid] || !interactive) btn.disabled = true;
       btn.onclick = function(){
-        if(matched[pid]) return;
+        if(matched[pid] || !interactive) return;
         selL = pid; checkMatch();
       };
       lCol.appendChild(btn);
@@ -784,10 +869,12 @@
 
     rOrder.forEach(function(pid){
       var p = s.pairs[pid];
-      var btn = document.createElement("button"); btn.type="button"; btn.className = "match-item" + (matched[pid] ? " matched" : "");
-      btn.textContent = p.right; if(matched[pid]) btn.disabled = true;
+      var btn = document.createElement("button"); btn.type="button"; 
+      btn.className = "match-item" + (matched[pid] ? " matched" : "");
+      btn.textContent = p.right; 
+      if(matched[pid] || !interactive) btn.disabled = true;
       btn.onclick = function(){
-        if(matched[pid]) return;
+        if(matched[pid] || !interactive) return;
         selR = pid; checkMatch();
       };
       rCol.appendChild(btn);
@@ -811,14 +898,19 @@
   function renderCircleBoard(s){
     var progress = getProgress(s.id);
     var selected = progress.selected || {};
+    var interactive = canInteract();
+
     var wrap = document.createElement("div");
     wrap.innerHTML = '<p class="circle-prompt zh">' + s.prompt + '</p>';
     var cBox = document.createElement("div"); cBox.className = "circle-choices";
     Object.keys(s.choices).forEach(function(cid){
       var c = s.choices[cid];
-      var btn = document.createElement("button"); btn.className = "circle-chip" + (selected[cid] ? " selected" : "");
+      var btn = document.createElement("button"); 
+      btn.className = "circle-chip" + (selected[cid] ? " selected" : "");
       btn.textContent = c.text;
+      if(!interactive) btn.disabled = true;
       btn.onclick = function(){
+        if(!interactive) return;
         selected[cid] = !selected[cid];
         writeProgress(s.id, { selected: selected });
       };
@@ -828,7 +920,7 @@
     stageEl.appendChild(wrap);
   }
 
-  /* 遠端游標常駐監聽 */
+  /* 遠端游標 */
   function ensurePeerCursorEl(){
     var el = document.getElementById("peer-cursor");
     if(!el){
@@ -840,14 +932,14 @@
   }
   function renderPeerCursor(c){
     var el = ensurePeerCursorEl();
-    if(!c || c.x == null){ el.classList.remove("show"); return; }
+    if(!c || c.x == null || !cursorOn){ el.classList.remove("show"); return; }
     el.style.left = c.x + "%"; el.style.top = c.y + "%";
     el.classList.add("show");
   }
 
   var lastM = 0;
   window.addEventListener("mousemove", function(e){
-    if(!inRoom()) return;
+    if(!inRoom() || !cursorOn) return;
     var now = Date.now();
     if(now - lastM < 45) return;
     lastM = now;
@@ -858,7 +950,7 @@
     update(ref(db, "roomCursors/" + activeRoomId + "/" + roomRole), { x: x, y: y });
   });
 
-  /* 編輯題目彈窗 */
+  /* 題目手動編輯彈窗 */
   var dialog = document.getElementById("editor-dialog");
   var typeToggle = document.getElementById("type-toggle");
   var matchFields = document.getElementById("match-fields");
@@ -934,6 +1026,177 @@
     sets[newSet.id] = newSet;
     writeSets(sets, newSet.id);
     dialog.close();
+  };
+
+  /* ================== EXCEL 批次操作（匯入、空白範本、匯出） ================== */
+  var excelInput = document.getElementById("excel-file-input");
+  document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
+
+  // 1. 匯入 Excel
+  excelInput.onchange = function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try {
+        var data = new Uint8Array(evt.target.result);
+        var wb = XLSX.read(data, { type: 'array' });
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(ws);
+
+        if(!rows || rows.length === 0){
+          alert("Excel 檔案內沒有資料！");
+          return;
+        }
+
+        var newSets = Object.assign({}, getSets());
+        var grouped = {};
+
+        rows.forEach(function(row){
+          var title = row["題目名稱"] || row["Title"] || "未命名題目";
+          var type = (row["題型"] || row["Type"] || "match").toLowerCase();
+          if(!grouped[title]){
+            grouped[title] = { title: title, type: type, items: [], desc: row["說明"] || row["Desc"] || "" };
+          }
+          grouped[title].items.push(row);
+        });
+
+        Object.keys(grouped).forEach(function(tKey){
+          var g = grouped[tKey];
+          var newId = uid("set");
+
+          if(g.type === "match"){
+            var pairs = {};
+            g.items.forEach(function(it, idx){
+              var pid = "p" + (idx + 1);
+              var l = it["左欄生詞"] || it["Left"] || "";
+              var r = it["右欄拼音或意思"] || it["Right"] || "";
+              if(l && r) pairs[pid] = { id: pid, left: String(l), right: String(r) };
+            });
+            newSets[newId] = {
+              id: newId, type: "match", title: g.title,
+              leftLabel: "生詞", rightLabel: "拼音／意思",
+              pairs: pairs
+            };
+          } else if(g.type === "circle"){
+            g.items.forEach(function(it, idx){
+              var subId = uid("set");
+              var prompt = it["題目說明"] || it["Prompt"] || g.title;
+              var rawChoices = String(it["選項(逗號分開)"] || it["Choices"] || "").split(/[,，、]/);
+              var answer = String(it["正確答案"] || it["Answer"] || "").trim();
+              var choices = {};
+              var correctIds = [];
+
+              rawChoices.forEach(function(cText, cIdx){
+                var cid = "c" + (cIdx + 1);
+                var trimTxt = cText.trim();
+                if(trimTxt){
+                  choices[cid] = { id: cid, text: trimTxt };
+                  if(trimTxt === answer) correctIds.push(cid);
+                }
+              });
+
+              newSets[subId] = {
+                id: subId, type: "circle",
+                title: g.title + (g.items.length > 1 ? " (" + (idx+1) + ")" : ""),
+                prompt: prompt, multiSelect: false,
+                choices: choices, correctIds: correctIds
+              };
+            });
+          }
+        });
+
+        writeSets(newSets);
+        alert("🎉 成功由 Excel 匯入 " + Object.keys(grouped).length + " 組題庫！");
+      } catch(err){
+        alert("解析失敗，請確認檔案格式是否相符。");
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // 2. 下載空白 Excel 填題範本
+  document.getElementById("btn-dl-template").onclick = function(){
+    var templateData = [
+      {
+        "題型": "match",
+        "題目名稱": "第一課生詞配對範例",
+        "左欄生詞": "你好",
+        "右欄拼音或意思": "nǐ hǎo",
+        "題目說明": "",
+        "選項(逗號分開)": "",
+        "正確答案": ""
+      },
+      {
+        "題型": "match",
+        "題目名稱": "第一課生詞配對範例",
+        "左欄生詞": "謝謝",
+        "右欄拼音或意思": "xièxie",
+        "題目說明": "",
+        "選項(逗號分開)": "",
+        "正確答案": ""
+      },
+      {
+        "題型": "circle",
+        "題目名稱": "語意測驗範例",
+        "左欄生詞": "",
+        "右欄拼音或意思": "",
+        "題目說明": "「謝謝」是什麼意思？",
+        "選項(逗號分開)": "Hello, Thank you, Goodbye",
+        "正確答案": "Thank you"
+      }
+    ];
+
+    var ws = XLSX.utils.json_to_sheet(templateData);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "題庫範本");
+    XLSX.writeFile(wb, "生詞練習台_題庫範本.xlsx");
+  };
+
+  // 3. 匯出目前平台上的所有題目為 Excel
+  document.getElementById("btn-export-excel").onclick = function(){
+    var currentSets = getSets();
+    var exportRows = [];
+
+    Object.keys(currentSets).forEach(function(sid){
+      var s = currentSets[sid];
+      if(s.type === "match" && s.pairs){
+        Object.keys(s.pairs).forEach(function(pid){
+          exportRows.push({
+            "題型": "match",
+            "題目名稱": s.title,
+            "左欄生詞": s.pairs[pid].left,
+            "右欄拼音或意思": s.pairs[pid].right,
+            "題目說明": "",
+            "選項(逗號分開)": "",
+            "正確答案": ""
+          });
+        });
+      } else if(s.type === "circle" && s.choices){
+        var cTexts = Object.keys(s.choices).map(function(cid){ return s.choices[cid].text; }).join(", ");
+        var ansText = s.correctIds && s.correctIds.length ? (s.choices[s.correctIds[0]] ? s.choices[s.correctIds[0]].text : "") : "";
+        exportRows.push({
+          "題型": "circle",
+          "題目名稱": s.title,
+          "左欄生詞": "",
+          "右欄拼音或意思": "",
+          "題目說明": s.prompt || "",
+          "選項(逗號分開)": cTexts,
+          "正確答案": ansText
+        });
+      }
+    });
+
+    if(exportRows.length === 0){
+      alert("目前沒有可匯出的連連看或選擇題。");
+      return;
+    }
+
+    var ws = XLSX.utils.json_to_sheet(exportRows);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "題庫備份");
+    XLSX.writeFile(wb, "生詞題庫備份_" + new Date().toISOString().slice(0,10) + ".xlsx");
   };
 
   renderTopbar(); renderSidebar();
