@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>生詞練習台 - 互動寫字白板版</title>
+<title>生詞練習台</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Public+Sans:wght@400;500;600;700&display=swap">
 <style>
   :root{
@@ -76,11 +76,6 @@
   .room-code b{color:var(--seal);}
   .presence-dot{width:9px;height:9px;border-radius:50%;background:var(--ink-soft);flex:none;}
   .presence-dot.online{background:var(--bamboo);}
-  .toggle{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-soft);cursor:pointer;user-select:none;}
-  .toggle-track{width:34px;height:18px;border-radius:99px;background:var(--surface-2);border:1px solid var(--grid-line);position:relative;transition:background .15s ease;}
-  .toggle-track::after{content:"";position:absolute;top:1px;left:1px;width:14px;height:14px;border-radius:50%;background:var(--surface);transition:transform .15s ease;}
-  .toggle.on .toggle-track{background:var(--bamboo);border-color:var(--bamboo);}
-  .toggle.on .toggle-track::after{transform:translateX(16px);}
 
   /* layout */
   .layout{flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0;}
@@ -147,10 +142,8 @@
   }
   .circle-chip.selected{border-color:var(--seal);background:var(--seal-soft);color:var(--seal);font-weight:700;}
   .circle-chip.correct{border-color:var(--bamboo);background:var(--bamboo-soft);color:var(--bamboo);font-weight:700;}
-  .circle-chip.missed{border-color:var(--bamboo);border-style:dashed;color:var(--bamboo);}
-  .circle-chip.selected-wrong{border-color:var(--ink-soft);background:var(--surface-2);color:var(--ink-soft);text-decoration:line-through;}
 
-  /* ================= 寫字教學與圖片畫布白板 ================= */
+  /* 寫字畫布白板 */
   .draw-board-container{display:flex;flex-direction:column;gap:12px;position:relative;}
   .draw-toolbar{
     display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;
@@ -174,7 +167,7 @@
     background-image:
       linear-gradient(to right, rgba(178,59,50,0.12) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(178,59,50,0.12) 1px, transparent 1px);
-    background-size:50% 50%; /* 田字格輔助線背景 */
+    background-size:50% 50%;
   }
   .bg-img-layer{
     position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:1;
@@ -188,11 +181,11 @@
     font-size:24px;font-weight:700;line-height:1.2;color:var(--ink);user-select:none;
     padding:4px 8px;border:1.5px dashed transparent;border-radius:6px;
   }
-  .movable-text:hover, .movable-text.active{border-color:var(--seal);background:rgba(255,255,255,0.8);}
+  .movable-text:hover, .movable-text.active{border-color:var(--seal);background:rgba(255,255,255,0.85);}
 
   /* 遠端游標 */
   .peer-cursor{
-    position:absolute;left:0;top:0;pointer-events:none;z-index:9999;
+    position:absolute;left:0;top:0;pointer-events:none;z-index:99999;
     display:none;align-items:center;gap:5px;transform:translate(-50%,-50%);
     transition:left .06s linear, top .06s linear;
   }
@@ -220,9 +213,6 @@
 
   .upload-box{border:2px dashed var(--grid-line);padding:14px;border-radius:10px;text-align:center;cursor:pointer;background:var(--paper);}
   .upload-box:hover{border-color:var(--seal);}
-
-  #toast-wrap{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:8px;}
-  .toast{background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:99px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);}
 </style>
 </head>
 <body>
@@ -250,7 +240,6 @@
   </div>
 </div>
 
-<!-- 題目編輯彈窗 -->
 <dialog class="editor-dialog" id="editor-dialog">
   <form id="editor-form">
     <div class="editor-head">
@@ -285,13 +274,13 @@
       </div>
 
       <div id="board-fields" style="display:none;">
-        <label>底圖設定（選填，可用於課本頁面、生詞圖片或田字格）</label>
+        <label>底圖設定（選填，可用於課本頁面或田字格）</label>
         <div class="upload-box" id="upload-box">
           <span id="upload-tip">📷 點擊上傳背景圖片（JPG/PNG）</span>
           <input type="file" id="f-board-img" accept="image/*" style="display:none;">
         </div>
-        <label>教學說明／指引</label>
-        <input type="text" id="f-board-desc" placeholder="例如：請在九宮格中寫出『你』，並標出筆順。">
+        <label>教學指引</label>
+        <input type="text" id="f-board-desc" placeholder="例如：請在九宮格中寫出『好』">
       </div>
     </div>
     <div class="editor-foot">
@@ -300,8 +289,6 @@
     </div>
   </form>
 </dialog>
-
-<div id="toast-wrap"></div>
 
 <script>
   window.FIREBASE_CONFIG = {
@@ -355,10 +342,8 @@
   var activeRoomId = null;
   var roomRole = isStudent ? "student" : "teacher";
   var roomData = null;
-  var cursorOn = false;
   var lastPeerCursor = null;
 
-  /* ---------- 內建模範題庫 ---------- */
   var SAMPLE_SETS = {
     sample_match: {
       id:"sample_match", type:"match", title:"生詞配對：你好！（範例）",
@@ -418,11 +403,16 @@
     else { local.currentId = id; saveLocal(); renderSidebar(); renderStage(); }
   }
   function writeProgress(setId, patch){
-    if(inRoom()){ update(ref(db, "rooms/" + activeRoomId + "/progress/" + setId), patch); }
-    else { Object.assign(getProgress(setId), patch); saveLocal(); renderStage(); }
+    if(inRoom()){ 
+      update(ref(db, "rooms/" + activeRoomId + "/progress/" + setId), patch); 
+    } else { 
+      Object.assign(getProgress(setId), patch); 
+      saveLocal(); 
+      renderStage(); 
+    }
   }
 
-  /* ---------- 頂部控制列 ---------- */
+  /* 頂部列 */
   var topbarActions = document.getElementById("topbar-actions");
   function renderTopbar(){
     topbarActions.innerHTML = "";
@@ -474,7 +464,6 @@
       roomData = snap.val() || {};
       renderTopbar(); renderSidebar(); renderStage();
     });
-    // 監聽游標
     var peerPath = role === "teacher" ? "student" : "teacher";
     onValue(ref(db, "roomCursors/" + rId + "/" + peerPath), function(snap){
       lastPeerCursor = snap.val();
@@ -482,7 +471,7 @@
     });
   }
 
-  /* ---------- 側欄選題 ---------- */
+  /* 側欄 */
   var setListEl = document.getElementById("set-list");
   function renderSidebar(){
     if(isStudent) return;
@@ -499,7 +488,7 @@
     });
   }
 
-  /* ---------- 舞台渲染主邏輯 ---------- */
+  /* 舞台主渲染 */
   var stageEl = document.getElementById("stage");
   function renderStage(){
     var s = getCurrentSet();
@@ -517,15 +506,14 @@
     renderPeerCursor(lastPeerCursor);
   }
 
-  /* ================= 寫字教學與圖片畫布白板 (核心) ================= */
+  /* 寫字板核心邏輯 */
   function renderDrawBoard(s){
     var progress = getProgress(s.id);
-    var strokes = progress.strokes || []; // 筆畫列表
-    var texts = progress.texts || [];     // 打字文字物件列表
+    var strokes = progress.strokes || [];
+    var texts = progress.texts || [];
 
     var wrap = document.createElement("div"); wrap.className = "draw-board-container";
 
-    // 工具列
     var toolbar = document.createElement("div"); toolbar.className = "draw-toolbar";
     toolbar.innerHTML = `
       <button type="button" class="tool-btn active" data-tool="pen">✏️ 畫筆</button>
@@ -533,7 +521,7 @@
       <button type="button" class="tool-btn" data-tool="select">✋ 移動</button>
       <div class="tool-sep"></div>
       <button type="button" class="tool-btn" data-tool="stroke-eraser" title="點擊整條筆畫刪除">🪄 筆畫擦</button>
-      <button type="button" class="tool-btn" data-tool="pixel-eraser" title="像實體橡皮擦一樣擦除路徑">🧽 局部擦</button>
+      <button type="button" class="tool-btn" data-tool="pixel-eraser" title="局部橡皮擦">🧽 局部擦</button>
       <div class="tool-sep"></div>
       <span style="font-size:12px;color:var(--ink-soft);">顏色:</span>
       <div class="color-dot active" data-color="#B23B32" style="background:#B23B32;"></div>
@@ -551,7 +539,6 @@
     `;
     wrap.appendChild(toolbar);
 
-    // 畫布容器
     var cWrap = document.createElement("div"); cWrap.className = "canvas-stage-wrap";
     if(s.bgImage){
       var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = s.bgImage;
@@ -564,7 +551,6 @@
     wrap.appendChild(cWrap);
     stageEl.appendChild(wrap);
 
-    // 內部狀態
     var ctx = canvas.getContext("2d");
     var activeTool = "pen";
     var activeColor = "#B23B32";
@@ -572,13 +558,14 @@
     var isDrawing = false;
     var currentPath = [];
 
-    // 重設 Canvas 尺寸解析度
     function resizeCanvas(){
       var r = cWrap.getBoundingClientRect();
-      canvas.width = r.width; canvas.height = r.height;
-      redrawStrokes();
+      if(r.width > 0 && r.height > 0){
+        canvas.width = r.width; canvas.height = r.height;
+        redrawStrokes();
+      }
     }
-    setTimeout(resizeCanvas, 40);
+    requestAnimationFrame(resizeCanvas);
 
     function redrawStrokes(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -616,10 +603,8 @@
         div.style.color = t.color || "#2A333C";
         div.style.fontSize = (t.size ? t.size * 5 : 24) + "px";
 
-        // 移動模式拖曳
         div.onmousedown = function(e){
           if(activeTool === "stroke-eraser"){
-            // 物件橡皮擦直接刪除文字
             texts.splice(idx, 1);
             writeProgress(s.id, { texts: texts });
             return;
@@ -650,7 +635,6 @@
       });
     }
 
-    // 取得點擊標準百分比座標
     function getPos(e){
       var r = cWrap.getBoundingClientRect();
       var cx = e.touches ? e.touches[0].clientX : e.clientX;
@@ -661,13 +645,12 @@
       };
     }
 
-    // 按筆畫擦除判定 (點擊是否落在筆畫外框內)
     function checkStrokeHit(p){
       for(var i = strokes.length - 1; i >= 0; i--){
         var pts = strokes[i].points;
         for(var j=0; j<pts.length; j++){
           var dist = Math.hypot(pts[j].x - p.x, pts[j].y - p.y);
-          if(dist < 2.5){ // 命中筆畫
+          if(dist < 3.5){
             strokes.splice(i, 1);
             writeProgress(s.id, { strokes: strokes });
             return true;
@@ -677,7 +660,6 @@
       return false;
     }
 
-    // 事件監聽
     canvas.onmousedown = function(e){
       var p = getPos(e);
       if(activeTool === "stroke-eraser"){
@@ -685,7 +667,7 @@
         return;
       }
       if(activeTool === "text"){
-        var txt = prompt("請輸入要加入畫布的文字（可輸入漢字或拼音）：");
+        var txt = prompt("請輸入要加入畫布的文字：");
         if(txt && txt.trim()){
           texts.push({ id: uid("t"), text: txt.trim(), x: p.x, y: p.y, color: activeColor, size: activeSize });
           writeProgress(s.id, { texts: texts });
@@ -703,7 +685,6 @@
       var p = getPos(e);
       currentPath.push(p);
 
-      // 本地即時預覽
       ctx.save();
       if(activeTool === "pixel-eraser"){
         ctx.globalCompositeOperation = "destination-out";
@@ -740,7 +721,6 @@
       currentPath = [];
     };
 
-    // 工具列點擊綁定
     toolbar.querySelectorAll(".tool-btn").forEach(function(b){
       b.onclick = function(){
         toolbar.querySelectorAll(".tool-btn").forEach(function(x){ x.classList.remove("active"); });
@@ -767,14 +747,14 @@
     });
 
     document.getElementById("btn-clear-draw").onclick = function(){
-      if(confirm("確定要清空畫布上的所有寫字與標註嗎？")){
+      if(confirm("確定要清空畫布上的所有內容嗎？")){
         strokes = []; texts = [];
         writeProgress(s.id, { strokes: strokes, texts: texts });
       }
     };
   }
 
-  /* ---------- 連連看 (保持順序對齊版) ---------- */
+  /* 連連看 */
   function renderMatchBoard(s){
     var progress = getProgress(s.id);
     var matched = progress.matched || {};
@@ -788,7 +768,7 @@
     rCol.innerHTML = '<div class="match-col-label">' + (s.rightLabel || "項目二") + '</div>';
 
     var pIds = Object.keys(s.pairs);
-    var rOrder = pIds.slice().reverse(); // 固定順序保證師生一致
+    var rOrder = pIds.slice().reverse();
     var selL = null, selR = null;
 
     pIds.forEach(function(pid){
@@ -827,7 +807,7 @@
     stageEl.appendChild(wrap);
   }
 
-  /* ---------- 圈選題 ---------- */
+  /* 圈選題 */
   function renderCircleBoard(s){
     var progress = getProgress(s.id);
     var selected = progress.selected || {};
@@ -848,7 +828,7 @@
     stageEl.appendChild(wrap);
   }
 
-  /* ---------- 遠端游標 ---------- */
+  /* 遠端游標常駐監聽 */
   function ensurePeerCursorEl(){
     var el = document.getElementById("peer-cursor");
     if(!el){
@@ -865,20 +845,20 @@
     el.classList.add("show");
   }
 
-  // 滑鼠節流傳遞
   var lastM = 0;
-  stageEl.onmousemove = function(e){
+  window.addEventListener("mousemove", function(e){
     if(!inRoom()) return;
     var now = Date.now();
-    if(now - lastM < 60) return;
+    if(now - lastM < 45) return;
     lastM = now;
     var r = stageEl.getBoundingClientRect();
-    var x = (e.clientX - r.left) / r.width * 100;
-    var y = (e.clientY - r.top) / r.height * 100;
+    if(r.width === 0 || r.height === 0) return;
+    var x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
+    var y = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100));
     update(ref(db, "roomCursors/" + activeRoomId + "/" + roomRole), { x: x, y: y });
-  };
+  });
 
-  /* ---------- 題目編輯器彈窗 (支援上傳圖片) ---------- */
+  /* 編輯題目彈窗 */
   var dialog = document.getElementById("editor-dialog");
   var typeToggle = document.getElementById("type-toggle");
   var matchFields = document.getElementById("match-fields");
@@ -898,7 +878,6 @@
     };
   });
 
-  // 圖片上傳壓縮轉 Base64
   var fileInput = document.getElementById("f-board-img");
   document.getElementById("upload-box").onclick = function(){ fileInput.click(); };
   fileInput.onchange = function(e){
@@ -909,12 +888,11 @@
       var img = new Image();
       img.onload = function(){
         var c = document.createElement("canvas");
-        var maxW = 900;
-        var scale = Math.min(1, maxW / img.width);
+        var scale = Math.min(1, 900 / img.width);
         c.width = img.width * scale; c.height = img.height * scale;
         var cx = c.getContext("2d");
         cx.drawImage(img, 0, 0, c.width, c.height);
-        uploadedBase64 = c.toDataURL("image/jpeg", 0.7); // 壓縮適合 Firebase 儲存
+        uploadedBase64 = c.toDataURL("image/jpeg", 0.7);
         document.getElementById("upload-tip").textContent = "✅ 已上傳圖片：" + f.name;
       };
       img.src = evt.target.result;
@@ -958,7 +936,6 @@
     dialog.close();
   };
 
-  /* ---------- 初始化開房/入房判定 ---------- */
   renderTopbar(); renderSidebar();
   if(urlRoom){
     window.addEventListener("firebase-bridge-ready", function(){
