@@ -982,11 +982,7 @@
     rightCol.innerHTML = '<div class="match-col-label">' + escapeHtml(s.rightLabel || "項目二") + '</div>';
 
     var pairIds = Object.keys(s.pairs);
-    var cacheKey = s.id;
-    if(!rightOrderCache[cacheKey] || rightOrderCache[cacheKey].length !== pairIds.length){
-      rightOrderCache[cacheKey] = shuffledIds(pairIds);
-    }
-    var rightOrder = rightOrderCache[cacheKey];
+    var rightOrder = pairIds.slice().reverse();
     var selectedLeft = null, selectedRight = null;
 
     pairIds.forEach(function(pid){
