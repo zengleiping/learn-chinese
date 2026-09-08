@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>生詞練習台</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --paper:#F3F5EF;
+    --surface:#FFFFFF;
+    --surface-2:#EAEDE4;
+    --ink:#2A333C;
+    --ink-soft:#66717A;
+    --grid-line:rgba(42,51,60,0.08);
+    --seal:#B23B32;
+    --seal-soft:#F5DFDB;
+    --seal-ring:rgba(178,59,50,0.38);
+    --bamboo:#4C7A5E;
+    --bamboo-soft:#DEEBE3;
+    --shadow: 0 1px 2px rgba(42,33,28,0.06), 0 6px 20px -8px rgba(42,33,28,0.18);
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1B211E; --surface:#232B27; --surface-2:#2A332E;
+      --ink:#E8EBE4; --ink-soft:#9BA79E; --grid-line:rgba(232,235,228,0.08);
+      --seal:#E2695C; --seal-soft:#3D2624; --seal-ring:rgba(226,105,92,0.42);
+      --bamboo:#7BB294; --bamboo-soft:#223229;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 24px -8px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#1B211E; --surface:#232B27; --surface-2:#2A332E;
+    --ink:#E8EBE4; --ink-soft:#9BA79E; --grid-line:rgba(232,235,228,0.08);
+    --seal:#E2695C; --seal-soft:#3D2624; --seal-ring:rgba(226,105,92,0.42);
+    --bamboo:#7BB294; --bamboo-soft:#223229;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 24px -8px rgba(0,0,0,0.5);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);}
+  .app{
+    background:var(--paper); color:var(--ink);
+    font-family:"Public Sans","Noto Sans TC",-apple-system,"Segoe UI",sans-serif;
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+  h1,h2,h3,.zh{ font-family:"LXGW WenKai TC","Noto Serif TC",serif; }
+  button, input, textarea{font-family:inherit;}
+  button:focus-visible, [tabindex]:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2.5px solid var(--seal); outline-offset:2px;
+  }
+  img{max-width:100%;}
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 24px;background:var(--surface);
+    border-bottom:1px solid var(--grid-line); gap:16px; flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .stamp{
+    width:34px;height:34px;flex:none; background:var(--seal);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"LXGW WenKai TC",serif;font-size:18px;font-weight:700;
+    border-radius:6px; transform:rotate(-6deg); box-shadow:var(--shadow);
+  }
+  .brand-text h1{margin:0;font-size:19px;font-weight:700;letter-spacing:.01em;}
+  .brand-text p{margin:1px 0 0;font-size:12.5px;color:var(--ink-soft);}
+  .topbar-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--grid-line); background:var(--surface); color:var(--ink);
+    padding:8px 14px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;
+    transition:background .12s ease, border-color .12s ease, transform .12s ease;
+  }
+  .btn:hover{border-color:var(--ink-soft);}
+  .btn:active{transform:translateY(1px);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-primary{background:var(--seal);border-color:var(--seal);color:#fff;}
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-ghost{background:transparent;border-color:transparent;color:var(--ink-soft);}
+  .btn-ghost:hover{background:var(--surface-2);color:var(--ink);}
+  .btn-sm{padding:6px 11px;font-size:12.5px;border-radius:7px;}
+
+  /* ---------- room cluster ---------- */
+  .room-cluster{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 12px;border:1px solid var(--grid-line);border-radius:10px;background:var(--paper);}
+  .room-code{font-family:"Public Sans",sans-serif;font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;letter-spacing:.06em;}
+  .room-code b{color:var(--seal);}
+  .presence-dot{width:9px;height:9px;border-radius:50%;background:var(--ink-soft);flex:none;}
+  .presence-dot.online{background:var(--bamboo);}
+  .presence-dot.offline{background:var(--seal);}
+  .presence-label{font-size:12px;color:var(--ink-soft);white-space:nowrap;}
+  .toggle{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);cursor:pointer;user-select:none;}
+  .toggle-track{width:36px;height:20px;border-radius:99px;background:var(--surface-2);border:1px solid var(--grid-line);position:relative;transition:background .15s ease;flex:none;}
+  .toggle-track::after{content:"";position:absolute;top:1px;left:1px;width:16px;height:16px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);transition:transform .15s ease;}
+  .toggle.on .toggle-track{background:var(--bamboo);border-color:var(--bamboo);}
+  .toggle.on .toggle-track::after{transform:translateX(16px);}
+
+  /* ---------- layout ---------- */
+  .layout{flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0;}
+  .app.present .layout, .app.student-mode .layout{grid-template-columns:1fr;}
+  .app.present .sidebar, .app.student-mode .sidebar{display:none;}
+  .app.present .topbar{padding:12px 20px;}
+
+  .sidebar{
+    background:var(--surface); border-right:1px solid var(--grid-line); padding:16px;
+    display:flex;flex-direction:column;gap:12px;overflow-y:auto;
+  }
+  .btn-new{width:100%;justify-content:center;padding:10px 14px;}
+  .set-list{display:flex;flex-direction:column;gap:8px;}
+  .set-card{
+    text-align:left;border:1.5px solid var(--grid-line);background:var(--paper);
+    border-radius:10px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:6px;
+  }
+  .set-card:hover{border-color:var(--ink-soft);}
+  .set-card.active{border-color:var(--seal);background:var(--seal-soft);}
+  .set-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .set-card-title{font-size:14px;font-weight:600;font-family:"LXGW WenKai TC",serif;}
+  .badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:99px;background:var(--surface-2);color:var(--ink-soft);white-space:nowrap;}
+  .set-card.active .badge{background:var(--seal);color:#fff;}
+  .set-card-meta{font-size:11.5px;color:var(--ink-soft);display:flex;justify-content:space-between;}
+  .set-card-del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:12px;padding:2px 4px;border-radius:5px;align-self:flex-end;}
+  .set-card-del:hover{color:var(--seal);background:var(--surface);}
+
+  .stage-wrap{overflow-y:auto;padding:28px clamp(16px,4vw,48px);display:flex;justify-content:center;}
+  .stage{
+    width:100%;max-width:860px;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      var(--surface);
+    background-size:28px 28px, 28px 28px, auto;
+    border:1px solid var(--grid-line);border-radius:16px;
+    padding:clamp(20px,4vw,40px); box-shadow:var(--shadow); min-height:420px; position:relative;
+  }
+  .app.present .stage, .app.student-mode .stage{max-width:1040px;min-height:60vh;}
+
+  .stage-empty{color:var(--ink-soft);text-align:center;padding:60px 20px;font-size:14px;}
+  .stage-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .stage-title{font-size:22px;font-weight:700;margin:0 0 4px;}
+  .stage-sub{font-size:13px;color:var(--ink-soft);margin:0;}
+  .stage-actions{display:flex;gap:8px;flex:none;}
+
+  .wait-overlay{
+    position:absolute;inset:0;border-radius:16px;background:color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;
+    text-align:center;padding:24px;z-index:5;
+  }
+  .wait-overlay .spinner{width:26px;height:26px;border-radius:50%;border:3px solid var(--grid-line);border-top-color:var(--seal);animation:spin 0.9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .wait-overlay p{margin:0;font-size:14.5px;color:var(--ink-soft);font-weight:600;}
+
+  /* ---------- match board ---------- */
+  .match-board{position:relative;}
+  .match-cols{display:flex;justify-content:space-between;gap:clamp(24px,8vw,120px);position:relative;z-index:1;}
+  .match-col{flex:1;display:flex;flex-direction:column;gap:12px;max-width:340px;}
+  .match-col-label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
+  .match-item{
+    font-family:"LXGW WenKai TC",serif;font-size:19px;text-align:center;padding:12px 16px;
+    border:2px solid var(--grid-line);background:var(--paper);color:var(--ink);border-radius:12px;cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .match-item[data-side="right"]{font-family:"Public Sans",sans-serif;font-size:16px;}
+  .match-item:hover:not(.matched):not(:disabled){border-color:var(--ink-soft);}
+  .match-item.selected{border-color:var(--seal);box-shadow:0 0 0 3px var(--seal-ring) inset;}
+  .match-item.matched{border-color:var(--bamboo);background:var(--bamboo-soft);cursor:default;}
+  .match-item:disabled{cursor:not-allowed;}
+  .match-item.wrong{animation:shake .4s ease;border-color:var(--seal);}
+  @keyframes shake{
+    10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(3px);}
+    30%,50%,70%{transform:translateX(-5px);} 40%,60%{transform:translateX(5px);}
+  }
+  .match-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+  .match-done{margin-top:20px;text-align:center;font-size:14px;color:var(--bamboo);font-weight:700;}
+
+  /* ---------- circle board ---------- */
+  .circle-prompt{font-family:"LXGW WenKai TC",serif;font-size:20px;margin:0 0 20px;line-height:1.6;}
+  .circle-choices{display:flex;flex-wrap:wrap;gap:14px;}
+  .circle-chip{
+    font-family:"Public Sans","Noto Sans TC",sans-serif;font-size:16px;font-weight:500;padding:12px 22px;
+    border-radius:48% 52% 51% 49% / 53% 47% 53% 47%;border:2.5px solid var(--grid-line);
+    background:var(--paper);color:var(--ink);cursor:pointer;min-width:88px;text-align:center;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .circle-chip:hover:not(:disabled){border-color:var(--ink-soft);}
+  .circle-chip:disabled{cursor:not-allowed;}
+  .circle-chip.selected{border-color:var(--seal);background:var(--seal-soft);color:var(--seal);font-weight:700;}
+  .circle-chip.correct{border-color:var(--bamboo);background:var(--bamboo-soft);color:var(--bamboo);font-weight:700;}
+  .circle-chip.missed{border-color:var(--bamboo);border-style:dashed;color:var(--bamboo);}
+  .circle-chip.selected-wrong{border-color:var(--ink-soft);background:var(--surface-2);color:var(--ink-soft);text-decoration:line-through;}
+  .reveal-note{margin-top:18px;font-size:13px;color:var(--ink-soft);}
+
+  /* ---------- editor dialog ---------- */
+  .editor-dialog{border:none;border-radius:16px;padding:0;background:var(--surface);color:var(--ink);box-shadow:var(--shadow);width:min(560px,92vw);max-height:86vh;}
+  .editor-dialog::backdrop{background:rgba(20,20,18,0.45);}
+  .editor-head{padding:20px 24px 4px;}
+  .editor-head h2{margin:0 0 2px;font-size:19px;}
+  .editor-head p{margin:0;font-size:12.5px;color:var(--ink-soft);}
+  .editor-body{padding:16px 24px;overflow-y:auto;max-height:56vh;}
+  .editor-foot{padding:14px 24px 22px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--grid-line);margin-top:8px;}
+  .type-toggle{display:flex;gap:8px;margin-bottom:16px;}
+  .type-toggle button{flex:1;padding:10px;border-radius:9px;border:1.5px solid var(--grid-line);background:var(--paper);color:var(--ink-soft);font-weight:600;font-size:13.5px;cursor:pointer;}
+  .type-toggle button.active{border-color:var(--seal);color:var(--seal);background:var(--seal-soft);}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:14px 0 5px;}
+  label:first-child{margin-top:0;}
+  input[type="text"], textarea{width:100%;border:1.5px solid var(--grid-line);background:var(--paper);color:var(--ink);border-radius:8px;padding:9px 11px;font-size:14.5px;}
+  .row-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .pair-row, .choice-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .pair-row input, .choice-row input[type="text"]{flex:1;}
+  .row-del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:15px;padding:4px 7px;flex:none;}
+  .row-del:hover{color:var(--seal);}
+  .add-row-btn{font-size:12.5px;color:var(--seal);background:none;border:none;cursor:pointer;font-weight:600;padding:4px 0;}
+  .check-row{display:flex;align-items:center;gap:8px;}
+  .check-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--seal);flex:none;}
+  .multi-toggle{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:13px;color:var(--ink-soft);}
+  .hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+
+  /* ---------- room dialog ---------- */
+  .room-dialog{border:none;border-radius:16px;padding:24px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow);width:min(420px,92vw);}
+  .room-dialog::backdrop{background:rgba(20,20,18,0.45);}
+  .room-dialog h2{margin:0 0 12px;font-size:18px;}
+  .room-dialog .big-code{font-size:34px;font-weight:700;letter-spacing:.08em;font-variant-numeric:tabular-nums;color:var(--seal);text-align:center;margin:6px 0 14px;}
+  .room-link-box{display:flex;gap:8px;margin-bottom:14px;}
+  .room-link-box input{flex:1;background:var(--paper);border:1.5px solid var(--grid-line);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--ink-soft);}
+  .room-dialog .hint{margin-bottom:14px;}
+  .room-dialog-foot{display:flex;justify-content:flex-end;gap:8px;}
+
+  /* ---------- toast ---------- */
+  #toast-wrap{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .toast{background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:99px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);opacity:0;transform:translateY(-8px);transition:opacity .2s ease, transform .2s ease;}
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  .setup-banner{background:var(--seal-soft);border:1px solid var(--seal);color:var(--seal);border-radius:10px;padding:10px 14px;font-size:12.5px;font-weight:600;margin:0 24px;display:none;}
+  .setup-banner.show{display:block;}
+
+  @media (prefers-reduced-motion: reduce){
+    .match-item.wrong{animation:none;}
+    .wait-overlay .spinner{animation:none;}
+    *{transition:none !important;}
+  }
+  @media (max-width:720px){
+    .layout{grid-template-columns:1fr;}
+    .sidebar{border-right:none;border-bottom:1px solid var(--grid-line);max-height:180px;}
+    .match-cols{flex-direction:column;gap:28px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <div class="setup-banner" id="setup-banner">⚠️ 還沒有設定 Firebase：請打開這個檔案的原始碼，依照最上面的說明填入你自己的 Firebase 設定，「開新房間」才能使用（本機單人練習不受影響）。</div>
+  <header class="topbar">
+    <div class="brand">
+      <div class="stamp">好</div>
+      <div class="brand-text">
+        <h1 id="brand-title">生詞練習台</h1>
+        <p id="brand-sub">連連看・圈出來－老師出題，學生連線作答</p>
+      </div>
+    </div>
+    <div class="topbar-actions" id="topbar-actions"></div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <button class="btn btn-primary btn-new" id="btn-new" type="button">＋ 新增題目</button>
+      <div class="set-list" id="set-list"></div>
+    </aside>
+    <main class="stage-wrap">
+      <div class="stage" id="stage"></div>
+    </main>
+  </div>
+</div>
+
+<dialog class="editor-dialog" id="editor-dialog">
+  <form id="editor-form">
+    <div class="editor-head">
+      <h2>新增題目</h2>
+      <p>做好之後會出現在左側清單，點一下就能切換到這一題</p>
+    </div>
+    <div class="editor-body">
+      <div class="type-toggle" id="type-toggle">
+        <button type="button" data-type="match" class="active">連連看</button>
+        <button type="button" data-type="circle">圈出來</button>
+      </div>
+      <label for="f-title">題目名稱</label>
+      <input type="text" id="f-title" placeholder="例如：第四課生詞配對" required>
+      <div id="match-fields">
+        <div class="row-two">
+          <div><label for="f-left-label">左欄標籤</label><input type="text" id="f-left-label" value="生詞"></div>
+          <div><label for="f-right-label">右欄標籤</label><input type="text" id="f-right-label" value="拼音／意思"></div>
+        </div>
+        <label>配對內容</label>
+        <div id="pair-rows"></div>
+        <button type="button" class="add-row-btn" id="add-pair">＋ 新增一組</button>
+      </div>
+      <div id="circle-fields" style="display:none;">
+        <label for="f-prompt">題目／提示文字</label>
+        <textarea id="f-prompt" rows="2" placeholder="例如：「謝謝」是什麼意思？"></textarea>
+        <label class="multi-toggle" style="display:flex;">
+          <input type="checkbox" id="f-multi" style="width:16px;height:16px;accent-color:var(--seal);"> 允許選多個正確答案（複選）
+        </label>
+        <label>選項（勾選代表正確答案）</label>
+        <div id="choice-rows"></div>
+        <button type="button" class="add-row-btn" id="add-choice">＋ 新增選項</button>
+        <p class="hint">單選題只需要勾一個正確答案；複選題可以勾多個。</p>
+      </div>
+    </div>
+    <div class="editor-foot">
+      <button type="button" class="btn btn-ghost" id="btn-cancel">取消</button>
+      <button type="submit" class="btn btn-primary">儲存題目</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="room-dialog" id="room-dialog">
+  <h2>房間已開好！</h2>
+  <div class="big-code" id="room-dialog-code">8823</div>
+  <p class="hint">把下面這個連結傳給學生（貼在視訊軟體的聊天室即可）。學生點開連結會自動加入房間，不需要登入、不需要輸入代碼。</p>
+  <div class="room-link-box">
+    <input type="text" id="room-dialog-link" readonly>
+    <button class="btn btn-sm" id="room-dialog-copy" type="button">複製連結</button>
+  </div>
+  <p class="hint">畫面預設先「不開放作答」，等你想讓學生點選的時候，在右上角把開關打開即可。</p>
+  <div class="room-dialog-foot">
+    <button class="btn btn-primary" id="room-dialog-close" type="button">開始上課</button>
+  </div>
+</dialog>
+
+<div id="toast-wrap"></div>
+
+<script>
+  // 這個 <script> 是普通(非 module)腳本，一定會執行 —— 就算下面 Firebase 的
+  // 部分完全連不上網路，本機單人練習模式也不受影響。
+  window.FIREBASE_CONFIG = {
+    apiKey: "貼上你的 apiKey",
+    authDomain: "貼上你的 authDomain",
+    databaseURL: "貼上你的 databaseURL",
+    projectId: "貼上你的 projectId",
+    storageBucket: "貼上你的 storageBucket",
+    messagingSenderId: "貼上你的 messagingSenderId",
+    appId: "貼上你的 appId"
+  };
+  window.__firebaseConfigured = !!(window.FIREBASE_CONFIG.apiKey && window.FIREBASE_CONFIG.apiKey.indexOf("貼上") === -1 && window.FIREBASE_CONFIG.databaseURL && window.FIREBASE_CONFIG.databaseURL.indexOf("貼上") === -1);
+</script>
+<script type="module">
+/* =========================================================================
+   FIREBASE 設定說明
+   1. https://console.firebase.google.com 建立一個新專案（免費 Spark 方案即可，
+      不需要信用卡）。
+   2. 專案總覽 → 新增應用程式 →「網頁」，複製它給你的 firebaseConfig 物件，
+      貼到上面那個 <script> 裡取代整個 window.FIREBASE_CONFIG。
+   3. 左側選單「Build → Realtime Database」→ 建立資料庫（測試模式即可）。
+      建好之後，把附上的 rules.json 內容貼到「規則」分頁並發布。
+   4. 左側選單「Build → Authentication」→ Sign-in method → 啟用「匿名」。
+   完整步驟請看附上的 README。這一段用「動態載入」的方式連線，就算網路
+   連不到 Firebase（例如學校網路擋住、或還沒設定），也只有房間功能會
+   不能用，本機單人練習模式完全不受影響。
+   ========================================================================= */
+(async function(){
+  if(!window.__firebaseConfigured){ window.__firebaseReady = false; return; }
+  try{
+    var appMod = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js");
+    var dbMod = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js");
+    var authMod = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js");
+    var fbApp = appMod.initializeApp(window.FIREBASE_CONFIG);
+    window.db = dbMod.getDatabase(fbApp);
+    window.ref = dbMod.ref; window.onValue = dbMod.onValue; window.set = dbMod.set;
+    window.update = dbMod.update; window.get = dbMod.get; window.onDisconnect = dbMod.onDisconnect;
+    window.serverTimestamp = dbMod.serverTimestamp;
+    window.auth = authMod.getAuth(fbApp);
+    await new Promise(function(resolve, reject){
+      authMod.onAuthStateChanged(window.auth, function(user){ if(user) resolve(user); });
+      authMod.signInAnonymously(window.auth).catch(reject);
+    });
+    window.__firebaseReady = true;
+    window.dispatchEvent(new Event("firebase-bridge-ready"));
+  }catch(e){
+    console.error("Firebase 載入或登入失敗，本機單人模式仍可正常使用：", e);
+    window.__firebaseReady = false;
+    window.dispatchEvent(new Event("firebase-bridge-failed"));
+  }
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  var STORAGE_KEY = "hanyu-practice-v1";
+  var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
+
+  /* ---------------- URL params / mode ---------------- */
+  var params = new URLSearchParams(location.search);
+  var urlRoom = params.get("room");
+  var urlRole = params.get("role");
+  var isStudent = urlRole === "student" && !!urlRoom;
+
+  var app_ = document.getElementById("app");
+  if(isStudent) app_.classList.add("student-mode");
+
+  var activeRoomId = null;     // set once a room is created/joined
+  var roomRole = isStudent ? "student" : "teacher";
+  var roomData = null;         // last known snapshot of rooms/{id}
+  var roomListenersAttached = false;
+  var studentStatus = "connecting"; // student-side header state: connecting | connected | error
+
+  /* ---------------- sample content (local mode only) ---------------- */
+  var SAMPLE_SETS = {
+    sample_match: {
+      id:"sample_match", type:"match", title:"生詞配對：你好！（範例）",
+      leftLabel:"生詞", rightLabel:"拼音",
+      pairs:{
+        p1:{id:"p1", left:"你好", right:"nǐ hǎo"},
+        p2:{id:"p2", left:"謝謝", right:"xièxie"},
+        p3:{id:"p3", left:"再見", right:"zàijiàn"},
+        p4:{id:"p4", left:"老師", right:"lǎoshī"},
+        p5:{id:"p5", left:"學生", right:"xuéshēng"}
+      }
+    },
+    sample_circle: {
+      id:"sample_circle", type:"circle", title:"生詞小測驗（範例）",
+      prompt:"「謝謝」是什麼意思？", multiSelect:false,
+      choices:{
+        c1:{id:"c1", text:"Hello"}, c2:{id:"c2", text:"Thank you"},
+        c3:{id:"c3", text:"Goodbye"}, c4:{id:"c4", text:"Teacher"}
+      },
+      correctIds:["c2"]
+    }
+  };
+
+  /* ---------------- local (offline) state ---------------- */
+  function loadLocal(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed && parsed.sets && Object.keys(parsed.sets).length) return parsed;
+      }
+    }catch(e){}
+    return { sets: JSON.parse(JSON.stringify(SAMPLE_SETS)), currentId:"sample_match", progress:{} };
+  }
+  var local = loadLocal();
+  if(!local.progress) local.progress = {};
+  function saveLocal(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(local)); }catch(e){} }
+
+  /* ---------------- unified data accessors ---------------- */
+  function inRoom(){ return !!activeRoomId; }
+  function getSets(){ return inRoom() ? (roomData && roomData.sets || {}) : local.sets; }
+  function getCurrentId(){ return inRoom() ? (roomData && roomData.currentSetId) : local.currentId; }
+  function getCurrentSet(){ var s = getSets(); return s[getCurrentId()] || null; }
+  function getProgress(setId){
+    if(inRoom()){ return (roomData && roomData.progress && roomData.progress[setId]) || { matched:{}, selected:{}, revealed:false }; }
+    if(!local.progress[setId]) local.progress[setId] = { matched:{}, selected:{}, revealed:false };
+    return local.progress[setId];
+  }
+  function isOpenForStudent(){ return inRoom() ? !!(roomData && roomData.isOpen) : true; }
+  function canInteract(){ return !inRoom() || roomRole === "teacher" || isOpenForStudent(); }
+
+  function writeSets(newSets, newCurrentId){
+    if(inRoom()){
+      var patch = { sets: newSets };
+      if(newCurrentId !== undefined) patch.currentSetId = newCurrentId;
+      update(ref(db, "rooms/" + activeRoomId), patch);
+    } else {
+      local.sets = newSets;
+      if(newCurrentId !== undefined) local.currentId = newCurrentId;
+      saveLocal();
+      renderSidebar(); renderStage();
+    }
+  }
+  function setCurrent(id){
+    if(inRoom()){ update(ref(db, "rooms/" + activeRoomId), { currentSetId: id }); }
+    else { local.currentId = id; saveLocal(); renderSidebar(); renderStage(); }
+  }
+  function writeProgress(setId, patch){
+    patch.lastActor = roomRole;
+    if(inRoom()){
+      update(ref(db, "rooms/" + activeRoomId + "/progress/" + setId), patch);
+    } else {
+      var p = getProgress(setId);
+      Object.assign(p, patch);
+      saveLocal();
+      renderStage();
+    }
+  }
+  function resetProgress(setId){
+    var blank = { matched:{}, selected:{}, revealed:false, lastActor: roomRole };
+    if(inRoom()){ set(ref(db, "rooms/" + activeRoomId + "/progress/" + setId), blank); }
+    else { local.progress[setId] = blank; saveLocal(); renderStage(); }
+  }
+
+  /* ---------------- toast ---------------- */
+  window.showToast = function(msg){
+    var wrap = document.getElementById("toast-wrap");
+    var t = document.createElement("div");
+    t.className = "toast"; t.textContent = msg;
+    wrap.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add("show"); });
+    setTimeout(function(){ t.classList.remove("show"); setTimeout(function(){ t.remove(); }, 250); }, 2600);
+  };
+
+  /* ---------------- topbar rendering ---------------- */
+  var topbarActions = document.getElementById("topbar-actions");
+  var setupBanner = document.getElementById("setup-banner");
+  if(!window.__firebaseConfigured && !isStudent) setupBanner.classList.add("show");
+
+  /* ---------------- firebase bridge readiness ---------------- */
+  function getFirebase(timeoutMs){
+    timeoutMs = timeoutMs || 8000;
+    if(window.__firebaseReady === true) return Promise.resolve(true);
+    if(window.__firebaseReady === false) return Promise.resolve(false);
+    return new Promise(function(resolve){
+      var done = false;
+      function finish(v){ if(done) return; done = true; cleanup(); resolve(v); }
+      function onReady(){ finish(true); }
+      function onFail(){ finish(false); }
+      function cleanup(){ window.removeEventListener("firebase-bridge-ready", onReady); window.removeEventListener("firebase-bridge-failed", onFail); }
+      window.addEventListener("firebase-bridge-ready", onReady);
+      window.addEventListener("firebase-bridge-failed", onFail);
+      setTimeout(function(){ finish(!!window.__firebaseReady); }, timeoutMs);
+    });
+  }
+
+  function renderTopbar(){
+    topbarActions.innerHTML = "";
+    if(isStudent){
+      var cluster = document.createElement("div");
+      cluster.className = "room-cluster";
+      var statusMeta = {
+        connecting: { dot: "", label: "連線中…" },
+        connected:  { dot: "online", label: "已連線到老師的房間" },
+        error:      { dot: "offline", label: "無法連線" }
+      }[studentStatus] || { dot: "", label: "連線中…" };
+      cluster.innerHTML = '<span class="presence-dot' + (statusMeta.dot ? " " + statusMeta.dot : "") + '"></span><span class="presence-label">' + statusMeta.label + '</span>';
+      topbarActions.appendChild(cluster);
+      document.getElementById("brand-sub").textContent = "跟著老師的畫面走，老師開放作答時就可以點選";
+      return;
+    }
+    if(inRoom()){
+      var c2 = document.createElement("div");
+      c2.className = "room-cluster";
+      var studentOnline = !!(roomData && roomData.presence && roomData.presence.student && roomData.presence.student.online);
+      c2.innerHTML =
+        '<span class="room-code">房間 <b>' + activeRoomId + '</b></span>' +
+        '<span class="presence-dot' + (studentOnline ? ' online' : '') + '"></span>' +
+        '<span class="presence-label">' + (studentOnline ? "學生已連線" : "學生尚未連線") + '</span>';
+      var toggle = document.createElement("label");
+      toggle.className = "toggle" + (isOpenForStudent() ? " on" : "");
+      toggle.innerHTML = '<span class="toggle-track"></span><span>' + (isOpenForStudent() ? "開放作答中" : "開放學生作答") + '</span>';
+      toggle.addEventListener("click", function(){
+        update(ref(db, "rooms/" + activeRoomId), { isOpen: !isOpenForStudent() });
+      });
+      c2.appendChild(toggle);
+      topbarActions.appendChild(c2);
+
+      var linkBtn = document.createElement("button");
+      linkBtn.className = "btn btn-sm"; linkBtn.type = "button"; linkBtn.textContent = "🔗 複製學生連結";
+      linkBtn.addEventListener("click", function(){ copyStudentLink(activeRoomId); });
+      topbarActions.appendChild(linkBtn);
+
+      var leaveBtn = document.createElement("button");
+      leaveBtn.className = "btn btn-ghost btn-sm"; leaveBtn.type = "button"; leaveBtn.textContent = "結束連線";
+      leaveBtn.addEventListener("click", leaveRoom);
+      topbarActions.appendChild(leaveBtn);
+    } else {
+      var newRoomBtn = document.createElement("button");
+      newRoomBtn.className = "btn"; newRoomBtn.type = "button"; newRoomBtn.textContent = "🔗 開新房間";
+      newRoomBtn.addEventListener("click", createRoom);
+      topbarActions.appendChild(newRoomBtn);
+
+      var presentBtn = document.createElement("button");
+      presentBtn.className = "btn"; presentBtn.type = "button"; presentBtn.id = "btn-present";
+      presentBtn.textContent = app_.classList.contains("present") ? "◀ 離開簡報模式" : "簡報模式";
+      presentBtn.addEventListener("click", function(){
+        var on = app_.classList.toggle("present");
+        presentBtn.textContent = on ? "◀ 離開簡報模式" : "簡報模式";
+        requestAnimationFrame(function(){ window.dispatchEvent(new Event("resize")); });
+      });
+      topbarActions.appendChild(presentBtn);
+    }
+  }
+
+  function studentLinkFor(roomId){
+    var url = new URL(location.href);
+    url.search = "";
+    url.searchParams.set("room", roomId);
+    url.searchParams.set("role", "student");
+    return url.toString();
+  }
+  function copyStudentLink(roomId){
+    var link = studentLinkFor(roomId);
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link).then(function(){ showToast("已複製學生連結"); }, function(){ promptLink(link); });
+    } else { promptLink(link); }
+  }
+  function promptLink(link){ window.prompt("複製這個連結給學生：", link); }
+
+  /* ---------------- room create / join / leave ---------------- */
+  function genRoomId(){ return String(Math.floor(1000 + Math.random() * 9000)); }
+
+  async function createRoom(){
+    if(!window.__firebaseConfigured){ setupBanner.classList.add("show"); showToast("請先完成 Firebase 設定才能開房間"); return; }
+    var ok = await getFirebase();
+    if(!ok){ showToast("⚠️ 連線功能載入失敗，請檢查網路連線後再試一次"); return; }
+    var roomId = genRoomId();
+    for(var i=0;i<5;i++){
+      var snap = await get(ref(db, "rooms/" + roomId));
+      if(!snap.exists()) break;
+      roomId = genRoomId();
+    }
+    var initialSets = JSON.parse(JSON.stringify(local.sets));
+    await set(ref(db, "rooms/" + roomId), {
+      createdAt: serverTimestamp(),
+      currentSetId: local.currentId,
+      isOpen: false,
+      sets: initialSets,
+      progress: {},
+      presence: { teacher: { online:true, lastSeen: serverTimestamp() } }
+    });
+    attachPresence(roomId, "teacher");
+    startRoom(roomId, "teacher");
+    var link = studentLinkFor(roomId);
+    document.getElementById("room-dialog-code").textContent = roomId;
+    document.getElementById("room-dialog-link").value = link;
+    document.getElementById("room-dialog").showModal();
+    history.replaceState(null, "", "?room=" + roomId);
+  }
+
+  async function joinAsStudent(roomId){
+    var ok = await getFirebase();
+    if(!ok){
+      studentStatus = "error"; renderTopbar();
+      stageEl.innerHTML = '<div class="stage-empty">無法連上連線服務，請檢查網路連線後重新整理頁面，或請老師確認連結是否正確。</div>';
+      return;
+    }
+    attachPresence(roomId, "student");
+    startRoom(roomId, "student");
+  }
+
+  function attachPresence(roomId, role){
+    var pRef = ref(db, "rooms/" + roomId + "/presence/" + role);
+    set(pRef, { online:true, lastSeen: serverTimestamp() });
+    onDisconnect(pRef).set({ online:false, lastSeen: serverTimestamp() });
+  }
+
+  function startRoom(roomId, role){
+    activeRoomId = roomId; roomRole = role;
+    var lastMatchedCount = null, lastSelectedCount = null;
+    onValue(ref(db, "rooms/" + roomId), function(snap){
+      if(!snap.exists()){
+        roomData = null;
+        if(role === "student") studentStatus = "error";
+        renderTopbar();
+        renderStage();
+        return;
+      }
+      var prev = roomData;
+      roomData = snap.val();
+      if(!roomData.sets) roomData.sets = {};
+      if(!roomData.progress) roomData.progress = {};
+      if(role === "student") studentStatus = "connected";
+
+      // "student got it right" toast, teacher side only
+      if(role === "teacher" && prev){
+        var curId = roomData.currentSetId;
+        var pNow = roomData.progress[curId];
+        var pPrev = prev.progress && prev.progress[curId];
+        if(pNow && pNow.lastActor === "student"){
+          var nowMatched = pNow.matched ? Object.keys(pNow.matched).length : 0;
+          var prevMatched = pPrev && pPrev.matched ? Object.keys(pPrev.matched).length : 0;
+          if(nowMatched > prevMatched) showToast("🎉 學生剛剛配對成功！");
+          var nowSel = pNow.selected ? Object.keys(pNow.selected).length : 0;
+          var prevSel = pPrev && pPrev.selected ? Object.keys(pPrev.selected).length : 0;
+          if(nowSel !== prevSel) showToast("✏️ 學生更新了作答");
+        }
+      }
+      renderTopbar();
+      renderStage();
+    }, function(err){
+      console.error(err);
+      if(role === "student"){ studentStatus = "error"; renderTopbar(); }
+      showToast("⚠️ 連線中斷：" + err.message);
+    });
+  }
+
+  function leaveRoom(){
+    if(activeRoomId){
+      set(ref(db, "rooms/" + activeRoomId + "/presence/teacher"), { online:false, lastSeen: serverTimestamp() });
+    }
+    activeRoomId = null; roomRole = "teacher"; roomData = null;
+    history.replaceState(null, "", location.pathname);
+    renderTopbar(); renderSidebar(); renderStage();
+  }
+
+  /* ---------------- sidebar ---------------- */
+  var setListEl = document.getElementById("set-list");
+  function renderSidebar(){
+    if(isStudent) return;
+    setListEl.innerHTML = "";
+    var sets = getSets();
+    Object.keys(sets).forEach(function(id){
+      var s = sets[id];
+      var card = document.createElement("div");
+      card.className = "set-card" + (id === getCurrentId() ? " active" : "");
+      card.setAttribute("role","button"); card.setAttribute("tabindex","0");
+      var top = document.createElement("div"); top.className = "set-card-top";
+      var title = document.createElement("div"); title.className = "set-card-title"; title.textContent = s.title;
+      var badge = document.createElement("span"); badge.className = "badge"; badge.textContent = s.type === "match" ? "連連看" : "圈出來";
+      top.appendChild(title); top.appendChild(badge);
+      var meta = document.createElement("div"); meta.className = "set-card-meta";
+      var count = s.type === "match" ? Object.keys(s.pairs||{}).length + " 組" : Object.keys(s.choices||{}).length + " 個選項";
+      meta.innerHTML = "<span>" + count + "</span>";
+      var del = document.createElement("button"); del.className = "set-card-del"; del.type = "button"; del.textContent = "刪除";
+      del.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        var ids = Object.keys(sets);
+        if(ids.length <= 1) return;
+        var newSets = Object.assign({}, sets); delete newSets[id];
+        var newCurrent = getCurrentId() === id ? Object.keys(newSets)[0] : undefined;
+        writeSets(newSets, newCurrent);
+      });
+      card.appendChild(top); card.appendChild(meta); card.appendChild(del);
+      card.addEventListener("click", function(){ setCurrent(id); });
+      card.addEventListener("keydown", function(ev){ if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); card.click(); } });
+      setListEl.appendChild(card);
+    });
+  }
+
+  /* ---------------- stage ---------------- */
+  var stageEl = document.getElementById("stage");
+  function escapeHtml(str){ var d = document.createElement("div"); d.textContent = str == null ? "" : str; return d.innerHTML; }
+
+  function renderStage(){
+    var s = getCurrentSet();
+    stageEl.innerHTML = "";
+    if(inRoom() && roomData === null){
+      stageEl.innerHTML = '<div class="stage-empty">找不到這個房間。跟老師確認連結是否正確，或請老師重新開一個房間。</div>';
+      return;
+    }
+    if(!s){
+      stageEl.innerHTML = isStudent
+        ? '<div class="wait-overlay" style="position:static;"><div class="spinner"></div><p>等待老師出題...</p></div>'
+        : '<div class="stage-empty">還沒有題目，點左側「＋ 新增題目」開始製作吧。</div>';
+      return;
+    }
+    var head = document.createElement("div"); head.className = "stage-head";
+    var titleWrap = document.createElement("div");
+    titleWrap.innerHTML = '<h2 class="stage-title zh">' + escapeHtml(s.title) + '</h2>' +
+      '<p class="stage-sub">' + (s.type === "match" ? "點左欄一個、再點右欄配對的一個" : (s.multiSelect ? "點選所有正確答案" : "點選一個正確答案")) + '</p>';
+    var actions = document.createElement("div"); actions.className = "stage-actions";
+    if(!isStudent){
+      var resetBtn = document.createElement("button");
+      resetBtn.className = "btn btn-sm"; resetBtn.type="button"; resetBtn.textContent = "🔄 重新開始";
+      resetBtn.addEventListener("click", function(){ resetProgress(s.id); });
+      actions.appendChild(resetBtn);
+      if(s.type === "circle"){
+        var revealBtn = document.createElement("button");
+        revealBtn.className = "btn btn-sm btn-primary"; revealBtn.type="button"; revealBtn.textContent = "公布答案";
+        revealBtn.addEventListener("click", function(){ writeProgress(s.id, { revealed:true }); });
+        actions.appendChild(revealBtn);
+      }
+    }
+    head.appendChild(titleWrap); head.appendChild(actions);
+    stageEl.appendChild(head);
+
+    if(isStudent && !isOpenForStudent()){
+      var overlay = document.createElement("div"); overlay.className = "wait-overlay";
+      overlay.innerHTML = '<p>老師還沒開放作答，先看老師怎麼帶這一題</p>';
+      stageEl.appendChild(overlay);
+    }
+
+    if(s.type === "match"){ renderMatchBoard(s); } else { renderCircleBoard(s); }
+  }
+
+  function shuffledIds(idArr){
+    var a = idArr.slice();
+    for(var i=a.length-1;i>0;i--){ var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+  var rightOrderCache = {};
+
+  function renderMatchBoard(s){
+    var progress = getProgress(s.id);
+    var matched = progress.matched || {};
+    var interactive = canInteract();
+    var board = document.createElement("div"); board.className = "match-board";
+    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","match-svg");
+    board.appendChild(svg);
+    var cols = document.createElement("div"); cols.className = "match-cols";
+    var leftCol = document.createElement("div"); leftCol.className = "match-col";
+    leftCol.innerHTML = '<div class="match-col-label">' + escapeHtml(s.leftLabel || "項目一") + '</div>';
+    var rightCol = document.createElement("div"); rightCol.className = "match-col";
+    rightCol.innerHTML = '<div class="match-col-label">' + escapeHtml(s.rightLabel || "項目二") + '</div>';
+
+    var pairIds = Object.keys(s.pairs);
+    var cacheKey = s.id;
+    if(!rightOrderCache[cacheKey] || rightOrderCache[cacheKey].length !== pairIds.length){
+      rightOrderCache[cacheKey] = shuffledIds(pairIds);
+    }
+    var rightOrder = rightOrderCache[cacheKey];
+    var selectedLeft = null, selectedRight = null;
+
+    pairIds.forEach(function(pid){
+      var p = s.pairs[pid];
+      var btn = document.createElement("button"); btn.type = "button";
+      btn.className = "match-item zh" + (matched[pid] ? " matched" : "");
+      btn.textContent = p.left; btn.dataset.side = "left"; btn.dataset.id = pid;
+      if(matched[pid] || !interactive) btn.disabled = true;
+      btn.addEventListener("click", function(){ onPick("left", pid, btn); });
+      leftCol.appendChild(btn);
+    });
+    rightOrder.forEach(function(pid){
+      var p = s.pairs[pid];
+      var btn = document.createElement("button"); btn.type = "button";
+      btn.className = "match-item" + (matched[pid] ? " matched" : "");
+      btn.dataset.side = "right"; btn.textContent = p.right; btn.dataset.id = pid;
+      if(matched[pid] || !interactive) btn.disabled = true;
+      btn.addEventListener("click", function(){ onPick("right", pid, btn); });
+      rightCol.appendChild(btn);
+    });
+    cols.appendChild(leftCol); cols.appendChild(rightCol);
+    board.appendChild(cols); stageEl.appendChild(board);
+
+    if(Object.keys(matched).length === pairIds.length && pairIds.length > 0){
+      var done = document.createElement("div"); done.className = "match-done"; done.textContent = "🎉 全部配對完成！";
+      stageEl.appendChild(done);
+    }
+
+    function clearSelection(){
+      selectedLeft = null; selectedRight = null;
+      board.querySelectorAll(".match-item.selected").forEach(function(el){ el.classList.remove("selected"); });
+    }
+    function onPick(side, id, el){
+      if(!interactive || el.disabled) return;
+      if(side === "left"){
+        if(selectedLeft === id){ clearSelection(); return; }
+        board.querySelectorAll('[data-side="left"]').forEach(function(b){b.classList.remove("selected");});
+        selectedLeft = id; el.classList.add("selected");
+      } else {
+        if(selectedRight === id){ clearSelection(); return; }
+        board.querySelectorAll('[data-side="right"]').forEach(function(b){b.classList.remove("selected");});
+        selectedRight = id; el.classList.add("selected");
+      }
+      if(selectedLeft && selectedRight){
+        if(selectedLeft === selectedRight){
+          var newMatched = Object.assign({}, matched); newMatched[selectedLeft] = true;
+          writeProgress(s.id, { matched: newMatched });
+          clearSelection();
+        } else {
+          var leftEl = board.querySelector('[data-side="left"][data-id="'+selectedLeft+'"]');
+          var rightEl = board.querySelector('[data-side="right"][data-id="'+selectedRight+'"]');
+          [leftEl,rightEl].forEach(function(e){ if(e){ e.classList.add("wrong"); setTimeout(function(){e.classList.remove("wrong");},400); } });
+          setTimeout(clearSelection, 420);
+        }
+      }
+    }
+    function drawLines(){
+      var rect = board.getBoundingClientRect();
+      svg.setAttribute("viewBox","0 0 "+rect.width+" "+rect.height);
+      svg.innerHTML = "";
+      var css = getComputedStyle(document.documentElement);
+      var bamboo = css.getPropertyValue("--bamboo").trim() || "#4C7A5E";
+      Object.keys(matched).forEach(function(pid){
+        var l = board.querySelector('[data-side="left"][data-id="'+pid+'"]');
+        var r = board.querySelector('[data-side="right"][data-id="'+pid+'"]');
+        if(!l || !r) return;
+        var lr = l.getBoundingClientRect(), rr = r.getBoundingClientRect();
+        var x1 = lr.right - rect.left, y1 = lr.top + lr.height/2 - rect.top;
+        var x2 = rr.left - rect.left, y2 = rr.top + rr.height/2 - rect.top;
+        var mx = (x1+x2)/2;
+        var path = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d", "M"+x1+","+y1+" C "+mx+","+y1+" "+mx+","+y2+" "+x2+","+y2);
+        path.setAttribute("stroke", bamboo); path.setAttribute("stroke-width","2.5");
+        path.setAttribute("fill","none"); path.setAttribute("stroke-linecap","round");
+        svg.appendChild(path);
+      });
+    }
+    requestAnimationFrame(drawLines);
+    window.addEventListener("resize", drawLines);
+  }
+
+  function renderCircleBoard(s){
+    var progress = getProgress(s.id);
+    var selected = progress.selected || {};
+    var interactive = canInteract() && !progress.revealed;
+    var wrap = document.createElement("div"); wrap.className = "circle-board";
+    wrap.innerHTML = '<p class="circle-prompt zh">' + escapeHtml(s.prompt || "") + "</p>";
+    var choicesEl = document.createElement("div"); choicesEl.className = "circle-choices";
+    var correctIds = s.correctIds || [];
+
+    Object.keys(s.choices).forEach(function(cid){
+      var c = s.choices[cid];
+      var chip = document.createElement("button"); chip.type = "button"; chip.className = "circle-chip"; chip.textContent = c.text;
+      var isSel = !!selected[cid];
+      var isCorrect = correctIds.indexOf(cid) !== -1;
+      if(progress.revealed){
+        if(isCorrect && isSel) chip.classList.add("correct");
+        else if(isCorrect && !isSel) chip.classList.add("missed");
+        else if(!isCorrect && isSel) chip.classList.add("selected-wrong");
+        chip.disabled = true;
+      } else {
+        if(isSel) chip.classList.add("selected");
+        if(!interactive) chip.disabled = true;
+      }
+      chip.addEventListener("click", function(){
+        if(!interactive) return;
+        var newSelected = Object.assign({}, selected);
+        if(s.multiSelect){
+          if(newSelected[cid]) delete newSelected[cid]; else newSelected[cid] = true;
+        } else if(selected[cid]){
+          newSelected = {};
+        } else {
+          newSelected = {}; newSelected[cid] = true;
+        }
+        writeProgress(s.id, { selected: newSelected });
+      });
+      choicesEl.appendChild(chip);
+    });
+    wrap.appendChild(choicesEl);
+    if(progress.revealed){
+      var note = document.createElement("p"); note.className = "reveal-note";
+      note.textContent = "綠色實框＝答對；綠色虛框＝漏掉的正確答案；劃線＝選錯。";
+      wrap.appendChild(note);
+    }
+    stageEl.appendChild(wrap);
+  }
+
+  /* ---------------- editor dialog (teacher, local or in-room) ---------------- */
+  if(!isStudent){
+    var dialog = document.getElementById("editor-dialog");
+    var form = document.getElementById("editor-form");
+    var typeToggle = document.getElementById("type-toggle");
+    var matchFields = document.getElementById("match-fields");
+    var circleFields = document.getElementById("circle-fields");
+    var pairRows = document.getElementById("pair-rows");
+    var choiceRows = document.getElementById("choice-rows");
+    var currentType = "match";
+
+    function newPairRow(left, right){
+      var row = document.createElement("div"); row.className = "pair-row";
+      row.innerHTML = '<input type="text" class="pair-left" placeholder="生詞，例如：謝謝">' +
+        '<input type="text" class="pair-right" placeholder="拼音／意思，例如：xièxie">' +
+        '<button type="button" class="row-del">✕</button>';
+      row.querySelector(".pair-left").value = left || "";
+      row.querySelector(".pair-right").value = right || "";
+      row.querySelector(".row-del").addEventListener("click", function(){ if(pairRows.children.length > 2) row.remove(); });
+      pairRows.appendChild(row);
+    }
+    function newChoiceRow(text, correct){
+      var row = document.createElement("div"); row.className = "choice-row";
+      row.innerHTML = '<label class="check-row"><input type="checkbox" class="choice-correct"></label>' +
+        '<input type="text" class="choice-text" placeholder="選項文字">' +
+        '<button type="button" class="row-del">✕</button>';
+      row.querySelector(".choice-text").value = text || "";
+      row.querySelector(".choice-correct").checked = !!correct;
+      row.querySelector(".row-del").addEventListener("click", function(){ if(choiceRows.children.length > 2) row.remove(); });
+      choiceRows.appendChild(row);
+    }
+    document.getElementById("add-pair").addEventListener("click", function(){ newPairRow(); });
+    document.getElementById("add-choice").addEventListener("click", function(){ newChoiceRow(); });
+    typeToggle.querySelectorAll("button").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        currentType = btn.dataset.type;
+        typeToggle.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b===btn); });
+        matchFields.style.display = currentType === "match" ? "" : "none";
+        circleFields.style.display = currentType === "circle" ? "" : "none";
+      });
+    });
+    function openEditor(){
+      currentType = "match";
+      typeToggle.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b.dataset.type==="match"); });
+      matchFields.style.display = ""; circleFields.style.display = "none";
+      document.getElementById("f-title").value = "";
+      document.getElementById("f-left-label").value = "生詞";
+      document.getElementById("f-right-label").value = "拼音／意思";
+      document.getElementById("f-prompt").value = "";
+      document.getElementById("f-multi").checked = false;
+      pairRows.innerHTML = ""; choiceRows.innerHTML = "";
+      newPairRow(); newPairRow(); newPairRow(); newChoiceRow(); newChoiceRow();
+      dialog.showModal(); document.getElementById("f-title").focus();
+    }
+    document.getElementById("btn-new").addEventListener("click", openEditor);
+    document.getElementById("btn-cancel").addEventListener("click", function(){ dialog.close(); });
+
+    form.addEventListener("submit", function(ev){
+      ev.preventDefault();
+      var title = document.getElementById("f-title").value.trim();
+      if(!title) return;
+      var newSet;
+      if(currentType === "match"){
+        var pairs = {};
+        pairRows.querySelectorAll(".pair-row").forEach(function(row){
+          var l = row.querySelector(".pair-left").value.trim();
+          var r = row.querySelector(".pair-right").value.trim();
+          if(l && r){ var pid = uid("p"); pairs[pid] = {id:pid, left:l, right:r}; }
+        });
+        if(Object.keys(pairs).length < 2) return;
+        var id1 = uid("set");
+        newSet = { id:id1, type:"match", title:title,
+          leftLabel: document.getElementById("f-left-label").value.trim() || "生詞",
+          rightLabel: document.getElementById("f-right-label").value.trim() || "拼音／意思",
+          pairs: pairs };
+      } else {
+        var choices = {}; var correctIds = [];
+        choiceRows.querySelectorAll(".choice-row").forEach(function(row){
+          var t = row.querySelector(".choice-text").value.trim();
+          var ok = row.querySelector(".choice-correct").checked;
+          if(t){ var cid = uid("c"); choices[cid] = {id:cid, text:t}; if(ok) correctIds.push(cid); }
+        });
+        if(Object.keys(choices).length < 2 || correctIds.length === 0) return;
+        var id2 = uid("set");
+        newSet = { id:id2, type:"circle", title:title,
+          prompt: document.getElementById("f-prompt").value.trim(),
+          multiSelect: document.getElementById("f-multi").checked,
+          choices: choices, correctIds: correctIds };
+      }
+      var sets = Object.assign({}, getSets());
+      sets[newSet.id] = newSet;
+      writeSets(sets, newSet.id);
+      dialog.close();
+      renderSidebar(); renderStage();
+    });
+  }
+
+  /* ---------------- room dialog close ---------------- */
+  document.getElementById("room-dialog-copy").addEventListener("click", function(){
+    var link = document.getElementById("room-dialog-link").value;
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(function(){ showToast("已複製學生連結"); }); }
+  });
+  document.getElementById("room-dialog-close").addEventListener("click", function(){ document.getElementById("room-dialog").close(); });
+
+  /* ---------------- boot ---------------- */
+  renderTopbar();
+  renderSidebar();
+
+  if(isStudent){
+    if(!window.__firebaseConfigured){
+      studentStatus = "error"; renderTopbar();
+      stageEl.innerHTML = '<div class="stage-empty">這個練習頁面還沒有完成設定，請聯絡老師。</div>';
+    } else {
+      stageEl.innerHTML = '<div class="stage-empty">連線中...</div>';
+      joinAsStudent(urlRoom);
+    }
+  } else if(urlRoom && window.__firebaseConfigured){
+    // teacher re-opening a link that already has ?room=xxxx (e.g. reloaded mid-class)
+    stageEl.innerHTML = '<div class="stage-empty">連線中...</div>';
+    getFirebase().then(function(ok){
+      if(!ok){ stageEl.innerHTML = '<div class="stage-empty">無法連上連線服務，請檢查網路連線。</div>'; return; }
+      attachPresence(urlRoom, "teacher"); startRoom(urlRoom, "teacher");
+    });
+  } else {
+    renderStage();
+  }
+})();
+</script>
+</body>
+</html>
