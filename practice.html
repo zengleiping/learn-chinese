@@ -73,7 +73,7 @@
   .btn-ghost{background:transparent;border-color:transparent;color:var(--ink-soft);}
   .btn-sm{padding:5px 10px;font-size:12px;border-radius:7px;}
 
-  /* room cluster 與 開關設計 */
+  /* room cluster 與 開關設計 (與原本完全一致) */
   .room-cluster{display:flex;align-items:center;gap:10px;padding:6px 12px;border:1px solid var(--grid-line);border-radius:10px;background:var(--paper);}
   .room-code{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;}
   .room-code b{color:var(--seal);}
@@ -157,7 +157,7 @@
   /* 寫字畫布白板 */
   .draw-board-container{display:flex;flex-direction:column;gap:12px;position:relative;}
   .draw-toolbar{
-    display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;
+    display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;
     background:var(--surface-2);border:1px solid var(--grid-line);flex-wrap:wrap;
   }
   .tool-btn{
@@ -166,6 +166,15 @@
   }
   .tool-btn.active{border-color:var(--seal);background:var(--seal-soft);color:var(--seal);}
   .tool-sep{width:1px;height:20px;background:var(--grid-line);margin:0 2px;}
+
+  /* 聲調專區 (一聲 ˉ, 二聲 ˊ, 三聲 ˇ, 四聲 ˋ, 輕聲 ˙) */
+  .tone-group{display:inline-flex;align-items:center;gap:3px;background:var(--surface);padding:3px 6px;border-radius:8px;border:1px solid var(--grid-line);}
+  .tone-btn{
+    width:24px;height:24px;padding:0;border:1px solid transparent;border-radius:5px;
+    background:transparent;font-size:15px;font-weight:700;line-height:1;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;color:var(--ink);
+  }
+  .tone-btn:hover{background:var(--seal-soft);color:var(--seal);}
 
   .color-dot{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
   .color-dot.active{border-color:var(--ink);transform:scale(1.15);}
@@ -190,11 +199,11 @@
   .movable-text{
     position:absolute;pointer-events:auto;cursor:move;font-family:"LXGW WenKai TC",serif;
     font-size:24px;font-weight:700;line-height:1.2;color:var(--ink);user-select:none;
-    padding:4px 8px;border:1.5px dashed transparent;border-radius:6px;
+    padding:3px 6px;border:1.5px dashed transparent;border-radius:6px;white-space:pre;
   }
-  .movable-text:hover, .movable-text.active{border-color:var(--seal);background:rgba(255,255,255,0.85);}
+  .movable-text:hover, .movable-text.active{border-color:var(--seal);background:rgba(255,255,255,0.88);}
 
-  /* 遠端游標 */
+  /* 遠端游標 (置頂並絕對定位) */
   .peer-cursor{
     position:absolute;left:0;top:0;pointer-events:none;z-index:99999;
     display:none;align-items:center;gap:5px;transform:translate(-50%,-50%);
@@ -262,7 +271,7 @@
   </div>
 </div>
 
-<!-- 題目手動編輯彈窗 -->
+<!-- 題目編輯彈窗 -->
 <dialog class="editor-dialog" id="editor-dialog">
   <form id="editor-form">
     <div class="editor-head">
@@ -365,7 +374,7 @@
   var activeRoomId = null;
   var roomRole = isStudent ? "student" : "teacher";
   var roomData = null;
-  var cursorOn = true; // 預設開啟指標
+  var cursorOn = true;
   var lastPeerCursor = null;
 
   var SAMPLE_SETS = {
@@ -382,7 +391,7 @@
     },
     sample_board: {
       id:"sample_board", type:"board", title:"生字書寫教學：『好』",
-      desc:"請用手寫筆寫出『好』，並試著用打字工具標上拼音。",
+      desc:"請用手寫筆寫出『好』，並可點擊聲調符號標出聲調。",
       bgImage:""
     }
   };
@@ -439,7 +448,7 @@
     }
   }
 
-  /* 頂部列：保留所有狀態與開關按鈕 */
+  /* 頂部列：完整保留開關按鈕與狀態顯示 */
   var topbarActions = document.getElementById("topbar-actions");
   function renderTopbar(){
     topbarActions.innerHTML = "";
@@ -450,11 +459,10 @@
       c2.innerHTML = `
         <span class="room-code">房間 <b>${activeRoomId}</b></span>
         <span class="presence-dot ${online ? 'online' : ''}"></span>
-        <span style="font-size:12px;">${online ? (isStudent ? "老師已在線" : "學生已連線") : "等待連線..."}</span>
+        <span style="font-size:12px;">${online ? (isStudent ? "老師已連線" : "學生已連線") : "等待連線..."}</span>
       `;
 
       if(!isStudent){
-        // 開放作答開關
         var toggleOpen = document.createElement("label");
         toggleOpen.className = "toggle" + (isOpenForStudent() ? " on" : "");
         toggleOpen.innerHTML = '<span class="toggle-track"></span><span>' + (isOpenForStudent() ? "開放作答中" : "鎖定作答中") + '</span>';
@@ -463,7 +471,6 @@
         };
         c2.appendChild(toggleOpen);
 
-        // 指標分享開關
         var toggleCursor = document.createElement("label");
         toggleCursor.className = "toggle" + (cursorOn ? " on" : "");
         toggleCursor.innerHTML = '<span class="toggle-track"></span><span>' + (cursorOn ? "指標分享中" : "指標已關閉") + '</span>';
@@ -538,7 +545,7 @@
     });
   }
 
-  /* 側欄 */
+  /* 側欄題庫管理 */
   var setListEl = document.getElementById("set-list");
   function renderSidebar(){
     if(isStudent) return;
@@ -549,9 +556,7 @@
       var card = document.createElement("div");
       card.className = "set-card" + (id === getCurrentId() ? " active" : "");
       var tag = s.type === "match" ? "連連看" : (s.type === "circle" ? "圈出來" : "寫字板");
-      card.innerHTML = `
-        <div class="set-card-top"><span class="set-card-title">${s.title}</span><span class="badge">${tag}</span></div>
-      `;
+      card.innerHTML = `<div class="set-card-top"><span class="set-card-title">${s.title}</span><span class="badge">${tag}</span></div>`;
       var del = document.createElement("button"); del.className = "set-card-del"; del.type = "button"; del.textContent = "刪除";
       del.onclick = function(ev){
         ev.stopPropagation();
@@ -586,7 +591,7 @@
     renderPeerCursor(lastPeerCursor);
   }
 
-  /* 寫字板功能 */
+  /* 寫字板功能（含聲調符號支援） */
   function renderDrawBoard(s){
     var progress = getProgress(s.id);
     var strokes = progress.strokes || [];
@@ -600,9 +605,22 @@
       <button type="button" class="tool-btn" data-tool="text">🔤 打字</button>
       <button type="button" class="tool-btn" data-tool="select">✋ 移動</button>
       <div class="tool-sep"></div>
+      
+      <!-- 聲調工具專屬按鈕 -->
+      <span style="font-size:12px;font-weight:700;color:var(--seal);">聲調:</span>
+      <div class="tone-group">
+        <button type="button" class="tone-btn" data-tone="ˉ" title="一聲 (陰平)">ˉ</button>
+        <button type="button" class="tone-btn" data-tone="ˊ" title="二聲 (陽平)">ˊ</button>
+        <button type="button" class="tone-btn" data-tone="ˇ" title="三聲 (上聲)">ˇ</button>
+        <button type="button" class="tone-btn" data-tone="ˋ" title="四聲 (去聲)">ˋ</button>
+        <button type="button" class="tone-btn" data-tone="˙" title="輕聲">˙</button>
+      </div>
+      <div class="tool-sep"></div>
+
       <button type="button" class="tool-btn" data-tool="stroke-eraser" title="點擊整條筆畫刪除">🪄 筆畫擦</button>
       <button type="button" class="tool-btn" data-tool="pixel-eraser" title="局部擦除">🧽 局部擦</button>
       <div class="tool-sep"></div>
+      
       <span style="font-size:12px;color:var(--ink-soft);">顏色:</span>
       <div class="color-dot active" data-color="#B23B32" style="background:#B23B32;"></div>
       <div class="color-dot" data-color="#2A333C" style="background:#2A333C;"></div>
@@ -610,6 +628,7 @@
       <div class="color-dot" data-color="#4C7A5E" style="background:#4C7A5E;"></div>
       <div class="color-dot" data-color="#FB8C00" style="background:#FB8C00;"></div>
       <div class="tool-sep"></div>
+      
       <span style="font-size:12px;color:var(--ink-soft);">粗細:</span>
       <button type="button" class="size-btn active" data-size="3">細</button>
       <button type="button" class="size-btn" data-size="6">中</button>
@@ -637,6 +656,7 @@
     var activeSize = 3;
     var isDrawing = false;
     var currentPath = [];
+    var activeSelectedTextId = null;
 
     function resizeCanvas(){
       var r = cWrap.getBoundingClientRect();
@@ -676,7 +696,7 @@
       textLayer.innerHTML = "";
       texts.forEach(function(t, idx){
         var div = document.createElement("div");
-        div.className = "movable-text";
+        div.className = "movable-text" + (t.id === activeSelectedTextId ? " active" : "");
         div.textContent = t.text;
         div.style.left = t.x + "%";
         div.style.top = t.y + "%";
@@ -689,6 +709,9 @@
             writeProgress(s.id, { texts: texts });
             return;
           }
+          activeSelectedTextId = t.id;
+          renderTexts();
+
           if(activeTool !== "select") return;
           e.stopPropagation();
           var startX = e.clientX, startY = e.clientY;
@@ -743,12 +766,14 @@
     canvas.onmousedown = function(e){
       if(!canInteract()) return;
       var p = getPos(e);
+      activeSelectedTextId = null;
+
       if(activeTool === "stroke-eraser"){
         checkStrokeHit(p);
         return;
       }
       if(activeTool === "text"){
-        var txt = prompt("請輸入要加入畫布的文字：");
+        var txt = prompt("請輸入要加入畫布的文字（可直接輸入中文字或拼音）：");
         if(txt && txt.trim()){
           texts.push({ id: uid("t"), text: txt.trim(), x: p.x, y: p.y, color: activeColor, size: activeSize });
           writeProgress(s.id, { texts: texts });
@@ -811,6 +836,32 @@
       };
     });
 
+    // 聲調點擊處理 (選取文字則疊加，未選取則新增為獨立可移動聲調)
+    toolbar.querySelectorAll(".tone-btn").forEach(function(tb){
+      tb.onclick = function(e){
+        e.stopPropagation();
+        var tone = tb.dataset.tone;
+        if(activeSelectedTextId){
+          var selObj = texts.find(function(item){ return item.id === activeSelectedTextId; });
+          if(selObj){
+            selObj.text += tone;
+            writeProgress(s.id, { texts: texts });
+            return;
+          }
+        }
+        // 未選取文字時：在畫布中央新增獨立聲調符號，可自由拖曳標註在任何地方
+        texts.push({
+          id: uid("t"),
+          text: tone,
+          x: 48,
+          y: 45,
+          color: activeColor,
+          size: activeSize * 1.5
+        });
+        writeProgress(s.id, { texts: texts });
+      };
+    });
+
     toolbar.querySelectorAll(".color-dot").forEach(function(d){
       d.onclick = function(){
         toolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
@@ -828,14 +879,14 @@
     });
 
     document.getElementById("btn-clear-draw").onclick = function(){
-      if(confirm("確定要清空畫布上的所有內容嗎？")){
+      if(confirm("確定要清空畫布上的所有寫字與標註嗎？")){
         strokes = []; texts = [];
         writeProgress(s.id, { strokes: strokes, texts: texts });
       }
     };
   }
 
-  /* 連連看（固定順序、支援鎖定作答） */
+  /* 連連看 */
   function renderMatchBoard(s){
     var progress = getProgress(s.id);
     var matched = progress.matched || {};
@@ -920,7 +971,7 @@
     stageEl.appendChild(wrap);
   }
 
-  /* 遠端游標 */
+  /* 遠端游標常駐監聽 (修正精準定位與置頂) */
   function ensurePeerCursorEl(){
     var el = document.getElementById("peer-cursor");
     if(!el){
@@ -1032,7 +1083,6 @@
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
 
-  // 1. 匯入 Excel
   excelInput.onchange = function(e){
     var file = e.target.files[0];
     if(!file) return;
@@ -1116,7 +1166,7 @@
     reader.readAsArrayBuffer(file);
   };
 
-  // 2. 下載空白 Excel 填題範本
+  // 下載空白 Excel 填題範本
   document.getElementById("btn-dl-template").onclick = function(){
     var templateData = [
       {
@@ -1154,7 +1204,7 @@
     XLSX.writeFile(wb, "生詞練習台_題庫範本.xlsx");
   };
 
-  // 3. 匯出目前平台上的所有題目為 Excel
+  // 匯出目前題目至 Excel
   document.getElementById("btn-export-excel").onclick = function(){
     var currentSets = getSets();
     var exportRows = [];
