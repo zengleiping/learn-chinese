@@ -1,0 +1,844 @@
+<title>生詞練習台</title>
+<style>
+  :root{
+    --paper:#F3F5EF;
+    --surface:#FFFFFF;
+    --surface-2:#EAEDE4;
+    --ink:#2A333C;
+    --ink-soft:#66717A;
+    --grid-line:rgba(42,51,60,0.08);
+    --seal:#B23B32;
+    --seal-soft:#F5DFDB;
+    --seal-ring:rgba(178,59,50,0.38);
+    --bamboo:#4C7A5E;
+    --bamboo-soft:#DEEBE3;
+    --shadow: 0 1px 2px rgba(42,33,28,0.06), 0 6px 20px -8px rgba(42,33,28,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1B211E;
+      --surface:#232B27;
+      --surface-2:#2A332E;
+      --ink:#E8EBE4;
+      --ink-soft:#9BA79E;
+      --grid-line:rgba(232,235,228,0.08);
+      --seal:#E2695C;
+      --seal-soft:#3D2624;
+      --seal-ring:rgba(226,105,92,0.42);
+      --bamboo:#7BB294;
+      --bamboo-soft:#223229;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 24px -8px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#1B211E;
+    --surface:#232B27;
+    --surface-2:#2A332E;
+    --ink:#E8EBE4;
+    --ink-soft:#9BA79E;
+    --grid-line:rgba(232,235,228,0.08);
+    --seal:#E2695C;
+    --seal-soft:#3D2624;
+    --seal-ring:rgba(226,105,92,0.42);
+    --bamboo:#7BB294;
+    --bamboo-soft:#223229;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 24px -8px rgba(0,0,0,0.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{background:var(--paper);color:var(--ink);}
+  .app{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Public Sans","Noto Sans TC",-apple-system,"Segoe UI",sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  h1,h2,h3,.zh{
+    font-family:"LXGW WenKai TC","Noto Serif TC",serif;
+  }
+  button{font-family:inherit;}
+  button:focus-visible, [tabindex]:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2.5px solid var(--seal);
+    outline-offset:2px;
+  }
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 24px;
+    background:var(--surface);
+    border-bottom:1px solid var(--grid-line);
+    gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .stamp{
+    width:34px;height:34px;flex:none;
+    background:var(--seal);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"LXGW WenKai TC",serif;font-size:18px;font-weight:700;
+    border-radius:6px;
+    transform:rotate(-6deg);
+    box-shadow:var(--shadow);
+  }
+  .brand-text h1{margin:0;font-size:19px;font-weight:700;letter-spacing:.01em;}
+  .brand-text p{margin:1px 0 0;font-size:12.5px;color:var(--ink-soft);}
+  .topbar-actions{display:flex;gap:8px;align-items:center;}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--grid-line);
+    background:var(--surface);
+    color:var(--ink);
+    padding:8px 14px;
+    border-radius:9px;
+    font-size:13.5px;font-weight:600;
+    cursor:pointer;
+    transition:background .12s ease, border-color .12s ease, transform .12s ease;
+  }
+  .btn:hover{border-color:var(--ink-soft);}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--seal);border-color:var(--seal);color:#fff;}
+  .btn-primary:hover{background:var(--seal);filter:brightness(1.06);}
+  .btn-ghost{background:transparent;border-color:transparent;color:var(--ink-soft);}
+  .btn-ghost:hover{background:var(--surface-2);color:var(--ink);}
+  .btn-sm{padding:6px 11px;font-size:12.5px;border-radius:7px;}
+
+  /* ---------- layout ---------- */
+  .layout{
+    flex:1;
+    display:grid;
+    grid-template-columns:260px 1fr;
+    min-height:0;
+  }
+  .app.present .layout{grid-template-columns:1fr;}
+  .app.present .sidebar{display:none;}
+  .app.present .topbar{padding:12px 20px;}
+
+  .sidebar{
+    background:var(--surface);
+    border-right:1px solid var(--grid-line);
+    padding:16px;
+    display:flex;flex-direction:column;gap:12px;
+    overflow-y:auto;
+  }
+  .btn-new{width:100%;justify-content:center;padding:10px 14px;}
+  .set-list{display:flex;flex-direction:column;gap:8px;}
+  .set-card{
+    text-align:left;
+    border:1.5px solid var(--grid-line);
+    background:var(--paper);
+    border-radius:10px;
+    padding:10px 12px;
+    cursor:pointer;
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .set-card:hover{border-color:var(--ink-soft);}
+  .set-card.active{border-color:var(--seal);background:var(--seal-soft);}
+  .set-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .set-card-title{font-size:14px;font-weight:600;font-family:"LXGW WenKai TC",serif;}
+  .badge{
+    font-size:10.5px;font-weight:700;letter-spacing:.04em;
+    padding:2px 7px;border-radius:99px;
+    background:var(--surface-2);color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .set-card.active .badge{background:var(--seal);color:#fff;}
+  .set-card-meta{font-size:11.5px;color:var(--ink-soft);display:flex;justify-content:space-between;}
+  .set-card-del{
+    background:none;border:none;color:var(--ink-soft);cursor:pointer;
+    font-size:12px;padding:2px 4px;border-radius:5px;align-self:flex-end;
+  }
+  .set-card-del:hover{color:var(--seal);background:var(--surface);}
+
+  .stage-wrap{
+    overflow-y:auto;
+    padding:28px clamp(16px,4vw,48px);
+    display:flex;justify-content:center;
+  }
+  .stage{
+    width:100%;max-width:860px;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      var(--surface);
+    background-size:28px 28px, 28px 28px, auto;
+    border:1px solid var(--grid-line);
+    border-radius:16px;
+    padding:clamp(20px,4vw,40px);
+    box-shadow:var(--shadow);
+    min-height:420px;
+  }
+  .app.present .stage{max-width:1040px;min-height:60vh;}
+
+  .stage-empty{color:var(--ink-soft);text-align:center;padding:60px 20px;font-size:14px;}
+  .stage-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .stage-title{font-size:22px;font-weight:700;margin:0 0 4px;}
+  .stage-sub{font-size:13px;color:var(--ink-soft);margin:0;}
+  .stage-actions{display:flex;gap:8px;flex:none;}
+
+  /* ---------- match board ---------- */
+  .match-board{position:relative;}
+  .match-cols{display:flex;justify-content:space-between;gap:clamp(24px,8vw,120px);position:relative;z-index:1;}
+  .match-col{flex:1;display:flex;flex-direction:column;gap:12px;max-width:340px;}
+  .match-col-label{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
+  .match-item{
+    font-family:"LXGW WenKai TC",serif;
+    font-size:19px;
+    text-align:center;
+    padding:12px 16px;
+    border:2px solid var(--grid-line);
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:12px;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .match-item[data-side="right"]{font-family:"Public Sans",sans-serif;font-size:16px;}
+  .match-item:hover:not(.matched){border-color:var(--ink-soft);}
+  .match-item.selected{border-color:var(--seal);box-shadow:0 0 0 3px var(--seal-ring) inset;}
+  .match-item.matched{
+    border-color:var(--bamboo);background:var(--bamboo-soft);
+    cursor:default;
+  }
+  .match-item.wrong{animation:shake .4s ease;border-color:var(--seal);}
+  @keyframes shake{
+    10%,90%{transform:translateX(-2px);}
+    20%,80%{transform:translateX(3px);}
+    30%,50%,70%{transform:translateX(-5px);}
+    40%,60%{transform:translateX(5px);}
+  }
+  .match-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+  .match-done{
+    margin-top:20px;text-align:center;font-size:14px;color:var(--bamboo);font-weight:700;
+  }
+
+  /* ---------- circle board ---------- */
+  .circle-prompt{
+    font-family:"LXGW WenKai TC",serif;
+    font-size:20px;margin:0 0 20px;line-height:1.6;
+  }
+  .circle-choices{display:flex;flex-wrap:wrap;gap:14px;}
+  .circle-chip{
+    font-family:"Public Sans","Noto Sans TC",sans-serif;
+    font-size:16px;font-weight:500;
+    padding:12px 22px;
+    border-radius:48% 52% 51% 49% / 53% 47% 53% 47%;
+    border:2.5px solid var(--grid-line);
+    background:var(--paper);color:var(--ink);
+    cursor:pointer;
+    min-width:88px;text-align:center;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .circle-chip:hover{border-color:var(--ink-soft);}
+  .circle-chip.selected{border-color:var(--seal);background:var(--seal-soft);color:var(--seal);font-weight:700;}
+  .circle-chip.correct{border-color:var(--bamboo);background:var(--bamboo-soft);color:var(--bamboo);font-weight:700;}
+  .circle-chip.missed{border-color:var(--bamboo);border-style:dashed;color:var(--bamboo);}
+  .circle-chip.selected-wrong{border-color:var(--ink-soft);background:var(--surface-2);color:var(--ink-soft);text-decoration:line-through;}
+  .reveal-note{margin-top:18px;font-size:13px;color:var(--ink-soft);}
+
+  /* ---------- editor dialog ---------- */
+  .editor-dialog{
+    border:none;border-radius:16px;padding:0;
+    background:var(--surface);color:var(--ink);
+    box-shadow:var(--shadow);
+    width:min(560px,92vw);
+    max-height:86vh;
+  }
+  .editor-dialog::backdrop{background:rgba(20,20,18,0.45);}
+  .editor-head{padding:20px 24px 4px;}
+  .editor-head h2{margin:0 0 2px;font-size:19px;}
+  .editor-head p{margin:0;font-size:12.5px;color:var(--ink-soft);}
+  .editor-body{padding:16px 24px;overflow-y:auto;max-height:56vh;}
+  .editor-foot{padding:14px 24px 22px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--grid-line);margin-top:8px;}
+
+  .type-toggle{display:flex;gap:8px;margin-bottom:16px;}
+  .type-toggle button{flex:1;padding:10px;border-radius:9px;border:1.5px solid var(--grid-line);background:var(--paper);color:var(--ink-soft);font-weight:600;font-size:13.5px;cursor:pointer;}
+  .type-toggle button.active{border-color:var(--seal);color:var(--seal);background:var(--seal-soft);}
+
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:14px 0 5px;}
+  label:first-child{margin-top:0;}
+  input[type="text"], textarea{
+    width:100%;
+    border:1.5px solid var(--grid-line);
+    background:var(--paper);color:var(--ink);
+    border-radius:8px;padding:9px 11px;font-size:14.5px;
+    font-family:inherit;
+  }
+  .row-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .pair-row, .choice-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .pair-row input, .choice-row input[type="text"]{flex:1;}
+  .row-del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:15px;padding:4px 7px;flex:none;}
+  .row-del:hover{color:var(--seal);}
+  .add-row-btn{font-size:12.5px;color:var(--seal);background:none;border:none;cursor:pointer;font-weight:600;padding:4px 0;}
+  .check-row{display:flex;align-items:center;gap:8px;}
+  .check-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--seal);flex:none;}
+  .multi-toggle{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:13px;color:var(--ink-soft);}
+  .hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+
+  @media (prefers-reduced-motion: reduce){
+    .match-item.wrong{animation:none;}
+    *{transition:none !important;}
+  }
+
+  @media (max-width:720px){
+    .layout{grid-template-columns:1fr;}
+    .sidebar{border-right:none;border-bottom:1px solid var(--grid-line);max-height:180px;}
+    .match-cols{flex-direction:column;gap:28px;}
+  }
+</style>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="stamp">好</div>
+      <div class="brand-text">
+        <h1>生詞練習台</h1>
+        <p>連連看・圈出來－上課時螢幕分享，老師點選操作</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn" id="btn-present" type="button">簡報模式</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <button class="btn btn-primary btn-new" id="btn-new" type="button">＋ 新增題目</button>
+      <div class="set-list" id="set-list"></div>
+    </aside>
+    <main class="stage-wrap">
+      <div class="stage" id="stage"></div>
+    </main>
+  </div>
+</div>
+
+<dialog class="editor-dialog" id="editor-dialog">
+  <form id="editor-form">
+    <div class="editor-head">
+      <h2 id="editor-title">新增題目</h2>
+      <p>做好之後會出現在左側清單，點一下就能切換到這一題</p>
+    </div>
+    <div class="editor-body">
+      <div class="type-toggle" id="type-toggle">
+        <button type="button" data-type="match" class="active">連連看</button>
+        <button type="button" data-type="circle">圈出來</button>
+      </div>
+
+      <label for="f-title">題目名稱</label>
+      <input type="text" id="f-title" placeholder="例如：第四課生詞配對" required>
+
+      <div id="match-fields">
+        <div class="row-two">
+          <div>
+            <label for="f-left-label">左欄標籤</label>
+            <input type="text" id="f-left-label" value="生詞">
+          </div>
+          <div>
+            <label for="f-right-label">右欄標籤</label>
+            <input type="text" id="f-right-label" value="拼音／意思">
+          </div>
+        </div>
+        <label>配對內容</label>
+        <div id="pair-rows"></div>
+        <button type="button" class="add-row-btn" id="add-pair">＋ 新增一組</button>
+      </div>
+
+      <div id="circle-fields" style="display:none;">
+        <label for="f-prompt">題目／提示文字</label>
+        <textarea id="f-prompt" rows="2" placeholder="例如：「謝謝」是什麼意思？"></textarea>
+        <label class="multi-toggle" style="display:flex;">
+          <input type="checkbox" id="f-multi" style="width:16px;height:16px;accent-color:var(--seal);">
+          允許選多個正確答案（複選）
+        </label>
+        <label>選項（勾選代表正確答案）</label>
+        <div id="choice-rows"></div>
+        <button type="button" class="add-row-btn" id="add-choice">＋ 新增選項</button>
+        <p class="hint">單選題只需要勾一個正確答案；複選題可以勾多個。</p>
+      </div>
+    </div>
+    <div class="editor-foot">
+      <button type="button" class="btn btn-ghost" id="btn-cancel">取消</button>
+      <button type="submit" class="btn btn-primary">儲存題目</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function(){
+  "use strict";
+  var STORAGE_KEY = "hanyu-practice-v1";
+  var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
+
+  var SAMPLE = {
+    sets:[
+      {
+        id:"sample_match",
+        type:"match",
+        title:"生詞配對：你好！（範例）",
+        leftLabel:"生詞",
+        rightLabel:"拼音",
+        pairs:[
+          {id:"p1", left:"你好", right:"nǐ hǎo"},
+          {id:"p2", left:"謝謝", right:"xièxie"},
+          {id:"p3", left:"再見", right:"zàijiàn"},
+          {id:"p4", left:"老師", right:"lǎoshī"},
+          {id:"p5", left:"學生", right:"xuéshēng"}
+        ]
+      },
+      {
+        id:"sample_circle",
+        type:"circle",
+        title:"生詞小測驗（範例）",
+        prompt:"「謝謝」是什麼意思？",
+        multiSelect:false,
+        choices:[
+          {id:"c1", text:"Hello"},
+          {id:"c2", text:"Thank you"},
+          {id:"c3", text:"Goodbye"},
+          {id:"c4", text:"Teacher"}
+        ],
+        correctIds:["c2"]
+      }
+    ]
+  };
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed && Array.isArray(parsed.sets) && parsed.sets.length){
+          return parsed;
+        }
+      }
+    }catch(e){}
+    return { sets: SAMPLE.sets.slice(), currentId: SAMPLE.sets[0].id, progress:{} };
+  }
+
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  var state = loadState();
+  if(!state.currentId && state.sets.length){ state.currentId = state.sets[0].id; }
+  if(!state.progress) state.progress = {};
+
+  var app = document.getElementById("app");
+  var setListEl = document.getElementById("set-list");
+  var stageEl = document.getElementById("stage");
+
+  function currentSet(){
+    return state.sets.find(function(s){ return s.id === state.currentId; }) || null;
+  }
+  function getProgress(setId){
+    if(!state.progress[setId]){
+      state.progress[setId] = { matched:[], selected:[], revealed:false };
+    }
+    return state.progress[setId];
+  }
+
+  /* ---------------- sidebar ---------------- */
+  function renderSidebar(){
+    setListEl.innerHTML = "";
+    state.sets.forEach(function(s){
+      var card = document.createElement("div");
+      card.className = "set-card" + (s.id === state.currentId ? " active" : "");
+      card.setAttribute("role","button");
+      card.setAttribute("tabindex","0");
+
+      var top = document.createElement("div");
+      top.className = "set-card-top";
+      var title = document.createElement("div");
+      title.className = "set-card-title";
+      title.textContent = s.title;
+      var badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = s.type === "match" ? "連連看" : "圈出來";
+      top.appendChild(title); top.appendChild(badge);
+
+      var meta = document.createElement("div");
+      meta.className = "set-card-meta";
+      var count = s.type === "match" ? s.pairs.length + " 組" : s.choices.length + " 個選項";
+      meta.innerHTML = "<span>" + count + "</span>";
+
+      var del = document.createElement("button");
+      del.className = "set-card-del";
+      del.type = "button";
+      del.textContent = "刪除";
+      del.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        if(state.sets.length <= 1) return;
+        state.sets = state.sets.filter(function(x){ return x.id !== s.id; });
+        delete state.progress[s.id];
+        if(state.currentId === s.id){ state.currentId = state.sets[0].id; }
+        saveState(); renderSidebar(); renderStage();
+      });
+
+      card.appendChild(top);
+      card.appendChild(meta);
+      card.appendChild(del);
+      card.addEventListener("click", function(){
+        state.currentId = s.id; saveState(); renderSidebar(); renderStage();
+      });
+      card.addEventListener("keydown", function(ev){
+        if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); card.click(); }
+      });
+      setListEl.appendChild(card);
+    });
+  }
+
+  /* ---------------- stage ---------------- */
+  function renderStage(){
+    var s = currentSet();
+    stageEl.innerHTML = "";
+    if(!s){
+      stageEl.innerHTML = '<div class="stage-empty">還沒有題目，點左側「＋ 新增題目」開始製作吧。</div>';
+      return;
+    }
+    var head = document.createElement("div");
+    head.className = "stage-head";
+    var titleWrap = document.createElement("div");
+    titleWrap.innerHTML = '<h2 class="stage-title zh">' + escapeHtml(s.title) + '</h2>' +
+      '<p class="stage-sub">' + (s.type === "match" ? "點左欄一個、再點右欄配對的一個" : (s.multiSelect ? "點選所有正確答案" : "點選一個正確答案")) + '</p>';
+    var actions = document.createElement("div");
+    actions.className = "stage-actions";
+    var resetBtn = document.createElement("button");
+    resetBtn.className = "btn btn-sm"; resetBtn.type="button"; resetBtn.textContent = "🔄 重新開始";
+    resetBtn.addEventListener("click", function(){
+      state.progress[s.id] = { matched:[], selected:[], revealed:false };
+      saveState(); renderStage();
+    });
+    actions.appendChild(resetBtn);
+    if(s.type === "circle"){
+      var revealBtn = document.createElement("button");
+      revealBtn.className = "btn btn-sm btn-primary"; revealBtn.type="button"; revealBtn.textContent = "公布答案";
+      revealBtn.addEventListener("click", function(){
+        getProgress(s.id).revealed = true; saveState(); renderStage();
+      });
+      actions.appendChild(revealBtn);
+    }
+    head.appendChild(titleWrap); head.appendChild(actions);
+    stageEl.appendChild(head);
+
+    if(s.type === "match"){ renderMatchBoard(s); } else { renderCircleBoard(s); }
+  }
+
+  function escapeHtml(str){
+    var d = document.createElement("div"); d.textContent = str == null ? "" : str; return d.innerHTML;
+  }
+
+  /* ---------------- match board ---------------- */
+  function shuffled(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+
+  function renderMatchBoard(s){
+    var progress = getProgress(s.id);
+    var board = document.createElement("div");
+    board.className = "match-board";
+
+    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+    svg.setAttribute("class","match-svg");
+    board.appendChild(svg);
+
+    var cols = document.createElement("div");
+    cols.className = "match-cols";
+
+    var leftCol = document.createElement("div");
+    leftCol.className = "match-col";
+    leftCol.innerHTML = '<div class="match-col-label">' + escapeHtml(s.leftLabel || "項目一") + '</div>';
+
+    var rightCol = document.createElement("div");
+    rightCol.className = "match-col";
+    rightCol.innerHTML = '<div class="match-col-label">' + escapeHtml(s.rightLabel || "項目二") + '</div>';
+
+    // stable shuffle stored on the set object so re-render doesn't reshuffle mid-exercise
+    if(!s._rightOrder || s._rightOrder.length !== s.pairs.length){
+      s._rightOrder = shuffled(s.pairs.map(function(p){return p.id;}));
+    }
+    var rightOrder = s._rightOrder;
+
+    var selectedLeft = null, selectedRight = null;
+
+    function isMatched(pairId){
+      return progress.matched.indexOf(pairId) !== -1;
+    }
+
+    s.pairs.forEach(function(p){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "match-item zh" + (isMatched(p.id) ? " matched" : "");
+      btn.textContent = p.left;
+      btn.dataset.side = "left"; btn.dataset.id = p.id;
+      if(isMatched(p.id)) btn.disabled = true;
+      btn.addEventListener("click", function(){ onPick("left", p.id, btn); });
+      leftCol.appendChild(btn);
+    });
+
+    rightOrder.forEach(function(pid){
+      var p = s.pairs.find(function(x){return x.id===pid;});
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "match-item" + (isMatched(p.id) ? " matched" : "");
+      btn.dataset.side = "right";
+      btn.textContent = p.right;
+      btn.dataset.id = p.id;
+      if(isMatched(p.id)) btn.disabled = true;
+      btn.addEventListener("click", function(){ onPick("right", p.id, btn); });
+      rightCol.appendChild(btn);
+    });
+
+    cols.appendChild(leftCol); cols.appendChild(rightCol);
+    board.appendChild(cols);
+    stageEl.appendChild(board);
+
+    if(progress.matched.length === s.pairs.length){
+      var done = document.createElement("div");
+      done.className = "match-done";
+      done.textContent = "🎉 全部配對完成！";
+      stageEl.appendChild(done);
+    }
+
+    function clearSelection(){
+      selectedLeft = null; selectedRight = null;
+      board.querySelectorAll(".match-item.selected").forEach(function(el){ el.classList.remove("selected"); });
+    }
+
+    function onPick(side, id, el){
+      if(el.classList.contains("matched")) return;
+      if(side === "left"){
+        if(selectedLeft === id){ clearSelection(); return; }
+        board.querySelectorAll('[data-side="left"]').forEach(function(b){b.classList.remove("selected");});
+        selectedLeft = id; el.classList.add("selected");
+      } else {
+        if(selectedRight === id){ clearSelection(); return; }
+        board.querySelectorAll('[data-side="right"]').forEach(function(b){b.classList.remove("selected");});
+        selectedRight = id; el.classList.add("selected");
+      }
+      if(selectedLeft && selectedRight){
+        if(selectedLeft === selectedRight){
+          progress.matched.push(selectedLeft);
+          saveState();
+          clearSelection();
+          renderStage();
+        } else {
+          var leftEl = board.querySelector('[data-side="left"][data-id="'+selectedLeft+'"]');
+          var rightEl = board.querySelector('[data-side="right"][data-id="'+selectedRight+'"]');
+          [leftEl,rightEl].forEach(function(e){ if(e){ e.classList.add("wrong"); setTimeout(function(){e.classList.remove("wrong");},400); } });
+          setTimeout(clearSelection, 420);
+        }
+      }
+    }
+
+    function drawLines(){
+      var rect = board.getBoundingClientRect();
+      svg.setAttribute("viewBox","0 0 "+rect.width+" "+rect.height);
+      svg.innerHTML = "";
+      var css = getComputedStyle(document.documentElement);
+      var bamboo = css.getPropertyValue("--bamboo").trim() || "#4C7A5E";
+      progress.matched.forEach(function(pid){
+        var l = board.querySelector('[data-side="left"][data-id="'+pid+'"]');
+        var r = board.querySelector('[data-side="right"][data-id="'+pid+'"]');
+        if(!l || !r) return;
+        var lr = l.getBoundingClientRect(), rr = r.getBoundingClientRect();
+        var x1 = lr.right - rect.left, y1 = lr.top + lr.height/2 - rect.top;
+        var x2 = rr.left - rect.left, y2 = rr.top + rr.height/2 - rect.top;
+        var mx = (x1+x2)/2;
+        var path = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d", "M"+x1+","+y1+" C "+mx+","+y1+" "+mx+","+y2+" "+x2+","+y2);
+        path.setAttribute("stroke", bamboo);
+        path.setAttribute("stroke-width","2.5");
+        path.setAttribute("fill","none");
+        path.setAttribute("stroke-linecap","round");
+        svg.appendChild(path);
+      });
+    }
+    requestAnimationFrame(drawLines);
+    window.addEventListener("resize", drawLines);
+  }
+
+  /* ---------------- circle board ---------------- */
+  function renderCircleBoard(s){
+    var progress = getProgress(s.id);
+    var wrap = document.createElement("div");
+    wrap.className = "circle-board";
+    wrap.innerHTML = '<p class="circle-prompt zh">' + escapeHtml(s.prompt || "") + "</p>";
+
+    var choicesEl = document.createElement("div");
+    choicesEl.className = "circle-choices";
+
+    s.choices.forEach(function(c){
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "circle-chip";
+      chip.textContent = c.text;
+      var isSel = progress.selected.indexOf(c.id) !== -1;
+      var isCorrect = s.correctIds.indexOf(c.id) !== -1;
+
+      if(progress.revealed){
+        if(isCorrect && isSel) chip.classList.add("correct");
+        else if(isCorrect && !isSel) chip.classList.add("missed");
+        else if(!isCorrect && isSel) chip.classList.add("selected-wrong");
+        chip.disabled = true;
+      } else if(isSel){
+        chip.classList.add("selected");
+      }
+
+      chip.addEventListener("click", function(){
+        if(progress.revealed) return;
+        var idx = progress.selected.indexOf(c.id);
+        if(s.multiSelect){
+          if(idx===-1) progress.selected.push(c.id); else progress.selected.splice(idx,1);
+        } else {
+          progress.selected = idx===-1 ? [c.id] : [];
+        }
+        saveState(); renderStage();
+      });
+      choicesEl.appendChild(chip);
+    });
+    wrap.appendChild(choicesEl);
+    if(progress.revealed){
+      var note = document.createElement("p");
+      note.className = "reveal-note";
+      note.textContent = "綠色實框＝答對；綠色虛框＝漏掉的正確答案；劃線＝選錯。";
+      wrap.appendChild(note);
+    }
+    stageEl.appendChild(wrap);
+  }
+
+  /* ---------------- editor dialog ---------------- */
+  var dialog = document.getElementById("editor-dialog");
+  var form = document.getElementById("editor-form");
+  var typeToggle = document.getElementById("type-toggle");
+  var matchFields = document.getElementById("match-fields");
+  var circleFields = document.getElementById("circle-fields");
+  var pairRows = document.getElementById("pair-rows");
+  var choiceRows = document.getElementById("choice-rows");
+  var currentType = "match";
+
+  function newPairRow(left, right){
+    var row = document.createElement("div");
+    row.className = "pair-row";
+    row.innerHTML = '<input type="text" class="pair-left" placeholder="生詞，例如：謝謝">' +
+      '<input type="text" class="pair-right" placeholder="拼音／意思，例如：xièxie">' +
+      '<button type="button" class="row-del">✕</button>';
+    row.querySelector(".pair-left").value = left || "";
+    row.querySelector(".pair-right").value = right || "";
+    row.querySelector(".row-del").addEventListener("click", function(){
+      if(pairRows.children.length > 2) row.remove();
+    });
+    pairRows.appendChild(row);
+  }
+  function newChoiceRow(text, correct){
+    var row = document.createElement("div");
+    row.className = "choice-row";
+    row.innerHTML = '<label class="check-row"><input type="checkbox" class="choice-correct"></label>' +
+      '<input type="text" class="choice-text" placeholder="選項文字">' +
+      '<button type="button" class="row-del">✕</button>';
+    row.querySelector(".choice-text").value = text || "";
+    row.querySelector(".choice-correct").checked = !!correct;
+    row.querySelector(".row-del").addEventListener("click", function(){
+      if(choiceRows.children.length > 2) row.remove();
+    });
+    choiceRows.appendChild(row);
+  }
+
+  document.getElementById("add-pair").addEventListener("click", function(){ newPairRow(); });
+  document.getElementById("add-choice").addEventListener("click", function(){ newChoiceRow(); });
+
+  typeToggle.querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      currentType = btn.dataset.type;
+      typeToggle.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b===btn); });
+      matchFields.style.display = currentType === "match" ? "" : "none";
+      circleFields.style.display = currentType === "circle" ? "" : "none";
+    });
+  });
+
+  function openEditor(){
+    currentType = "match";
+    typeToggle.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b.dataset.type==="match"); });
+    matchFields.style.display = ""; circleFields.style.display = "none";
+    document.getElementById("f-title").value = "";
+    document.getElementById("f-left-label").value = "生詞";
+    document.getElementById("f-right-label").value = "拼音／意思";
+    document.getElementById("f-prompt").value = "";
+    document.getElementById("f-multi").checked = false;
+    pairRows.innerHTML = ""; choiceRows.innerHTML = "";
+    newPairRow(); newPairRow(); newPairRow();
+    newChoiceRow(); newChoiceRow();
+    dialog.showModal();
+    document.getElementById("f-title").focus();
+  }
+
+  document.getElementById("btn-new").addEventListener("click", openEditor);
+  document.getElementById("btn-cancel").addEventListener("click", function(){ dialog.close(); });
+
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var title = document.getElementById("f-title").value.trim();
+    if(!title) return;
+
+    if(currentType === "match"){
+      var pairs = [];
+      pairRows.querySelectorAll(".pair-row").forEach(function(row){
+        var l = row.querySelector(".pair-left").value.trim();
+        var r = row.querySelector(".pair-right").value.trim();
+        if(l && r) pairs.push({id: uid("p"), left:l, right:r});
+      });
+      if(pairs.length < 2) return;
+      var newSet = {
+        id: uid("set"), type:"match", title:title,
+        leftLabel: document.getElementById("f-left-label").value.trim() || "生詞",
+        rightLabel: document.getElementById("f-right-label").value.trim() || "拼音／意思",
+        pairs: pairs
+      };
+      state.sets.push(newSet);
+      state.currentId = newSet.id;
+    } else {
+      var choices = [];
+      choiceRows.querySelectorAll(".choice-row").forEach(function(row){
+        var t = row.querySelector(".choice-text").value.trim();
+        var ok = row.querySelector(".choice-correct").checked;
+        if(t){ var id = uid("c"); choices.push({id:id, text:t, _correct:ok}); }
+      });
+      if(choices.length < 2) return;
+      var correctIds = choices.filter(function(c){return c._correct;}).map(function(c){return c.id;});
+      if(correctIds.length === 0) return;
+      choices.forEach(function(c){ delete c._correct; });
+      var newSet2 = {
+        id: uid("set"), type:"circle", title:title,
+        prompt: document.getElementById("f-prompt").value.trim(),
+        multiSelect: document.getElementById("f-multi").checked,
+        choices: choices,
+        correctIds: correctIds
+      };
+      state.sets.push(newSet2);
+      state.currentId = newSet2.id;
+    }
+    saveState();
+    dialog.close();
+    renderSidebar();
+    renderStage();
+  });
+
+  /* ---------------- presentation mode ---------------- */
+  document.getElementById("btn-present").addEventListener("click", function(){
+    var on = app.classList.toggle("present");
+    document.getElementById("btn-present").textContent = on ? "◀ 離開簡報模式" : "簡報模式";
+    requestAnimationFrame(function(){
+      window.dispatchEvent(new Event("resize"));
+    });
+  });
+
+  renderSidebar();
+  renderStage();
+})();
+</script>
