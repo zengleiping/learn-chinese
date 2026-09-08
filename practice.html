@@ -287,19 +287,35 @@
   
   .text-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
   
-  /* 關鍵對準修復：加入 translate(-50%, -50%) 將文字錨點鎖定於中心，且字體依比例等比縮放 */
+  /* 文字物件層：translate(-50%, -50%) 將文字錨點鎖定於中心，支援藍框縮放控制點 */
   .movable-text{
     position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif;
     font-weight:700;line-height:1.2;color:var(--ink);user-select:none;
-    padding:4px 8px;border:2px dashed transparent;border-radius:6px;white-space:pre;
+    padding:6px 10px;border:2px dashed transparent;border-radius:6px;white-space:pre;
     cursor:grab;transform:translate(-50%, -50%);
     transition:border-color .15s ease, background .15s ease;
   }
-  .movable-text:hover{
-    border:2px solid #1E88E5 !important;background:rgba(255,255,255,0.92);
-    box-shadow:0 2px 10px rgba(30,136,229,0.25);cursor:move !important;
+  .movable-text:hover, .movable-text.active{
+    border:2px solid #1E88E5 !important;
+    background:rgba(255,255,255,0.92);
+    box-shadow:0 2px 10px rgba(30,136,229,0.25);
+    cursor:move !important;
   }
-  .movable-text.active{border:2px solid var(--seal) !important;background:rgba(255,255,255,0.95);cursor:grabbing !important;}
+  .movable-text.active{
+    border-color:var(--seal) !important;
+    cursor:grabbing !important;
+  }
+
+  /* 縮放控制手把 (藍色框框右下角圓點) */
+  .resize-handle{
+    display:none;position:absolute;right:-6px;bottom:-6px;width:12px;height:12px;
+    background:#1E88E5;border:2px solid #FFFFFF;border-radius:50%;
+    cursor:nwse-resize !important;box-shadow:0 1px 4px rgba(0,0,0,0.3);z-index:10;
+  }
+  .movable-text:hover .resize-handle,
+  .movable-text.active .resize-handle{
+    display:block;
+  }
 
   .multi-cursor-container{position:absolute;inset:0;pointer-events:none;z-index:99999;overflow:hidden;}
   .peer-cursor{
@@ -602,6 +618,14 @@
     }catch(e){}
   }
 
+  /* ================== 寫字板持久狀態（徹底修復顏色與橡皮擦跳回預設） ================== */
+  var boardState = {
+    tool: "pen",
+    color: "#B23B32",
+    size: 3,
+    fontSize: 36
+  };
+
   /* ================== 專案/課次 資料管理 ================== */
   var PROJECTS_KEY = "hanyu-practice-projects-v3";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
@@ -708,7 +732,6 @@
     return isOpenForStudent();
   }
 
-  /* 核心：1對1即時共用進度 (shared) */
   function getProgress(setId){
     if(inRoom()){
       return (roomData && roomData.sharedProgress && roomData.sharedProgress[setId]) || {};
@@ -1165,7 +1188,7 @@
     }
   }
 
-  /* 寫字板功能（精準中心錨點對齊 + 等比字體筆觸縮放） */
+  /* ================= 寫字板功能（精準中心錨點對齊 + 下拉選單選字號 + 藍框拉動縮放） ================= */
   function renderDrawBoard(s){
     var progress = getProgress(s.id);
     var strokes = progress.strokes || [];
@@ -1176,10 +1199,22 @@
 
     var toolbar = document.createElement("div"); toolbar.className = "draw-toolbar";
     toolbar.innerHTML = `
-      <button type="button" class="tool-btn active" data-tool="pen">✏️ 畫筆</button>
-      <button type="button" class="tool-btn" data-tool="text">🔤 打字</button>
-      <button type="button" class="tool-btn" data-tool="stroke-eraser" title="點選整條筆畫刪除（持續有效）">🪄 筆畫擦</button>
-      <button type="button" class="tool-btn" data-tool="pixel-eraser" title="局部橡皮擦">🧽 局部擦</button>
+      <button type="button" class="tool-btn ${boardState.tool==='pen'?'active':''}" data-tool="pen">✏️ 畫筆</button>
+      <button type="button" class="tool-btn ${boardState.tool==='text'?'active':''}" data-tool="text">🔤 打字</button>
+      <button type="button" class="tool-btn ${boardState.tool==='stroke-eraser'?'active':''}" data-tool="stroke-eraser" title="點選整條筆畫刪除（持續有效）">🪄 筆畫擦</button>
+      <button type="button" class="tool-btn ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部橡皮擦">🧽 局部擦</button>
+      <div class="tool-sep"></div>
+
+      <!-- 字號選單 (免自己打字輸入) -->
+      <span style="font-size:12px;font-weight:700;color:var(--ink);">字號:</span>
+      <select class="board-font-select" style="padding:4px 6px;border-radius:6px;border:1px solid var(--grid-line);font-size:12px;background:var(--surface);cursor:pointer;">
+        <option value="24" ${boardState.fontSize===24?'selected':''}>24 號</option>
+        <option value="32" ${boardState.fontSize===32?'selected':''}>32 號</option>
+        <option value="40" ${boardState.fontSize===40?'selected':''}>40 號</option>
+        <option value="52" ${boardState.fontSize===52?'selected':''}>52 號</option>
+        <option value="68" ${boardState.fontSize===68?'selected':''}>68 號</option>
+        <option value="84" ${boardState.fontSize===84?'selected':''}>84 號</option>
+      </select>
       <div class="tool-sep"></div>
 
       <span style="font-size:12px;font-weight:700;color:var(--ink);">格線:</span>
@@ -1199,17 +1234,17 @@
       <div class="tool-sep"></div>
 
       <span style="font-size:12px;color:var(--ink-soft);">顏色:</span>
-      <div class="color-dot active" data-color="#B23B32" style="background:#B23B32;"></div>
-      <div class="color-dot" data-color="#2A333C" style="background:#2A333C;"></div>
-      <div class="color-dot" data-color="#1E88E5" style="background:#1E88E5;"></div>
-      <div class="color-dot" data-color="#4C7A5E" style="background:#4C7A5E;"></div>
-      <div class="color-dot" data-color="#FB8C00" style="background:#FB8C00;"></div>
+      <div class="color-dot ${boardState.color==='#B23B32'?'active':''}" data-color="#B23B32" style="background:#B23B32;"></div>
+      <div class="color-dot ${boardState.color==='#2A333C'?'active':''}" data-color="#2A333C" style="background:#2A333C;"></div>
+      <div class="color-dot ${boardState.color==='#1E88E5'?'active':''}" data-color="#1E88E5" style="background:#1E88E5;"></div>
+      <div class="color-dot ${boardState.color==='#4C7A5E'?'active':''}" data-color="#4C7A5E" style="background:#4C7A5E;"></div>
+      <div class="color-dot ${boardState.color==='#FB8C00'?'active':''}" data-color="#FB8C00" style="background:#FB8C00;"></div>
       <div class="tool-sep"></div>
       
       <span style="font-size:12px;color:var(--ink-soft);">粗細:</span>
-      <button type="button" class="size-btn active" data-size="3">細</button>
-      <button type="button" class="size-btn" data-size="6">中</button>
-      <button type="button" class="size-btn" data-size="12">粗</button>
+      <button type="button" class="size-btn ${boardState.size===3?'active':''}" data-size="3">細</button>
+      <button type="button" class="size-btn ${boardState.size===6?'active':''}" data-size="6">中</button>
+      <button type="button" class="size-btn ${boardState.size===12?'active':''}" data-size="12">粗</button>
       <div class="tool-sep"></div>
       <button type="button" class="btn btn-sm" id="btn-clear-draw" style="color:var(--seal);">🗑️ 清空</button>
     `;
@@ -1229,14 +1264,10 @@
     stageEl.appendChild(wrap);
 
     var ctx = canvas.getContext("2d");
-    var activeTool = "pen";
-    var activeColor = "#B23B32";
-    var activeSize = 3;
     var isDrawing = false;
     var currentPath = [];
     var activeSelectedTextId = null;
 
-    // 關鍵計算：取得相對於基準 500px 畫布的縮放比率
     function getScaleRatio(){
       var w = cWrap.clientWidth || canvas.width || 500;
       return Math.max(0.4, w / 500);
@@ -1247,7 +1278,7 @@
       if(r.width > 0 && r.height > 0){
         canvas.width = r.width; canvas.height = r.height;
         redrawStrokes();
-        renderTexts(); // 尺寸變動時，文字圖層自動以等比字級重畫，防止排版跑位
+        renderTexts();
       }
     }
     requestAnimationFrame(resizeCanvas);
@@ -1285,19 +1316,53 @@
       texts.forEach(function(t, idx){
         var div = document.createElement("div");
         div.className = "movable-text" + (t.id === activeSelectedTextId ? " active" : "");
-        div.textContent = t.text;
         div.style.left = t.x + "%";
         div.style.top = t.y + "%";
         div.style.color = t.color || "#2A333C";
         
-        // 核心對齊修復：字級大小依畫布寬度等比計算，確保在大小螢幕視覺比例完全一致
         var baseSize = t.fontSize || 36;
         div.style.fontSize = Math.round(baseSize * scale) + "px";
 
+        div.innerHTML = `
+          <span class="text-content">${t.text}</span>
+          <div class="resize-handle" title="按住拖動縮放字體"></div>
+        `;
+
+        // 縮放控制：拉動右下角藍點放大/縮小字體
+        var handle = div.querySelector(".resize-handle");
+        handle.onmousedown = function(e){
+          e.stopPropagation();
+          e.preventDefault();
+          var startSize = t.fontSize || 36;
+          var centerRect = div.getBoundingClientRect();
+          var centerX = centerRect.left + centerRect.width / 2;
+          var centerY = centerRect.top + centerRect.height / 2;
+          var startDist = Math.hypot(e.clientX - centerX, e.clientY - centerY) || 1;
+
+          function onResizeMove(ev){
+            var currentDist = Math.hypot(ev.clientX - centerX, ev.clientY - centerY);
+            var ratio = currentDist / startDist;
+            var newSize = Math.max(16, Math.min(120, Math.round(startSize * ratio)));
+            t.fontSize = newSize;
+            div.style.fontSize = Math.round(newSize * scale) + "px";
+            if(fontSelect) fontSelect.value = String(newSize);
+          }
+
+          function onResizeUp(){
+            window.removeEventListener("mousemove", onResizeMove);
+            window.removeEventListener("mouseup", onResizeUp);
+            writeProgress(s.id, { texts: texts });
+          }
+
+          window.addEventListener("mousemove", onResizeMove);
+          window.addEventListener("mouseup", onResizeUp);
+        };
+
+        // 移動控制：靠近藍框按住任意處直接平移
         div.onmousedown = function(e){
           e.stopPropagation();
 
-          if(activeTool === "stroke-eraser"){
+          if(boardState.tool === "stroke-eraser"){
             texts.splice(idx, 1);
             writeProgress(s.id, { texts: texts });
             return;
@@ -1305,6 +1370,7 @@
 
           activeSelectedTextId = t.id;
           div.classList.add("active");
+          if(fontSelect) fontSelect.value = String(t.fontSize || 36);
 
           var startX = e.clientX, startY = e.clientY;
           var origX = t.x, origY = t.y;
@@ -1364,25 +1430,20 @@
       var p = getPos(e);
       activeSelectedTextId = null;
 
-      if(activeTool === "stroke-eraser"){
+      if(boardState.tool === "stroke-eraser"){
         checkStrokeHit(p);
         return;
       }
-      if(activeTool === "text"){
+      if(boardState.tool === "text"){
         var txt = prompt("請輸入文字內容（漢字或拼音）：");
         if(txt && txt.trim()){
-          var sizeChoice = prompt("請輸入字體大小 (例如 24, 36, 48, 64)：", "36");
-          var fSize = parseInt(sizeChoice, 10);
-          if(isNaN(fSize) || fSize < 12) fSize = 36;
-
-          // 核心對齊修復：點擊位置 p.x, p.y 即為文字的中心點
           texts.push({ 
             id: uid("t"), 
             text: txt.trim(), 
             x: p.x, 
             y: p.y, 
-            color: activeColor, 
-            fontSize: fSize 
+            color: boardState.color, 
+            fontSize: boardState.fontSize || 36 
           });
           writeProgress(s.id, { texts: texts });
         }
@@ -1400,13 +1461,13 @@
 
       var scale = getScaleRatio();
       ctx.save();
-      if(activeTool === "pixel-eraser"){
+      if(boardState.tool === "pixel-eraser"){
         ctx.globalCompositeOperation = "destination-out";
-        ctx.lineWidth = Math.max(2, activeSize * 2.5 * scale);
+        ctx.lineWidth = Math.max(2, boardState.size * 2.5 * scale);
       } else {
         ctx.globalCompositeOperation = "source-over";
-        ctx.strokeStyle = activeColor;
-        ctx.lineWidth = Math.max(1, activeSize * scale);
+        ctx.strokeStyle = boardState.color;
+        ctx.lineWidth = Math.max(1, boardState.size * scale);
       }
       ctx.lineCap = "round"; ctx.lineJoin = "round";
       ctx.beginPath();
@@ -1426,23 +1487,39 @@
         strokes.push({
           id: uid("st"),
           points: currentPath,
-          color: activeColor,
-          size: activeSize,
-          isEraser: activeTool === "pixel-eraser"
+          color: boardState.color,
+          size: boardState.size,
+          isEraser: boardState.tool === "pixel-eraser"
         });
         writeProgress(s.id, { strokes: strokes });
       }
       currentPath = [];
     };
 
+    // 工具切換（保存於 boardState，更新不丟失）
     toolbar.querySelectorAll(".tool-btn").forEach(function(b){
       b.onclick = function(){
         toolbar.querySelectorAll(".tool-btn").forEach(function(x){ x.classList.remove("active"); });
         b.classList.add("active");
-        activeTool = b.dataset.tool;
-        canvas.style.cursor = (activeTool === "text" ? "text" : "crosshair");
+        boardState.tool = b.dataset.tool;
+        canvas.style.cursor = (boardState.tool === "text" ? "text" : (boardState.tool.includes("eraser") ? "cell" : "crosshair"));
       };
     });
+
+    // 字號下拉選單監聽
+    var fontSelect = toolbar.querySelector(".board-font-select");
+    if(fontSelect){
+      fontSelect.onchange = function(){
+        boardState.fontSize = Number(fontSelect.value);
+        if(activeSelectedTextId){
+          var selObj = texts.find(function(item){ return item.id === activeSelectedTextId; });
+          if(selObj){
+            selObj.fontSize = boardState.fontSize;
+            writeProgress(s.id, { texts: texts });
+          }
+        }
+      };
+    }
 
     toolbar.querySelectorAll(".grid-toggle-btn").forEach(function(gb){
       gb.onclick = function(){
@@ -1471,26 +1548,28 @@
           text: tone,
           x: 50,
           y: 50,
-          color: activeColor,
-          fontSize: 38
+          color: boardState.color,
+          fontSize: boardState.fontSize || 36
         });
         writeProgress(s.id, { texts: texts });
       };
     });
 
+    // 顏色切換（保存於 boardState，更新不丟失）
     toolbar.querySelectorAll(".color-dot").forEach(function(d){
       d.onclick = function(){
         toolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
         d.classList.add("active");
-        activeColor = d.dataset.color;
+        boardState.color = d.dataset.color;
       };
     });
 
+    // 粗細切換（保存於 boardState，更新不丟失）
     toolbar.querySelectorAll(".size-btn").forEach(function(sBtn){
       sBtn.onclick = function(){
         toolbar.querySelectorAll(".size-btn").forEach(function(x){ x.classList.remove("active"); });
         sBtn.classList.add("active");
-        activeSize = Number(sBtn.dataset.size);
+        boardState.size = Number(sBtn.dataset.size);
       };
     });
 
