@@ -85,6 +85,18 @@
   .toggle.on .toggle-track{background:var(--bamboo);border-color:var(--bamboo);}
   .toggle.on .toggle-track::after{transform:translateX(16px);}
 
+  /* 教師端：小班學生分頁列 */
+  .students-bar{
+    background:var(--surface-2);border-bottom:1px solid var(--grid-line);
+    padding:6px 20px;display:flex;align-items:center;gap:8px;overflow-x:auto;
+  }
+  .student-tab-btn{
+    padding:6px 14px;border-radius:20px;border:1px solid var(--grid-line);
+    background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;color:var(--ink);white-space:nowrap;
+  }
+  .student-tab-btn.active{background:var(--seal);color:#fff;border-color:var(--seal);}
+
   .layout{flex:1;display:grid;grid-template-columns:260px 1fr;min-height:0;}
   .app.student-mode .layout, .app.present .layout{grid-template-columns:1fr;}
   .app.student-mode .sidebar, .app.present .sidebar{display:none;}
@@ -143,12 +155,9 @@
     border-color:var(--bamboo);background:var(--bamboo-soft);color:var(--bamboo);
     font-weight:700;cursor:default;animation:popSuccess .3s ease;
   }
-  .match-item.wrong{
-    border-color:var(--seal) !important;background:var(--seal-soft) !important;
-    animation:shakeWrong .45s ease;
-  }
+  .match-item.wrong{border-color:var(--seal) !important;background:var(--seal-soft) !important;animation:shakeWrong .45s ease;}
 
-  /* 圈選與選擇題樣式 */
+  /* 選擇題與圈選題 */
   .circle-prompt{font-family:"LXGW WenKai TC",serif;font-size:20px;margin:0 0 18px;line-height:1.6;}
   .circle-choices{display:flex;flex-wrap:wrap;gap:14px;position:relative;}
   .circle-chip{
@@ -161,7 +170,6 @@
   .circle-chip.missed{border-color:var(--bamboo);border-style:dashed;color:var(--bamboo);}
   .circle-chip.selected-wrong{border-color:var(--ink-soft);background:var(--surface-2);color:var(--ink-soft);text-decoration:line-through;}
 
-  /* 選擇題專屬垂直選單排版 */
   .mc-choices-container{display:flex;flex-direction:column;gap:12px;margin-top:10px;}
   .mc-option-btn{
     padding:14px 20px;border-radius:12px;border:2px solid var(--grid-line);
@@ -186,13 +194,11 @@
     40%, 60% { transform: translate3d(6px, 0, 0); }
   }
   @keyframes popSuccess{
-    0%{ transform:scale(0.96); }
-    50%{ transform:scale(1.04); }
-    100%{ transform:scale(1); }
+    0%{ transform:scale(0.96); } 50%{ transform:scale(1.04); } 100%{ transform:scale(1); }
   }
   .match-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 
-  /* 寫字畫布白板 */
+  /* 寫字畫布白板：強制 1:1 正方形且水平置中 */
   .draw-board-container{display:flex;flex-direction:column;gap:12px;position:relative;}
   .draw-toolbar{
     display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;
@@ -224,9 +230,17 @@
   .size-btn{padding:4px 8px;font-size:11px;border-radius:5px;border:1px solid var(--grid-line);background:var(--surface);cursor:pointer;}
   .size-btn.active{background:var(--ink);color:var(--paper);}
 
+  /* 田字格與九宮格容器：鎖定 1:1 正方形 */
   .canvas-stage-wrap{
-    position:relative;width:100%;height:520px;background:#FFFDF8;
-    border:2px solid var(--grid-line);border-radius:12px;overflow:hidden;
+    position:relative;
+    width:100%;
+    max-width:520px;
+    aspect-ratio:1 / 1;
+    margin:0 auto;
+    background:#FFFDF8;
+    border:2px solid var(--grid-line);
+    border-radius:12px;
+    overflow:hidden;
   }
   .canvas-stage-wrap.grid-tian{
     background-image:
@@ -241,51 +255,40 @@
     background-size:33.333% 33.333%;
   }
 
-  .bg-img-layer{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:1;
-  }
-  canvas#paint-canvas{
-    position:absolute;inset:0;width:100%;height:100%;z-index:2;touch-action:none;cursor:crosshair;
-  }
+  .bg-img-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:1;}
+  canvas#paint-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;touch-action:none;cursor:crosshair;}
   
-  /* 文字物件層：Google Meet 式邊框實線拖曳回饋 */
+  /* 文字物件層：靠近即亮起實線藍框，可直接拖曳 */
   .text-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
   .movable-text{
     position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif;
     font-weight:700;line-height:1.2;color:var(--ink);user-select:none;
     padding:4px 8px;border:2px dashed transparent;border-radius:6px;white-space:pre;
-    cursor:grab;transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    cursor:grab;transition:border-color .15s ease, background .15s ease;
   }
-  /* 滑鼠靠近即時亮起實線藍框，支援直接拖動 */
   .movable-text:hover{
-    border:2px solid #1E88E5 !important;
-    background:rgba(255,255,255,0.92);
-    box-shadow:0 2px 10px rgba(30,136,229,0.25);
-    cursor:move !important;
+    border:2px solid #1E88E5 !important;background:rgba(255,255,255,0.92);
+    box-shadow:0 2px 10px rgba(30,136,229,0.25);cursor:move !important;
   }
-  .movable-text.active{
-    border:2px solid var(--seal) !important;
-    background:rgba(255,255,255,0.95);
-    cursor:grabbing !important;
-  }
+  .movable-text.active{border:2px solid var(--seal) !important;background:rgba(255,255,255,0.95);cursor:grabbing !important;}
 
-  /* 遠端游標 */
+  /* 多人動態遠端游標元件 */
+  .multi-cursor-container{position:absolute;inset:0;pointer-events:none;z-index:99999;overflow:hidden;}
   .peer-cursor{
-    position:absolute;left:0;top:0;pointer-events:none;z-index:99999;
-    display:none;align-items:center;gap:5px;transform:translate(-50%,-50%);
-    transition:left .06s linear, top .06s linear;
+    position:absolute;pointer-events:none;display:flex;align-items:center;gap:5px;
+    transform:translate(-50%,-50%);transition:left .06s linear, top .06s linear;
   }
-  .peer-cursor.show{display:flex;}
-  .peer-cursor-dot{width:14px;height:14px;border-radius:50%;background:var(--seal);border:2px solid var(--surface);box-shadow:0 1px 6px rgba(0,0,0,.35);}
-  .peer-cursor-label{background:var(--seal);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;}
+  .peer-cursor-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 1px 6px rgba(0,0,0,.35);}
+  .peer-cursor-label{color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
 
-  /* 題目編輯彈窗 */
-  .editor-dialog{border:none;border-radius:16px;padding:0;background:var(--surface);color:var(--ink);box-shadow:var(--shadow);width:min(580px,92vw);max-height:86vh;}
-  .editor-dialog::backdrop{background:rgba(20,20,18,0.45);}
-  .editor-head{padding:20px 24px 4px;}
-  .editor-head h2{margin:0 0 2px;font-size:19px;}
-  .editor-body{padding:16px 24px;overflow-y:auto;max-height:56vh;}
-  .editor-foot{padding:14px 24px 22px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--grid-line);margin-top:8px;}
+  /* 彈窗設計 */
+  .dialog-modal{border:none;border-radius:16px;padding:0;background:var(--surface);color:var(--ink);box-shadow:var(--shadow);width:min(580px,92vw);max-height:86vh;}
+  .dialog-modal::backdrop{background:rgba(20,20,18,0.45);}
+  .dialog-head{padding:20px 24px 4px;}
+  .dialog-head h2{margin:0 0 2px;font-size:19px;}
+  .dialog-body{padding:16px 24px;overflow-y:auto;max-height:56vh;}
+  .dialog-foot{padding:14px 24px 22px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--grid-line);margin-top:8px;}
+  
   .type-toggle{display:flex;gap:8px;margin-bottom:16px;}
   .type-toggle button{flex:1;padding:9px;border-radius:9px;border:1.5px solid var(--grid-line);background:var(--paper);color:var(--ink-soft);font-weight:600;font-size:13px;cursor:pointer;}
   .type-toggle button.active{border-color:var(--seal);color:var(--seal);background:var(--seal-soft);}
@@ -296,9 +299,8 @@
   .pair-row input, .choice-row input[type="text"]{flex:1;}
   .row-del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:15px;padding:4px 7px;}
   .add-row-btn{font-size:12.5px;color:var(--seal);background:none;border:none;cursor:pointer;font-weight:600;padding:4px 0;}
-
   .upload-box{border:2px dashed var(--grid-line);padding:14px;border-radius:10px;text-align:center;cursor:pointer;background:var(--paper);}
-  .upload-box:hover{border-color:var(--seal);}
+  .student-link-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--paper);border:1px solid var(--grid-line);border-radius:8px;margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -309,11 +311,17 @@
       <div class="stamp">好</div>
       <div class="brand-text">
         <h1 id="brand-title">生詞練習台</h1>
-        <p id="brand-sub">連連看・單選・圈選・生字書寫板</p>
+        <p id="brand-sub">多學生課堂儀表板系統</p>
       </div>
     </div>
     <div class="topbar-actions" id="topbar-actions"></div>
   </header>
+
+  <!-- 教師端：小班學生切換分頁列 -->
+  <div class="students-bar" id="students-bar" style="display:none;">
+    <span style="font-size:12px;font-weight:700;color:var(--ink-soft);">學生視角:</span>
+    <div id="student-tabs-list" style="display:inline-flex;gap:6px;"></div>
+  </div>
 
   <div class="layout">
     <aside class="sidebar" id="sidebar">
@@ -336,13 +344,72 @@
   </div>
 </div>
 
-<!-- 題目手動編輯彈窗：支援 四大題型 -->
-<dialog class="editor-dialog" id="editor-dialog">
+<!-- 設定彈窗：支援小班學生名單、專屬連結、音效風格與外觀色彩 -->
+<dialog class="dialog-modal" id="settings-dialog">
+  <div class="dialog-head">
+    <h2>⚙️ 課堂與多學生設定</h2>
+  </div>
+  <div class="dialog-body">
+    <label>👥 這堂課有多少位學生？</label>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <input type="number" id="setting-student-count" min="1" max="20" value="1" style="width:90px;padding:8px;border-radius:8px;border:1.5px solid var(--grid-line);">
+      <span style="font-size:13px;color:var(--ink-soft);">位學生</span>
+    </div>
+
+    <label style="margin-top:16px;">✏️ 預先輸入學生姓名（選填）</label>
+    <p style="font-size:12px;color:var(--ink-soft);margin-top:0;">輸入名字可直接生成專屬連結，學生點開免打名字直接加入！若不填，學生點通用連結時需自行輸入名字。</p>
+    <div id="student-names-container" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+    <div id="student-links-section" style="margin-top:16px;display:none;">
+      <label>🔗 學生專屬連結清單（複製個別傳送）：</label>
+      <div id="student-links-list"></div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--grid-line);margin:20px 0;">
+
+    <label>🔊 作答音效風格</label>
+    <select id="setting-sound-style" style="width:100%;padding:9px;border-radius:8px;border:1.5px solid var(--grid-line);font-size:14px;background:var(--paper);color:var(--ink);">
+      <option value="bell">清脆鈴聲 (Ding-Dong / 推薦)</option>
+      <option value="retro">電玩像素風 (8-Bit Retro)</option>
+      <option value="marimba">輕柔木琴風 (Soft Marimba)</option>
+      <option value="mute">🔇 靜音模式 (Mute)</option>
+    </select>
+    <button type="button" class="btn btn-sm" id="btn-test-sound" style="margin-top:6px;">🎵 試聽答對與答錯音效</button>
+
+    <label style="margin-top:20px;">🎨 平台主視覺顏色</label>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button type="button" class="btn btn-sm" data-theme-color="seal" style="background:#B23B32;color:#fff;">朱砂紅 (經典)</button>
+      <button type="button" class="btn btn-sm" data-theme-color="bamboo" style="background:#4C7A5E;color:#fff;">竹葉綠 (護眼)</button>
+      <button type="button" class="btn btn-sm" data-theme-color="blue" style="background:#1E88E5;color:#fff;">青空藍 (清爽)</button>
+      <button type="button" class="btn btn-sm" data-theme-color="amber" style="background:#E65100;color:#fff;">暖琥珀 (溫馨)</button>
+    </div>
+  </div>
+  <div class="dialog-foot">
+    <button type="button" class="btn btn-primary" id="btn-close-settings">完成</button>
+  </div>
+</dialog>
+
+<!-- 學生進入時自填姓名彈窗（使用通用連結時觸發） -->
+<dialog class="dialog-modal" id="student-name-dialog" style="max-width:380px;">
+  <div class="dialog-head" style="text-align:center;">
+    <h2>🎓 歡迎來到生詞練習台！</h2>
+    <p style="font-size:13px;color:var(--ink-soft);">請輸入你的名字開始上課：</p>
+  </div>
+  <div class="dialog-body">
+    <input type="text" id="input-student-name" placeholder="例如：愛黛 (Adele)" style="font-size:16px;text-align:center;padding:12px;">
+  </div>
+  <div class="dialog-foot" style="justify-content:center;">
+    <button type="button" class="btn btn-primary" id="btn-submit-student-name" style="padding:10px 24px;font-size:15px;">進入教室 →</button>
+  </div>
+</dialog>
+
+<!-- 題目手動編輯彈窗 -->
+<dialog class="dialog-modal" id="editor-dialog">
   <form id="editor-form">
-    <div class="editor-head">
+    <div class="dialog-head">
       <h2>新增題目／畫板</h2>
     </div>
-    <div class="editor-body">
+    <div class="dialog-body">
       <div class="type-toggle" id="type-toggle">
         <button type="button" data-type="match" class="active">連連看</button>
         <button type="button" data-type="choice">🔘 選擇題</button>
@@ -353,7 +420,6 @@
       <label for="f-title">題目名稱</label>
       <input type="text" id="f-title" placeholder="例如：第四課生字書寫" required>
 
-      <!-- 連連看 -->
       <div id="match-fields">
         <div class="row-two">
           <div><label>左欄標籤</label><input type="text" id="f-left-label" value="生詞"></div>
@@ -364,16 +430,14 @@
         <button type="button" class="add-row-btn" id="add-pair">＋ 新增一組</button>
       </div>
 
-      <!-- 選擇題 (單選) -->
       <div id="choice-fields" style="display:none;">
         <label>題目／題幹敘述</label>
         <textarea id="f-choice-prompt" rows="2" placeholder="例如：下面哪一個是「謝謝」的正確拼音？"></textarea>
-        <label>選項（點擊單選鈕指定唯一正確答案）</label>
+        <label>選項（點擊單選指定唯一正解）</label>
         <div id="choice-opt-rows"></div>
         <button type="button" class="add-row-btn" id="add-mc-opt">＋ 新增選項</button>
       </div>
 
-      <!-- 圈出來 (自由選/複選) -->
       <div id="circle-fields" style="display:none;">
         <label>題目／提示文字</label>
         <textarea id="f-prompt" rows="2" placeholder="例如：「謝謝」是什麼意思？"></textarea>
@@ -382,9 +446,8 @@
         <button type="button" class="add-row-btn" id="add-circle-opt">＋ 新增選項</button>
       </div>
 
-      <!-- 寫字板 -->
       <div id="board-fields" style="display:none;">
-        <label>底圖設定（選填，可用於課本頁面或背景圖）</label>
+        <label>底圖設定（選填）</label>
         <div class="upload-box" id="upload-box">
           <span id="upload-tip">📷 點擊上傳背景圖片（JPG/PNG）</span>
           <input type="file" id="f-board-img" accept="image/*" style="display:none;">
@@ -393,7 +456,7 @@
         <input type="text" id="f-board-desc" placeholder="例如：請在格線中寫出『好』">
       </div>
     </div>
-    <div class="editor-foot">
+    <div class="dialog-foot">
       <button type="button" class="btn btn-ghost" id="btn-cancel">取消</button>
       <button type="submit" class="btn btn-primary">儲存題目</button>
     </div>
@@ -420,7 +483,7 @@
     var fbApp = appMod.initializeApp(window.FIREBASE_CONFIG);
     window.db = dbMod.getDatabase(fbApp);
     window.ref = dbMod.ref; window.onValue = dbMod.onValue; window.set = dbMod.set;
-    window.update = dbMod.update; window.get = dbMod.get; window.onDisconnect = dbMod.onDisconnect;
+    window.update = dbMod.update; window.onDisconnect = dbMod.onDisconnect;
     window.serverTimestamp = dbMod.serverTimestamp;
     window.auth = authMod.getAuth(fbApp);
     await new Promise(function(resolve, reject){
@@ -439,76 +502,113 @@
 (function(){
   "use strict";
 
-  /* ================== Web Audio API 對錯音效 ================== */
+  /* ================== 音效引擎 ================== */
   var audioCtx = null;
+  var currentSoundStyle = localStorage.getItem("hanyu_sound_style") || "bell";
+
   function getAudioContext(){
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
   }
+  window.addEventListener("touchstart", function(){ getAudioContext(); }, { once:true });
+  window.addEventListener("click", function(){ getAudioContext(); }, { once:true });
 
   function playCorrectSound(){
+    if(currentSoundStyle === "mute") return;
     try{
-      var ctx = getAudioContext();
-      var now = ctx.currentTime;
-      var osc1 = ctx.createOscillator(), gain1 = ctx.createGain();
-      osc1.type = "sine"; osc1.frequency.setValueAtTime(1318.5, now);
-      gain1.gain.setValueAtTime(0.18, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      osc1.connect(gain1); gain1.connect(ctx.destination);
-      osc1.start(now); osc1.stop(now + 0.35);
+      var ctx = getAudioContext(), now = ctx.currentTime;
 
-      var osc2 = ctx.createOscillator(), gain2 = ctx.createGain();
-      osc2.type = "sine"; osc2.frequency.setValueAtTime(1567.9, now + 0.1);
-      gain2.gain.setValueAtTime(0.22, now + 0.1); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-      osc2.connect(gain2); gain2.connect(ctx.destination);
-      osc2.start(now + 0.1); osc2.stop(now + 0.55);
+      if(currentSoundStyle === "retro"){
+        var osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.setValueAtTime(880, now + 0.08);
+        g.gain.setValueAtTime(0.12, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.28);
+      } else if(currentSoundStyle === "marimba"){
+        var mOsc = ctx.createOscillator(), mG = ctx.createGain();
+        mOsc.type = "sine";
+        mOsc.frequency.setValueAtTime(784, now);
+        mG.gain.setValueAtTime(0.2, now);
+        mG.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        mOsc.connect(mG); mG.connect(ctx.destination);
+        mOsc.start(now); mOsc.stop(now + 0.4);
+      } else {
+        var osc1 = ctx.createOscillator(), gain1 = ctx.createGain();
+        osc1.type = "sine"; osc1.frequency.setValueAtTime(1318.5, now);
+        gain1.gain.setValueAtTime(0.18, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc1.connect(gain1); gain1.connect(ctx.destination);
+        osc1.start(now); osc1.stop(now + 0.35);
+
+        var osc2 = ctx.createOscillator(), gain2 = ctx.createGain();
+        osc2.type = "sine"; osc2.frequency.setValueAtTime(1567.9, now + 0.1);
+        gain2.gain.setValueAtTime(0.22, now + 0.1); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc2.connect(gain2); gain2.connect(ctx.destination);
+        osc2.start(now + 0.1); osc2.stop(now + 0.55);
+      }
     }catch(e){}
   }
 
   function playWrongSound(){
+    if(currentSoundStyle === "mute") return;
     try{
-      var ctx = getAudioContext();
-      var now = ctx.currentTime;
-      var osc = ctx.createOscillator(), gain = ctx.createGain();
+      var ctx = getAudioContext(), now = ctx.currentTime;
+      var osc = ctx.createOscillator(), g = ctx.createGain();
       osc.type = "triangle"; osc.frequency.setValueAtTime(220, now);
       osc.frequency.setValueAtTime(185, now + 0.1);
-      gain.gain.setValueAtTime(0.25, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
-      osc.connect(gain); gain.connect(ctx.destination);
+      g.gain.setValueAtTime(0.25, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+      osc.connect(g); g.connect(ctx.destination);
       osc.start(now); osc.stop(now + 0.32);
     }catch(e){}
   }
 
   function playVictorySound(){
+    if(currentSoundStyle === "mute") return;
     try{
-      var ctx = getAudioContext();
-      var now = ctx.currentTime;
+      var ctx = getAudioContext(), now = ctx.currentTime;
       [523.25, 659.25, 783.99, 1046.5].forEach(function(freq, idx){
-        var osc = ctx.createOscillator(), gain = ctx.createGain();
+        var osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + idx * 0.12);
-        gain.gain.setValueAtTime(0.2, now + idx * 0.12);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
-        osc.connect(gain); gain.connect(ctx.destination);
+        g.gain.setValueAtTime(0.2, now + idx * 0.12);
+        g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
+        osc.connect(g); g.connect(ctx.destination);
         osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
       });
     }catch(e){}
   }
 
+  /* ================== 多學生角色與狀態分配 ================== */
   var STORAGE_KEY = "hanyu-practice-v1";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var params = new URLSearchParams(location.search);
   var urlRoom = params.get("room");
   var urlRole = params.get("role");
-  var isStudent = urlRole === "student" && !!urlRoom;
+  var urlName = params.get("name");
 
+  var isStudent = (urlRole === "student") || (!!urlRoom && !urlRole);
   var app_ = document.getElementById("app");
   if(isStudent) app_.classList.add("student-mode");
 
   var activeRoomId = null;
   var roomRole = isStudent ? "student" : "teacher";
+  var myName = urlName || (isStudent ? "" : "老師");
+  var myId = isStudent ? (localStorage.getItem("hanyu_my_id") || uid("stu")) : "teacher";
+  localStorage.setItem("hanyu_my_id", myId);
+
   var roomData = null;
   var cursorOn = true;
-  var lastPeerCursor = null;
+  var currentViewingStudentId = "all";
+
+  var CURSOR_COLORS = ["#B23B32", "#1E88E5", "#4C7A5E", "#FB8C00", "#8E24AA", "#00897B", "#D81B60"];
+  function getColorForStudent(nameOrId){
+    var sum = 0;
+    for(var i=0; i<nameOrId.length; i++) sum += nameOrId.charCodeAt(i);
+    return CURSOR_COLORS[sum % CURSOR_COLORS.length];
+  }
 
   var SAMPLE_SETS = {
     sample_match: {
@@ -566,7 +666,10 @@
   }
 
   function getProgress(setId){
-    if(inRoom()){ return (roomData && roomData.progress && roomData.progress[setId]) || {}; }
+    if(inRoom()){
+      var targetScope = isStudent ? myId : (currentViewingStudentId === "all" ? "shared" : currentViewingStudentId);
+      return (roomData && roomData.studentProgress && roomData.studentProgress[targetScope] && roomData.studentProgress[targetScope][setId]) || {};
+    }
     if(!local.progress[setId]) local.progress[setId] = {};
     return local.progress[setId];
   }
@@ -586,9 +689,11 @@
     if(inRoom()){ update(ref(db, "rooms/" + activeRoomId), { currentSetId: id }); }
     else { local.currentId = id; saveLocal(); renderSidebar(); renderStage(); }
   }
+
   function writeProgress(setId, patch){
     if(inRoom()){ 
-      update(ref(db, "rooms/" + activeRoomId + "/progress/" + setId), patch); 
+      var targetScope = isStudent ? myId : (currentViewingStudentId === "all" ? "shared" : currentViewingStudentId);
+      update(ref(db, "rooms/" + activeRoomId + "/studentProgress/" + targetScope + "/" + setId), patch); 
     } else { 
       Object.assign(getProgress(setId), patch); 
       saveLocal(); 
@@ -602,12 +707,17 @@
     topbarActions.innerHTML = "";
     if(inRoom()){
       var c2 = document.createElement("div"); c2.className = "room-cluster";
-      var online = !!(roomData && roomData.presence && roomData.presence[isStudent ? "teacher" : "student"] && roomData.presence[isStudent ? "teacher" : "student"].online);
+      var onlineCount = 0;
+      if(roomData && roomData.presence){
+        Object.keys(roomData.presence).forEach(function(k){
+          if(roomData.presence[k].online) onlineCount++;
+        });
+      }
       
       c2.innerHTML = `
         <span class="room-code">房間 <b>${activeRoomId}</b></span>
-        <span class="presence-dot ${online ? 'online' : ''}"></span>
-        <span style="font-size:12px;">${online ? (isStudent ? "老師已連線" : "學生已連線") : "等待連線..."}</span>
+        <span class="presence-dot ${onlineCount > 1 ? 'online' : ''}"></span>
+        <span style="font-size:12px;">${isStudent ? `已加入（${myName}）` : `在線：${onlineCount} 人`}</span>
       `;
 
       if(!isStudent){
@@ -631,12 +741,12 @@
       topbarActions.appendChild(c2);
 
       if(!isStudent){
-        var copyBtn = document.createElement("button"); copyBtn.className = "btn btn-sm btn-primary"; copyBtn.textContent = "🔗 複製學生連結";
-        copyBtn.onclick = function(){
-          var link = location.origin + location.pathname + "?room=" + activeRoomId + "&role=student";
-          navigator.clipboard.writeText(link).then(function(){ alert("學生專屬連結已複製！"); });
+        var shareBtn = document.createElement("button"); shareBtn.className = "btn btn-sm btn-primary"; shareBtn.textContent = "🔗 發送學生連結";
+        shareBtn.onclick = function(){
+          updateStudentLinksUI();
+          document.getElementById("settings-dialog").showModal();
         };
-        topbarActions.appendChild(copyBtn);
+        topbarActions.appendChild(shareBtn);
 
         var leaveBtn = document.createElement("button"); leaveBtn.className = "btn btn-sm btn-ghost"; leaveBtn.textContent = "結束連線";
         leaveBtn.onclick = leaveRoom;
@@ -647,53 +757,104 @@
       btn.onclick = createRoom;
       topbarActions.appendChild(btn);
     }
+
+    var setBtn = document.createElement("button"); setBtn.className = "btn btn-sm btn-ghost"; setBtn.textContent = "⚙️ 設定";
+    setBtn.onclick = function(){ 
+      updateStudentLinksUI();
+      document.getElementById("settings-dialog").showModal(); 
+    };
+    topbarActions.appendChild(setBtn);
+  }
+
+  /* 教師端：小班學生分頁標籤 */
+  var studentsBar = document.getElementById("students-bar");
+  var studentTabsList = document.getElementById("student-tabs-list");
+  function renderStudentsBar(){
+    if(isStudent || !inRoom()){
+      studentsBar.style.display = "none";
+      return;
+    }
+    studentsBar.style.display = "flex";
+    studentTabsList.innerHTML = "";
+
+    var sharedBtn = document.createElement("button");
+    sharedBtn.type = "button";
+    sharedBtn.className = "student-tab-btn" + (currentViewingStudentId === "all" ? " active" : "");
+    sharedBtn.innerHTML = "👑 全體共用視角";
+    sharedBtn.onclick = function(){
+      currentViewingStudentId = "all";
+      renderStudentsBar();
+      renderStage();
+    };
+    studentTabsList.appendChild(sharedBtn);
+
+    var studentList = [];
+    if(roomData && roomData.presence){
+      Object.keys(roomData.presence).forEach(function(pid){
+        if(pid !== "teacher"){
+          studentList.push({ id: pid, name: roomData.presence[pid].name || "未命名學生" });
+        }
+      });
+    }
+
+    studentList.forEach(function(stu){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "student-tab-btn" + (currentViewingStudentId === stu.id ? " active" : "");
+      btn.style.borderColor = getColorForStudent(stu.name);
+      btn.innerHTML = `🎓 ${stu.name}`;
+      btn.onclick = function(){
+        currentViewingStudentId = stu.id;
+        renderStudentsBar();
+        renderStage();
+      };
+      studentTabsList.appendChild(btn);
+    });
   }
 
   async function createRoom(){
     var rId = String(Math.floor(1000 + Math.random() * 9000));
     activeRoomId = rId;
     await set(ref(db, "rooms/" + rId), {
-      currentSetId: local.currentId, sets: local.sets, progress: {},
+      currentSetId: local.currentId, sets: local.sets, studentProgress: {},
       isOpen: true,
-      presence: { teacher: { online:true } }
+      presence: { teacher: { online:true, name:"老師" } }
     });
-    attachPresence(rId, "teacher");
+    attachPresence(rId, "teacher", "老師");
     startRoom(rId, "teacher");
     history.replaceState(null, "", "?room=" + rId);
     renderTopbar();
-    var link = location.origin + location.pathname + "?room=" + rId + "&role=student";
-    navigator.clipboard.writeText(link).then(function(){ alert("✅ 房間已開好！\n學生連結已複製到剪貼簿，傳給學生即可加入。"); });
+    updateStudentLinksUI();
+    document.getElementById("settings-dialog").showModal();
   }
 
   function leaveRoom(){
     if(activeRoomId){
-      set(ref(db, "rooms/" + activeRoomId + "/presence/teacher"), { online: false });
+      set(ref(db, "rooms/" + activeRoomId + "/presence/" + myId), { online: false });
     }
     activeRoomId = null; roomData = null;
     history.replaceState(null, "", location.pathname);
     renderTopbar(); renderSidebar(); renderStage();
   }
 
-  function attachPresence(rId, role){
-    var pRef = ref(db, "rooms/" + rId + "/presence/" + role);
-    set(pRef, { online: true });
-    onDisconnect(pRef).set({ online: false });
+  function attachPresence(rId, id, name){
+    var pRef = ref(db, "rooms/" + rId + "/presence/" + id);
+    set(pRef, { online: true, name: name });
+    onDisconnect(pRef).set({ online: false, name: name });
   }
 
   function startRoom(rId, role){
     activeRoomId = rId; roomRole = role;
     onValue(ref(db, "rooms/" + rId), function(snap){
       roomData = snap.val() || {};
-      renderTopbar(); renderSidebar(); renderStage();
+      renderTopbar(); renderSidebar(); renderStudentsBar(); renderStage();
     });
-    var peerPath = role === "teacher" ? "student" : "teacher";
-    onValue(ref(db, "roomCursors/" + rId + "/" + peerPath), function(snap){
-      lastPeerCursor = snap.val();
-      renderPeerCursor(lastPeerCursor);
+    onValue(ref(db, "roomCursors/" + rId), function(snap){
+      renderMultiCursors(snap.val());
     });
   }
 
-  /* 側欄清單 */
+  /* 側欄 */
   var setListEl = document.getElementById("set-list");
   function renderSidebar(){
     if(isStudent) return;
@@ -729,7 +890,8 @@
     if(!s) return;
 
     var head = document.createElement("div"); head.className = "stage-head";
-    head.innerHTML = '<div><h2 class="stage-title zh">' + s.title + '</h2><p class="stage-sub">' + (s.desc || "即時互動練習") + '</p></div>';
+    var scopeLabel = (!isStudent && currentViewingStudentId !== "all") ? ` <span style="font-size:13px;color:var(--seal);">(目前正在觀看：${getStudentNameById(currentViewingStudentId)})</span>` : "";
+    head.innerHTML = '<div><h2 class="stage-title zh">' + s.title + scopeLabel + '</h2><p class="stage-sub">' + (s.desc || "即時互動練習") + '</p></div>';
     
     if(!isStudent){
       var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
@@ -751,15 +913,23 @@
 
     stageEl.appendChild(head);
 
+    var cursorBox = document.createElement("div");
+    cursorBox.className = "multi-cursor-container";
+    cursorBox.id = "multi-cursor-box";
+    stageEl.appendChild(cursorBox);
+
     if(s.type === "match") renderMatchBoard(s);
     else if(s.type === "choice") renderChoiceBoard(s);
     else if(s.type === "circle") renderCircleBoard(s);
     else if(s.type === "board") renderDrawBoard(s);
-
-    renderPeerCursor(lastPeerCursor);
   }
 
-  /* ================= 1. 選擇題 (單選) 專屬渲染 ================= */
+  function getStudentNameById(sid){
+    if(roomData && roomData.presence && roomData.presence[sid]) return roomData.presence[sid].name;
+    return sid;
+  }
+
+  /* 選擇題 */
   function renderChoiceBoard(s){
     var progress = getProgress(s.id);
     var interactive = canInteract();
@@ -801,14 +971,8 @@
 
       btn.onclick = function(){
         if(!interactive || isRevealed) return;
-        
-        // 點選單選答案，播放音效
-        if(isCorrect){
-          playCorrectSound();
-        } else {
-          playWrongSound();
-        }
-
+        if(isCorrect) playCorrectSound();
+        else playWrongSound();
         writeProgress(s.id, { choicePick: cid });
       };
 
@@ -827,7 +991,7 @@
     stageEl.appendChild(wrap);
   }
 
-  /* ================= 2. 寫字板功能 (Google Meet 式靠近實線邊框直接拖曳) ================= */
+  /* 寫字板功能 */
   function renderDrawBoard(s){
     var progress = getProgress(s.id);
     var strokes = progress.strokes || [];
@@ -852,11 +1016,11 @@
       
       <span style="font-size:12px;font-weight:700;color:var(--seal);">聲調:</span>
       <div class="tone-group">
-        <button type="button" class="tone-btn" data-tone="ˉ" title="一聲">ˉ</button>
-        <button type="button" class="tone-btn" data-tone="ˊ" title="二聲">ˊ</button>
-        <button type="button" class="tone-btn" data-tone="ˇ" title="三聲">ˇ</button>
-        <button type="button" class="tone-btn" data-tone="ˋ" title="四聲">ˋ</button>
-        <button type="button" class="tone-btn" data-tone="˙" title="輕聲">˙</button>
+        <button type="button" class="tone-btn" data-tone="ˉ">ˉ</button>
+        <button type="button" class="tone-btn" data-tone="ˊ">ˊ</button>
+        <button type="button" class="tone-btn" data-tone="ˇ">ˇ</button>
+        <button type="button" class="tone-btn" data-tone="ˋ">ˋ</button>
+        <button type="button" class="tone-btn" data-tone="˙">˙</button>
       </div>
       <div class="tool-sep"></div>
 
@@ -906,6 +1070,7 @@
       }
     }
     requestAnimationFrame(resizeCanvas);
+    window.addEventListener("resize", resizeCanvas);
 
     function redrawStrokes(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -932,7 +1097,6 @@
       renderTexts();
     }
 
-    /* 渲染文字物件（靠近即時出現實線邊框，可直接按住拖曳） */
     function renderTexts(){
       textLayer.innerHTML = "";
       texts.forEach(function(t, idx){
@@ -944,7 +1108,6 @@
         div.style.color = t.color || "#2A333C";
         div.style.fontSize = (t.fontSize || 28) + "px";
 
-        // 滑鼠按住物件直接開始拖曳（無需切換到移動工具！）
         div.onmousedown = function(e){
           e.stopPropagation();
 
@@ -1151,7 +1314,7 @@
     };
   }
 
-  /* ================= 3. 連連看 ================= */
+  /* 連連看 */
   function renderMatchBoard(s){
     var progress = getProgress(s.id);
     var matched = progress.matched || {};
@@ -1260,7 +1423,7 @@
     window.addEventListener("resize", drawLines);
   }
 
-  /* ================= 4. 圈選題 ================= */
+  /* 圈選題 */
   function renderCircleBoard(s){
     var progress = getProgress(s.id);
     var selected = progress.selected || {};
@@ -1313,21 +1476,31 @@
     stageEl.appendChild(wrap);
   }
 
-  /* 遠端游標 */
-  function ensurePeerCursorEl(){
-    var el = document.getElementById("peer-cursor");
-    if(!el){
-      el = document.createElement("div"); el.id = "peer-cursor"; el.className = "peer-cursor";
-      el.innerHTML = '<span class="peer-cursor-dot"></span><span class="peer-cursor-label">' + (roomRole==="teacher"?"學生":"老師") + '</span>';
-      stageEl.appendChild(el);
-    }
-    return el;
-  }
-  function renderPeerCursor(c){
-    var el = ensurePeerCursorEl();
-    if(!c || c.x == null || !cursorOn){ el.classList.remove("show"); return; }
-    el.style.left = c.x + "%"; el.style.top = c.y + "%";
-    el.classList.add("show");
+  /* ================== 多人即時游標渲染 ================== */
+  function renderMultiCursors(cursorData){
+    var container = document.getElementById("multi-cursor-box");
+    if(!container) return;
+    container.innerHTML = "";
+    if(!cursorData || !cursorOn) return;
+
+    Object.keys(cursorData).forEach(function(peerId){
+      if(peerId === myId) return;
+
+      var c = cursorData[peerId];
+      if(!c || c.x == null) return;
+
+      var color = getColorForStudent(c.name || peerId);
+      var el = document.createElement("div");
+      el.className = "peer-cursor";
+      el.style.left = c.x + "%";
+      el.style.top = c.y + "%";
+
+      el.innerHTML = `
+        <span class="peer-cursor-dot" style="background:${color};"></span>
+        <span class="peer-cursor-label" style="background:${color};">${c.name || "學生"}</span>
+      `;
+      container.appendChild(el);
+    });
   }
 
   var lastM = 0;
@@ -1340,8 +1513,86 @@
     if(r.width === 0 || r.height === 0) return;
     var x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
     var y = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100));
-    update(ref(db, "roomCursors/" + activeRoomId + "/" + roomRole), { x: x, y: y });
+    update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { 
+      x: x, 
+      y: y, 
+      name: myName,
+      role: roomRole 
+    });
   });
+
+  /* ================== 設定面板：學生人數與個別連結生成 ================== */
+  var studentCountInput = document.getElementById("setting-student-count");
+  var studentNamesContainer = document.getElementById("student-names-container");
+
+  function renderStudentNameInputs(){
+    var count = parseInt(studentCountInput.value, 10) || 1;
+    studentNamesContainer.innerHTML = "";
+    var savedNames = JSON.parse(localStorage.getItem("hanyu_pre_names") || "[]");
+
+    for(var i=0; i<count; i++){
+      var row = document.createElement("div");
+      row.style.display = "flex"; row.style.gap = "8px"; row.style.alignItems = "center";
+      var defaultVal = savedNames[i] || (i === 0 ? "愛黛 (Adele)" : `學生 ${i+1}`);
+      row.innerHTML = `
+        <span style="font-size:12px;font-weight:700;width:55px;">學生 ${i+1}:</span>
+        <input type="text" class="setting-stu-name" value="${defaultVal}" placeholder="輸入學生名字" style="padding:7px;flex:1;">
+      `;
+      studentNamesContainer.appendChild(row);
+    }
+    updateStudentLinksUI();
+  }
+
+  studentCountInput.onchange = renderStudentNameInputs;
+
+  function updateStudentLinksUI(){
+    var linksSec = document.getElementById("student-links-section");
+    var linksList = document.getElementById("student-links-list");
+    if(!activeRoomId){
+      linksSec.style.display = "none";
+      return;
+    }
+    linksSec.style.display = "block";
+    linksList.innerHTML = "";
+
+    var universalUrl = `${location.origin}${location.pathname}?room=${activeRoomId}&role=student`;
+    var uRow = document.createElement("div");
+    uRow.className = "student-link-item";
+    uRow.innerHTML = `
+      <span style="font-size:12.5px;font-weight:700;">🌐 通用連結（發全班／學生點開自打名字）：</span>
+      <button type="button" class="btn btn-sm btn-primary">複製通用連結</button>
+    `;
+    uRow.querySelector("button").onclick = function(){
+      navigator.clipboard.writeText(universalUrl).then(function(){ alert("✅ 通用連結已複製！發送後學生點開會自行輸入姓名。"); });
+    };
+    linksList.appendChild(uRow);
+
+    var nameInputs = studentNamesContainer.querySelectorAll(".setting-stu-name");
+    nameInputs.forEach(function(inp, idx){
+      var sName = inp.value.trim() || `學生${idx+1}`;
+      var personalUrl = `${location.origin}${location.pathname}?room=${activeRoomId}&role=student&name=${encodeURIComponent(sName)}`;
+
+      var pRow = document.createElement("div");
+      pRow.className = "student-link-item";
+      pRow.innerHTML = `
+        <span style="font-size:12.5px;">🎓 <b>${sName}</b> 的專屬連結</span>
+        <button type="button" class="btn btn-sm btn-ghost" style="border:1px solid var(--grid-line);">複製專屬連結</button>
+      `;
+      pRow.querySelector("button").onclick = function(){
+        navigator.clipboard.writeText(personalUrl).then(function(){ alert(`✅ 已複製【${sName}】的專屬連結！傳給他點開免輸入名字直接加入。`); });
+      };
+      linksList.appendChild(pRow);
+    });
+  }
+
+  document.getElementById("btn-close-settings").onclick = function(){
+    var names = [];
+    studentNamesContainer.querySelectorAll(".setting-stu-name").forEach(function(i){ names.push(i.value.trim()); });
+    localStorage.setItem("hanyu_pre_names", JSON.stringify(names));
+    currentSoundStyle = document.getElementById("setting-sound-style").value;
+    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
+    document.getElementById("settings-dialog").close();
+  };
 
   /* 題目手動編輯彈窗 */
   var dialog = document.getElementById("editor-dialog");
@@ -1365,7 +1616,6 @@
     };
   });
 
-  // 選擇題選項增減
   var choiceOptRows = document.getElementById("choice-opt-rows");
   function addChoiceOptRow(text, isAnswer){
     var row = document.createElement("div"); row.className = "choice-row";
@@ -1374,14 +1624,11 @@
       <input type="text" class="mc-opt-text" placeholder="輸入選項內容" value="${text || ''}">
       <button type="button" class="row-del">✕</button>
     `;
-    row.querySelector(".row-del").onclick = function(){
-      if(choiceOptRows.children.length > 2) row.remove();
-    };
+    row.querySelector(".row-del").onclick = function(){ if(choiceOptRows.children.length > 2) row.remove(); };
     choiceOptRows.appendChild(row);
   }
   document.getElementById("add-mc-opt").onclick = function(){ addChoiceOptRow("", false); };
 
-  // 圈選題選項增減
   var circleRows = document.getElementById("circle-rows");
   function addCircleOptRow(text, isChecked){
     var row = document.createElement("div"); row.className = "choice-row";
@@ -1390,14 +1637,11 @@
       <input type="text" class="circle-opt-text" placeholder="輸入選項文字" value="${text || ''}">
       <button type="button" class="row-del">✕</button>
     `;
-    row.querySelector(".row-del").onclick = function(){
-      if(circleRows.children.length > 2) row.remove();
-    };
+    row.querySelector(".row-del").onclick = function(){ if(circleRows.children.length > 2) row.remove(); };
     circleRows.appendChild(row);
   }
   document.getElementById("add-circle-opt").onclick = function(){ addCircleOptRow("", false); };
 
-  // 連連看配對增減
   var pairRows = document.getElementById("pair-rows");
   function addPairRow(l, r){
     var row = document.createElement("div"); row.className = "pair-row";
@@ -1406,14 +1650,11 @@
       <input type="text" class="pair-right" placeholder="拼音／意思" value="${r || ''}">
       <button type="button" class="row-del">✕</button>
     `;
-    row.querySelector(".row-del").onclick = function(){
-      if(pairRows.children.length > 2) row.remove();
-    };
+    row.querySelector(".row-del").onclick = function(){ if(pairRows.children.length > 2) row.remove(); };
     pairRows.appendChild(row);
   }
   document.getElementById("add-pair").onclick = function(){ addPairRow("", ""); };
 
-  // 背景圖上傳
   var fileInput = document.getElementById("f-board-img");
   document.getElementById("upload-box").onclick = function(){ fileInput.click(); };
   fileInput.onchange = function(e){
@@ -1441,7 +1682,7 @@
     document.getElementById("upload-tip").textContent = "📷 點擊上傳背景圖片（JPG/PNG）";
     pairRows.innerHTML = ""; choiceOptRows.innerHTML = ""; circleRows.innerHTML = "";
     addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie");
-    addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false); addChoiceOptRow("選項 C", false);
+    addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false);
     addCircleOptRow("選項 1", true); addCircleOptRow("選項 2", false);
     dialog.showModal();
   };
@@ -1457,8 +1698,7 @@
       newSet = {
         id: uid("set"), type: "board", title: title,
         desc: document.getElementById("f-board-desc").value.trim(),
-        bgImage: uploadedBase64,
-        gridType: "jiu"
+        bgImage: uploadedBase64, gridType: "jiu"
       };
     } else if(currentType === "choice"){
       var choices = {};
@@ -1472,9 +1712,7 @@
           if(isRadio) ansId = cid;
         }
       });
-      if(Object.keys(choices).length < 2){ alert("選擇題至少需要 2 個選項！"); return; }
       if(!ansId) ansId = Object.keys(choices)[0];
-
       newSet = {
         id: uid("set"), type: "choice", title: title,
         prompt: document.getElementById("f-choice-prompt").value.trim() || title,
@@ -1518,7 +1756,7 @@
     dialog.close();
   };
 
-  /* ================== EXCEL 批次操作 (支援選擇題) ================== */
+  /* Excel 批次操作 */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
 
@@ -1534,10 +1772,7 @@
         var ws = wb.Sheets[wb.SheetNames[0]];
         var rows = XLSX.utils.sheet_to_json(ws);
 
-        if(!rows || rows.length === 0){
-          alert("Excel 檔案內沒有資料！");
-          return;
-        }
+        if(!rows || rows.length === 0){ alert("Excel 檔案內沒有資料！"); return; }
 
         var newSets = Object.assign({}, getSets());
         var grouped = {};
@@ -1574,8 +1809,7 @@
               var prompt = it["題目說明"] || it["Prompt"] || g.title;
               var rawChoices = String(it["選項(逗號分開)"] || it["Choices"] || "").split(/[,，、]/);
               var answer = String(it["正確答案"] || it["Answer"] || "").trim();
-              var choices = {};
-              var answerId = null;
+              var choices = {}, answerId = null;
 
               rawChoices.forEach(function(cText, cIdx){
                 var cid = "c" + (cIdx + 1);
@@ -1591,9 +1825,7 @@
               newSets[subId] = {
                 id: subId, type: "choice",
                 title: g.title + (g.items.length > 1 ? " (" + (idx+1) + ")" : ""),
-                prompt: prompt,
-                choices: choices,
-                answerId: answerId
+                prompt: prompt, choices: choices, answerId: answerId
               };
             });
           } else if(g.type === "circle"){
@@ -1625,10 +1857,8 @@
         });
 
         writeSets(newSets);
-        alert("🎉 成功由 Excel 匯入 " + Object.keys(grouped).length + " 組題庫！");
-      } catch(err){
-        alert("解析失敗，請確認檔案格式是否相符。");
-      }
+        alert("🎉 成功由 Excel 匯入題庫！");
+      } catch(err){ alert("解析失敗，請確認檔案格式。"); }
     };
     reader.readAsArrayBuffer(file);
   };
@@ -1637,10 +1867,8 @@
     var templateData = [
       { "題型": "match", "題目名稱": "第一課生詞配對", "左欄生詞": "你好", "右欄拼音或意思": "nǐ hǎo", "題目說明": "", "選項(逗號分開)": "", "正確答案": "" },
       { "題型": "match", "題目名稱": "第一課生詞配對", "左欄生詞": "謝謝", "右欄拼音或意思": "xièxie", "題目說明": "", "選項(逗號分開)": "", "正確答案": "" },
-      { "題型": "choice", "題目名稱": "第一課單選題", "左欄生詞": "", "右欄拼音或意思": "", "題目說明": "「謝謝」是什麼意思？", "選項(逗號分開)": "Hello, Thank you, Goodbye", "正確答案": "Thank you" },
-      { "題型": "circle", "題目名稱": "第一課圈選題", "左欄生詞": "", "右欄拼音或意思": "", "題目說明": "圈出與『再見』意思相同的詞", "選項(逗號分開)": "Goodbye, Bye-bye, Hello", "正確答案": "Goodbye" }
+      { "題型": "choice", "題目名稱": "第一課單選題", "左欄生詞": "", "右欄拼音或意思": "", "題目說明": "「謝謝」是什麼意思？", "選項(逗號分開)": "Hello, Thank you, Goodbye", "正確答案": "Thank you" }
     ];
-
     var ws = XLSX.utils.json_to_sheet(templateData);
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "題庫範本");
@@ -1650,64 +1878,93 @@
   document.getElementById("btn-export-excel").onclick = function(){
     var currentSets = getSets();
     var exportRows = [];
-
     Object.keys(currentSets).forEach(function(sid){
       var s = currentSets[sid];
       if(s.type === "match" && s.pairs){
         Object.keys(s.pairs).forEach(function(pid){
-          exportRows.push({
-            "題型": "match",
-            "題目名稱": s.title,
-            "左欄生詞": s.pairs[pid].left,
-            "右欄拼音或意思": s.pairs[pid].right,
-            "題目說明": "",
-            "選項(逗號分開)": "",
-            "正確答案": ""
-          });
+          exportRows.push({ "題型": "match", "題目名稱": s.title, "左欄生詞": s.pairs[pid].left, "右欄拼音或意思": s.pairs[pid].right, "題目說明": "", "選項(逗號分開)": "", "正確答案": "" });
         });
       } else if(s.type === "choice" && s.choices){
         var cTexts = Object.keys(s.choices).map(function(cid){ return s.choices[cid].text; }).join(", ");
         var ansText = s.choices[s.answerId] ? s.choices[s.answerId].text : "";
-        exportRows.push({
-          "題型": "choice",
-          "題目名稱": s.title,
-          "左欄生詞": "",
-          "右欄拼音或意思": "",
-          "題目說明": s.prompt || "",
-          "選項(逗號分開)": cTexts,
-          "正確答案": ansText
-        });
-      } else if(s.type === "circle" && s.choices){
-        var cTexts2 = Object.keys(s.choices).map(function(cid){ return s.choices[cid].text; }).join(", ");
-        var ansText2 = s.correctIds && s.correctIds.length ? (s.choices[s.correctIds[0]] ? s.choices[s.correctIds[0]].text : "") : "";
-        exportRows.push({
-          "題型": "circle",
-          "題目名稱": s.title,
-          "左欄生詞": "",
-          "右欄拼音或意思": "",
-          "題目說明": s.prompt || "",
-          "選項(逗號分開)": cTexts2,
-          "正確答案": ansText2
-        });
+        exportRows.push({ "題型": "choice", "題目名稱": s.title, "左欄生詞": "", "右欄拼音或意思": "", "題目說明": s.prompt || "", "選項(逗號分開)": cTexts, "正確答案": ansText });
       }
     });
-
-    if(exportRows.length === 0){
-      alert("目前沒有可匯出的題目。");
-      return;
-    }
-
+    if(exportRows.length === 0){ alert("目前沒有可匯出的題目。"); return; }
     var ws = XLSX.utils.json_to_sheet(exportRows);
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "題庫備份");
     XLSX.writeFile(wb, "生詞題庫備份_" + new Date().toISOString().slice(0,10) + ".xlsx");
   };
 
-  renderTopbar(); renderSidebar();
+  /* ================== 設定面板操作 ================== */
+  var soundSelect = document.getElementById("setting-sound-style");
+  soundSelect.value = currentSoundStyle;
+
+  soundSelect.onchange = function(){
+    currentSoundStyle = soundSelect.value;
+    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
+  };
+
+  document.getElementById("btn-test-sound").onclick = function(){
+    playCorrectSound();
+    setTimeout(playWrongSound, 600);
+  };
+
+  document.querySelectorAll("[data-theme-color]").forEach(function(tb){
+    tb.onclick = function(){
+      var col = tb.dataset.themeColor;
+      var root = document.documentElement;
+      if(col === "bamboo"){
+        root.style.setProperty("--seal", "#4C7A5E");
+        root.style.setProperty("--seal-soft", "#DEEBE3");
+      } else if(col === "blue"){
+        root.style.setProperty("--seal", "#1E88E5");
+        root.style.setProperty("--seal-soft", "#E3F2FD");
+      } else if(col === "amber"){
+        root.style.setProperty("--seal", "#E65100");
+        root.style.setProperty("--seal-soft", "#FFE0B2");
+      } else {
+        root.style.setProperty("--seal", "#B23B32");
+        root.style.setProperty("--seal-soft", "#F5DFDB");
+      }
+    };
+  });
+
+  /* 學生進入時自填姓名引導 */
+  function handleStudentJoin(){
+    if(!isStudent || !urlRoom) return;
+
+    if(urlName){
+      myName = decodeURIComponent(urlName);
+      attachPresence(urlRoom, myId, myName);
+      startRoom(urlRoom, "student");
+      return;
+    }
+
+    var nameDialog = document.getElementById("student-name-dialog");
+    nameDialog.showModal();
+
+    document.getElementById("btn-submit-student-name").onclick = function(){
+      var entered = document.getElementById("input-student-name").value.trim();
+      if(!entered) entered = "學生 " + Math.floor(10 + Math.random()*90);
+      myName = entered;
+      nameDialog.close();
+      attachPresence(urlRoom, myId, myName);
+      startRoom(urlRoom, "student");
+    };
+  }
+
+  /* 初始化 */
+  renderTopbar(); renderSidebar(); renderStudentNameInputs();
   if(urlRoom){
     window.addEventListener("firebase-bridge-ready", function(){
-      attachPresence(urlRoom, roomRole);
-      startRoom(urlRoom, roomRole);
+      if(isStudent){
+        handleStudentJoin();
+      } else {
+        attachPresence(urlRoom, "teacher", "老師");
+        startRoom(urlRoom, "teacher");
+      }
     });
   } else {
     renderStage();
