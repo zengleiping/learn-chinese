@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中文學習遊戲 - 互動練習平台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Serif+TC:wght@500;700&family=Public+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --paper:#F5F6F0;
+      --surface:#FFFFFF;
+      --ink:#2B333B;
+      --ink-soft:#66737F;
+      --seal:#B83C32;
+      --seal-soft:#F8EBE8;
+      --bamboo:#457B59;
+      --bamboo-soft:#E2ECE6;
+      --border:rgba(43,51,59,0.08);
+      --shadow:0 8px 32px -8px rgba(43,33,28,0.08);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --paper:#191F1C;
+        --surface:#212925;
+        --ink:#EAEFEA;
+        --ink-soft:#96A399;
+        --seal:#E06456;
+        --seal-soft:#332321;
+        --bamboo:#76AF8F;
+        --bamboo-soft:#213127;
+        --border:rgba(234,239,234,0.08);
+        --shadow:0 8px 32px -8px rgba(0,0,0,0.5);
+      }
+    }
+
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:var(--paper);
+      color:var(--ink);
+      font-family:"Public Sans","Noto Sans TC",-apple-system,sans-serif;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      overflow-x:hidden;
+    }
+
+    /* 背景方格與裝飾紋理 */
+    .bg-grid{
+      position:absolute;
+      inset:0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size:36px 36px;
+      pointer-events:none;
+      z-index:0;
+      mask-image:radial-gradient(ellipse at center, rgba(0,0,0,0.75) 20%, transparent 80%);
+    }
+
+    /* 主視覺容器 */
+    .container{
+      position:relative;
+      z-index:1;
+      max-width:760px;
+      width:min(90%, 760px);
+      margin:40px auto;
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+
+    .stamp{
+      width:52px;
+      height:52px;
+      background:var(--seal);
+      color:#fff;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-family:"LXGW WenKai TC",serif;
+      font-size:26px;
+      font-weight:700;
+      border-radius:10px;
+      transform:rotate(-5deg);
+      box-shadow:0 4px 16px rgba(184,60,50,0.25);
+      margin-bottom:20px;
+    }
+
+    .badge{
+      display:inline-block;
+      font-size:12.5px;
+      letter-spacing:0.08em;
+      color:var(--bamboo);
+      background:var(--bamboo-soft);
+      padding:4px 14px;
+      border-radius:99px;
+      font-weight:600;
+      margin-bottom:14px;
+    }
+
+    h1{
+      font-family:"LXGW WenKai TC","Noto Serif TC",serif;
+      font-size:clamp(36px, 6vw, 48px);
+      letter-spacing:0.04em;
+      margin:0 0 16px;
+      font-weight:700;
+    }
+
+    p.subtitle{
+      font-size:clamp(15px, 2.5vw, 17px);
+      color:var(--ink-soft);
+      line-height:1.7;
+      margin:0 0 36px;
+      max-width:520px;
+    }
+
+    /* 遊戲特色卡片 */
+    .features{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));
+      gap:16px;
+      width:100%;
+      margin-bottom:40px;
+    }
+
+    .card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:22px 18px;
+      text-align:left;
+      box-shadow:var(--shadow);
+      transition:transform 0.15s ease, border-color 0.15s ease;
+    }
+    .card:hover{
+      transform:translateY(-2px);
+      border-color:var(--bamboo);
+    }
+    .card-icon{
+      font-size:24px;
+      margin-bottom:8px;
+      display:inline-block;
+    }
+    .card-title{
+      font-family:"LXGW WenKai TC",serif;
+      font-size:17px;
+      font-weight:700;
+      margin:0 0 6px;
+    }
+    .card-desc{
+      font-size:13px;
+      color:var(--ink-soft);
+      line-height:1.5;
+      margin:0;
+    }
+
+    /* 進入按鈕 */
+    .cta-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      background:var(--seal);
+      color:#FFFFFF;
+      text-decoration:none;
+      font-size:16px;
+      font-weight:600;
+      padding:14px 38px;
+      border-radius:12px;
+      box-shadow:0 6px 20px -4px rgba(184,60,50,0.35);
+      transition:background 0.15s ease, transform 0.12s ease;
+    }
+    .cta-btn:hover{
+      filter:brightness(1.06);
+      transform:translateY(-1px);
+    }
+    .cta-btn:active{
+      transform:translateY(1px);
+    }
+    .arrow{
+      font-size:18px;
+      transition:transform 0.15s ease;
+    }
+    .cta-btn:hover .arrow{
+      transform:translateX(4px);
+    }
+
+    footer{
+      position:relative;
+      z-index:1;
+      margin-top:auto;
+      padding:24px;
+      font-size:12.5px;
+      color:var(--ink-soft);
+      letter-spacing:0.02em;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <main class="container">
+    <div class="stamp">好</div>
+    <span class="badge">互動教學小工具</span>
+    <h1>中文學習遊戲</h1>
+    <p class="subtitle">為線上華語課堂打造的輕量練習站。<br>支援雙方畫面即時同步連動，讓詞彙複習既自然又有趣。</p>
+
+    <div class="features">
+      <div class="card">
+        <span class="card-icon">🥢</span>
+        <h2 class="card-title">生詞連連看</h2>
+        <p class="card-desc">左欄生詞配對右欄拼音與釋義，拖拉牽線一氣呵成。</p>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">⭕</span>
+        <h2 class="card-title">圈出正確答案</h2>
+        <p class="card-desc">單選複選自由切換，答案即時變色回饋，課堂小測最俐落。</p>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🔗</span>
+        <h2 class="card-title">雙向即時連線</h2>
+        <p class="card-desc">建立房間複製連結，學生一點即入，跨螢幕同步操作不卡頓。</p>
+      </div>
+    </div>
+
+    <!-- 點擊進入練習台主畫面 -->
+    <a href="practice.html" class="cta-btn">
+      開始練習
+      <span class="arrow">→</span>
+    </a>
+  </main>
+
+  <footer>
+    生詞練習台・線上中文課堂的輕量互動夥伴
+  </footer>
+</body>
+</html>
