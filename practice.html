@@ -145,29 +145,50 @@
   .btn-new{width:100%;justify-content:center;padding:11px 16px; font-weight:700;}
   .sidebar-excel-group{display:flex;flex-direction:column;gap:6px;margin-bottom:4px;}
   
-  /* 試卷考題清單 (支援平滑拖曳重排) */
+  /* 試卷考題清單 */
   .section-list{display:flex;flex-direction:column;gap:10px;}
   .section-block{
     border:1.5px solid var(--grid-line);border-radius:12px;
     background:var(--surface);overflow:hidden;transition:all .15s ease;
-    cursor:grab;
+    cursor:grab; position:relative;
   }
   .section-block:active{cursor:grabbing;}
   .section-block.is-dragging{
     opacity:0.35;border:1.5px dashed var(--seal);
   }
-  .section-block.drag-over{
-    border-color:var(--seal);
-    background:var(--seal-soft);
-    box-shadow:0 0 0 2px var(--seal-ring);
-    transform:translateY(-2px);
+
+  /* PPT 投影片式指示線（大題） */
+  .section-block.drag-indicator-top::before {
+    content: "";
+    position: absolute;
+    top: -2.5px;
+    left: 4px;
+    right: 4px;
+    height: 3.5px;
+    background: var(--seal);
+    border-radius: 99px;
+    box-shadow: 0 0 8px var(--seal-ring), 0 0 0 1px rgba(255,255,255,0.85);
+    z-index: 100;
+    pointer-events: none;
   }
+  .section-block.drag-indicator-bottom::after {
+    content: "";
+    position: absolute;
+    bottom: -2.5px;
+    left: 4px;
+    right: 4px;
+    height: 3.5px;
+    background: var(--seal);
+    border-radius: 99px;
+    box-shadow: 0 0 8px var(--seal-ring), 0 0 0 1px rgba(255,255,255,0.85);
+    z-index: 100;
+    pointer-events: none;
+  }
+
   .section-head{
     padding:10px 12px;background:var(--surface-2);
     display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none;
   }
-  
-  /* 關鍵防止拖曳閃爍：內部文字節點設為 pointer-events: none */
   .section-head-title{
     font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px;
     pointer-events:none;
@@ -191,7 +212,7 @@
   .question-item-btn{
     padding:8px 12px;border-radius:8px;border:1px solid transparent;background:transparent;
     font-size:13px;font-weight:500;text-align:left;cursor:grab;display:flex;align-items:center;justify-content:space-between;
-    color:var(--ink);transition:all .12s ease;user-select:none;
+    color:var(--ink);transition:all .12s ease;user-select:none;position:relative;
   }
   .question-item-btn:active{cursor:grabbing;}
   .question-item-btn:hover{background:var(--surface-2);}
@@ -201,11 +222,35 @@
   .question-item-btn.is-dragging{
     opacity:0.35;border:1px dashed var(--seal);background:var(--seal-soft);
   }
-  .question-item-btn.drag-over{
-    border-color:var(--seal) !important;
-    background:var(--seal-soft) !important;
-    color:var(--seal);
+  
+  /* PPT 投影片式指示線（小題） */
+  .question-item-btn.drag-indicator-top::before {
+    content: "";
+    position: absolute;
+    top: -2.5px;
+    left: 4px;
+    right: 4px;
+    height: 3px;
+    background: var(--seal);
+    border-radius: 99px;
+    box-shadow: 0 0 6px var(--seal-ring), 0 0 0 1px rgba(255,255,255,0.85);
+    z-index: 100;
+    pointer-events: none;
   }
+  .question-item-btn.drag-indicator-bottom::after {
+    content: "";
+    position: absolute;
+    bottom: -2.5px;
+    left: 4px;
+    right: 4px;
+    height: 3px;
+    background: var(--seal);
+    border-radius: 99px;
+    box-shadow: 0 0 6px var(--seal-ring), 0 0 0 1px rgba(255,255,255,0.85);
+    z-index: 100;
+    pointer-events: none;
+  }
+
   .question-item-btn > span:first-child{ pointer-events:none; }
   .question-item-btn > span:first-child *{ pointer-events:none; }
   .question-item-btn .btn-del-q{ pointer-events:auto; }
@@ -559,7 +604,7 @@
         <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display:none;">
       </div>
 
-      <!-- 大題與小題樹狀折疊清單（完整支援拖曳重排） -->
+      <!-- 大題與小題樹狀折疊清單（支援 PPT 插入輔助線拖曳排序） -->
       <div class="section-list" id="section-tree-list"></div>
     </aside>
     
@@ -1009,7 +1054,8 @@
         var osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + idx * 0.12);
         g.gain.setValueAtTime(0.2, now + idx * 0.12); g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
-        osc.connect(g); g.connect(ctx.destination); osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
       });
     }catch(e){}
   }
@@ -1163,6 +1209,13 @@
   var draggedSecId = null;
   var draggedQ = null;
 
+  // 全域清除所有插入指示輔助線
+  function clearAllDragIndicators(){
+    document.querySelectorAll(".drag-indicator-top, .drag-indicator-bottom").forEach(function(el){
+      el.classList.remove("drag-indicator-top", "drag-indicator-bottom");
+    });
+  }
+
   var CURSOR_COLORS = ["#1E88E5", "#4C7A5E", "#FB8C00", "#8E24AA", "#00897B", "#D81B60"];
   function getColorForStudent(nameOrId, role){
     if(role === "teacher" || nameOrId === "teacher" || nameOrId === "老師" || nameOrId === "👑 老師") return "#B23B32";
@@ -1181,7 +1234,6 @@
     return (proj && proj.sections) || {};
   }
 
-  // 嚴格依據 order 數值排序大題與小題
   function getSortedSectionKeys(){
     var secs = getSections();
     return Object.keys(secs).sort(function(a, b){
@@ -1769,7 +1821,7 @@
     });
   }
 
-  /* ================== 側欄：大題與小題樹狀折疊目錄（支援完全拖曳重排） ================== */
+  /* ================== 側欄：大題與小題樹狀折疊目錄（PPT 式插入線拖曳重排） ================== */
   var sectionTreeListEl = document.getElementById("section-tree-list");
   function renderSidebar(){
     if(isStudent) return;
@@ -1789,9 +1841,9 @@
       block.className = "section-block";
       block.setAttribute("draggable", "true");
 
-      // 大題拖曳開始與結束
+      // 大題拖曳處理
       block.ondragstart = function(e){
-        if(draggedQ) return; // 優先給小題拖曳處理
+        if(draggedQ) return;
         draggedSecId = secId;
         e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("text/plain", "sec:" + secId);
@@ -1801,33 +1853,42 @@
       block.ondragend = function(e){
         block.classList.remove("is-dragging");
         draggedSecId = null;
-        document.querySelectorAll(".section-block").forEach(function(el){ el.classList.remove("drag-over"); });
+        clearAllDragIndicators();
       };
 
       block.ondragover = function(e){
         if(!draggedSecId || draggedSecId === secId) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
-        block.classList.add("drag-over");
+
+        // 計算滑鼠落在上半部或下半部
+        var rect = block.getBoundingClientRect();
+        var isTop = (e.clientY - rect.top) < (rect.height / 2);
+
+        block.classList.toggle("drag-indicator-top", isTop);
+        block.classList.toggle("drag-indicator-bottom", !isTop);
       };
 
       block.ondragleave = function(e){
-        // 避免子節點穿透誤判
         if(!block.contains(e.relatedTarget)){
-          block.classList.remove("drag-over");
+          block.classList.remove("drag-indicator-top", "drag-indicator-bottom");
         }
       };
 
       block.ondrop = function(e){
         e.preventDefault();
-        block.classList.remove("drag-over");
+        var isTop = block.classList.contains("drag-indicator-top");
+        clearAllDragIndicators();
+
         if(draggedSecId && draggedSecId !== secId){
           var currentSecKeys = getSortedSectionKeys();
           var fromIdx = currentSecKeys.indexOf(draggedSecId);
-          var toIdx = currentSecKeys.indexOf(secId);
-          if(fromIdx > -1 && toIdx > -1){
+          if(fromIdx > -1){
             currentSecKeys.splice(fromIdx, 1);
+            var toIdx = currentSecKeys.indexOf(secId);
+            if(!isTop) toIdx += 1;
             currentSecKeys.splice(toIdx, 0, draggedSecId);
+
             currentSecKeys.forEach(function(k, idx){
               secs[k].order = idx;
             });
@@ -1903,9 +1964,9 @@
               <span class="row-del btn-del-q" title="刪除此題" style="font-size:12px; padding:2px 4px;">✕</span>
             `;
 
-            // 小題拖曳開始
+            // 小題拖曳處理
             qBtn.ondragstart = function(e){
-              e.stopPropagation(); // 阻止向上冒泡觸發大題拖曳
+              e.stopPropagation();
               draggedQ = { secId: secId, qId: qId };
               e.dataTransfer.effectAllowed = "move";
               e.dataTransfer.setData("text/plain", "q:" + qId);
@@ -1916,7 +1977,7 @@
               e.stopPropagation();
               qBtn.classList.remove("is-dragging");
               draggedQ = null;
-              document.querySelectorAll(".question-item-btn").forEach(function(el){ el.classList.remove("drag-over"); });
+              clearAllDragIndicators();
             };
 
             qBtn.ondragover = function(e){
@@ -1924,55 +1985,63 @@
               e.preventDefault();
               e.stopPropagation();
               e.dataTransfer.dropEffect = "move";
-              qBtn.classList.add("drag-over");
+
+              var rect = qBtn.getBoundingClientRect();
+              var isTop = (e.clientY - rect.top) < (rect.height / 2);
+
+              qBtn.classList.toggle("drag-indicator-top", isTop);
+              qBtn.classList.toggle("drag-indicator-bottom", !isTop);
             };
 
             qBtn.ondragleave = function(e){
               e.stopPropagation();
               if(!qBtn.contains(e.relatedTarget)){
-                qBtn.classList.remove("drag-over");
+                qBtn.classList.remove("drag-indicator-top", "drag-indicator-bottom");
               }
             };
 
             qBtn.ondrop = function(e){
               e.preventDefault();
               e.stopPropagation();
-              qBtn.classList.remove("drag-over");
+              var isTop = qBtn.classList.contains("drag-indicator-top");
+              clearAllDragIndicators();
 
               if(draggedQ && draggedQ.qId !== qId){
-                // 同一大題內重排
+                // 1. 同一大題內重排
                 if(draggedQ.secId === secId){
                   var qList = getSortedQuestionKeys(sec);
                   var fromIdx = qList.indexOf(draggedQ.qId);
-                  var toIdx = qList.indexOf(qId);
-                  if(fromIdx > -1 && toIdx > -1){
+                  if(fromIdx > -1){
                     qList.splice(fromIdx, 1);
+                    var toIdx = qList.indexOf(qId);
+                    if(!isTop) toIdx += 1;
                     qList.splice(toIdx, 0, draggedQ.qId);
+
                     qList.forEach(function(k, orderIdx){
                       sec.questions[k].order = orderIdx;
                     });
                     writeSections(secs);
                   }
                 } 
-                // 跨大題移動 (限相同題型大題)
+                // 2. 跨大題移動 (限相同題型大題)
                 else if(secs[draggedQ.secId] && secs[draggedQ.secId].type === sec.type){
                   var movingQ = secs[draggedQ.secId].questions[draggedQ.qId];
                   if(movingQ){
                     delete secs[draggedQ.secId].questions[draggedQ.qId];
-                    // 重排舊大題小題 order
                     var oldQList = getSortedQuestionKeys(secs[draggedQ.secId]);
                     oldQList.forEach(function(k, orderIdx){
                       secs[draggedQ.secId].questions[k].order = orderIdx;
                     });
 
-                    // 插入至新大題指定位置
                     var newQList = getSortedQuestionKeys(sec);
                     var toIdx = newQList.indexOf(qId);
-                    if(toIdx === -1) toIdx = newQList.length;
-                    newQList.splice(toIdx, 0, draggedQ.qId);
+                    if(!isTop) toIdx += 1;
+                    if(toIdx < 0) toIdx = 0;
 
+                    newQList.splice(toIdx, 0, draggedQ.qId);
                     if(!sec.questions) sec.questions = {};
                     sec.questions[draggedQ.qId] = movingQ;
+
                     newQList.forEach(function(k, orderIdx){
                       sec.questions[k].order = orderIdx;
                     });
@@ -3186,7 +3255,7 @@
     editorDialog.close();
   };
 
-  /* Excel 批次操作 (對齊大題與小題試卷架構) */
+  /* Excel 批次操作 */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
 
