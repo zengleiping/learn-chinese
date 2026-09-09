@@ -157,32 +157,13 @@
     opacity:0.35;border:1.5px dashed var(--seal);
   }
 
-  /* PPT 投影片式指示線（大題） */
   .section-block.drag-indicator-top::before {
-    content: "";
-    position: absolute;
-    top: -2.5px;
-    left: 4px;
-    right: 4px;
-    height: 3.5px;
-    background: var(--seal);
-    border-radius: 99px;
-    box-shadow: 0 0 8px var(--seal-ring), 0 0 0 1px rgba(255,255,255,0.85);
-    z-index: 100;
-    pointer-events: none;
+    content: ""; position: absolute; top: -2.5px; left: 4px; right: 4px; height: 3.5px;
+    background: var(--seal); border-radius: 99px; box-shadow: 0 0 8px var(--seal-ring); z-index: 100; pointer-events: none;
   }
   .section-block.drag-indicator-bottom::after {
-    content: "";
-    position: absolute;
-    bottom: -2.5px;
-    left: 4px;
-    right: 4px;
-    height: 3.5px;
-    background: var(--seal);
-    border-radius: 99px;
-    box-shadow: 0 0 8px var(--seal-ring), 0 0 0 1px rgba(255,255,255,0.85);
-    z-index: 100;
-    pointer-events: none;
+    content: ""; position: absolute; bottom: -2.5px; left: 4px; right: 4px; height: 3.5px;
+    background: var(--seal); border-radius: 99px; box-shadow: 0 0 8px var(--seal-ring); z-index: 100; pointer-events: none;
   }
 
   .section-head{
@@ -190,8 +171,7 @@
     display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none;
   }
   .section-head-title{
-    font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px;
-    pointer-events:none;
+    font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px; pointer-events:none;
   }
   .section-head-title *{ pointer-events:none; }
   .section-head-actions{display:flex;align-items:center;gap:4px;}
@@ -202,12 +182,9 @@
   }
   
   .drag-handle-icon{
-    color:var(--ink-soft);opacity:0.45;font-size:13px;cursor:grab;margin-right:2px;user-select:none;
-    pointer-events:none;
+    color:var(--ink-soft);opacity:0.45;font-size:13px;cursor:grab;margin-right:2px;user-select:none; pointer-events:none;
   }
-  .section-head:hover .drag-handle-icon, .question-item-btn:hover .drag-handle-icon{
-    opacity:0.9;
-  }
+  .section-head:hover .drag-handle-icon, .question-item-btn:hover .drag-handle-icon{ opacity:0.9; }
 
   .question-item-btn{
     padding:8px 12px;border-radius:8px;border:1px solid transparent;background:transparent;
@@ -219,36 +196,15 @@
   .question-item-btn.active{
     background:var(--seal-soft);color:var(--seal);font-weight:700;border-color:var(--seal-ring);
   }
-  .question-item-btn.is-dragging{
-    opacity:0.35;border:1px dashed var(--seal);background:var(--seal-soft);
-  }
+  .question-item-btn.is-dragging{ opacity:0.35;border:1px dashed var(--seal);background:var(--seal-soft); }
   
-  /* PPT 投影片式指示線（小題） */
   .question-item-btn.drag-indicator-top::before {
-    content: "";
-    position: absolute;
-    top: -2.5px;
-    left: 4px;
-    right: 4px;
-    height: 3px;
-    background: var(--seal);
-    border-radius: 99px;
-    box-shadow: 0 0 6px var(--seal-ring), 0 0 0 1px rgba(255,255,255,0.85);
-    z-index: 100;
-    pointer-events: none;
+    content: ""; position: absolute; top: -2.5px; left: 4px; right: 4px; height: 3px;
+    background: var(--seal); border-radius: 99px; box-shadow: 0 0 6px var(--seal-ring); z-index: 100; pointer-events: none;
   }
   .question-item-btn.drag-indicator-bottom::after {
-    content: "";
-    position: absolute;
-    bottom: -2.5px;
-    left: 4px;
-    right: 4px;
-    height: 3px;
-    background: var(--seal);
-    border-radius: 99px;
-    box-shadow: 0 0 6px var(--seal-ring), 0 0 0 1px rgba(255,255,255,0.85);
-    z-index: 100;
-    pointer-events: none;
+    content: ""; position: absolute; bottom: -2.5px; left: 4px; right: 4px; height: 3px;
+    background: var(--seal); border-radius: 99px; box-shadow: 0 0 6px var(--seal-ring); z-index: 100; pointer-events: none;
   }
 
   .question-item-btn > span:first-child{ pointer-events:none; }
@@ -272,6 +228,22 @@
     box-shadow:var(--shadow); min-height:560px; position:relative;
     transition:transform .15s ease-out;
   }
+
+  /* 排序題專屬樣式 (Sentence Reordering) */
+  .reorder-container{display:flex;flex-direction:column;gap:20px;max-width:840px;margin:0 auto;}
+  .reorder-slot-zone{
+    display:flex;flex-wrap:wrap;gap:10px;min-height:68px;padding:14px;
+    background:var(--surface-2);border:2px dashed var(--grid-line);border-radius:14px;align-items:center;
+  }
+  .reorder-chip{
+    font-family:"LXGW WenKai TC",serif;font-size:18px;font-weight:700;padding:10px 18px;
+    background:var(--surface);border:2px solid var(--grid-line);color:var(--ink);border-radius:10px;cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,0.03);transition:all .12s ease;user-select:none;
+  }
+  .reorder-chip:hover{border-color:var(--seal); transform:translateY(-2px); color:var(--seal);}
+  .reorder-chip.placed{background:var(--seal-soft); border-color:var(--seal); color:var(--seal);}
+  .reorder-chip.correct-done{background:var(--bamboo-soft); border-color:var(--bamboo); color:var(--bamboo); cursor:default;}
+  .reorder-chip.wrong-shake{border-color:#E63946 !important; background:rgba(230,57,70,0.12) !important; color:#E63946 !important; animation:shakeWrong .45s ease;}
 
   /* 浮動畫面縮放調節控制器 */
   .zoom-floating-widget{
@@ -305,86 +277,45 @@
   .stage-sub{font-size:13.5px;color:var(--ink-soft);margin:0;}
   .stage-actions{display:flex;gap:10px;}
 
-  .board-area{
-    position:relative;
-    width:100%;
-    margin:0 auto;
-  }
+  .board-area{ position:relative; width:100%; margin:0 auto; }
 
   /* 連連看 */
   .match-board{position:relative; width:100%; max-width:880px; margin:0 auto;}
   .match-cols{
-    display:flex;
-    justify-content:center;
-    gap:clamp(40px, 12vw, 100px);
-    position:relative;
-    z-index:1;
+    display:flex; justify-content:center; gap:clamp(40px, 12vw, 100px); position:relative; z-index:1;
   }
-  .match-col{
-    flex:1;
-    max-width:380px;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-  }
+  .match-col{ flex:1; max-width:380px; display:flex; flex-direction:column; gap:14px; }
   .match-col-label{font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;}
   .match-item{
     font-family:"LXGW WenKai TC",serif;font-size:19px;text-align:center;padding:15px 20px;
     border:2px solid var(--grid-line);background:var(--surface-2);color:var(--ink);border-radius:14px;cursor:pointer;
-    transition:border-color .15s ease, background .15s ease, transform .12s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+    transition:border-color .15s ease, background .15s ease, transform .12s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.01);
   }
   .match-item[data-side="right"]{font-family:"Plus Jakarta Sans",sans-serif;font-size:16.5px;}
   .match-item:hover:not(.matched):not(:disabled){border-color:var(--seal);background:var(--surface); transform:translateY(-1px);}
   .match-item.selected{border-color:var(--seal);box-shadow:0 0 0 3px var(--seal-ring) inset;}
   .match-item.matched{
-    border-color:var(--bamboo);background:var(--bamboo-soft);color:var(--bamboo);
-    font-weight:700;cursor:default;animation:popSuccess .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-color:var(--bamboo);background:var(--bamboo-soft);color:var(--bamboo); font-weight:700;cursor:default;animation:popSuccess .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .match-item.wrong{
-    border-color: #E63946 !important;
-    background: rgba(230, 57, 70, 0.12) !important;
-    color: #E63946 !important;
-    animation: shakeWrong .45s ease;
-    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.35) inset !important;
+    border-color: #E63946 !important; background: rgba(230, 57, 70, 0.12) !important; color: #E63946 !important; animation: shakeWrong .45s ease; box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.35) inset !important;
   }
 
-  /* 選擇題與圈選題 */
+  /* 選擇題與多選題 */
   .circle-prompt{font-family:"LXGW WenKai TC",serif;font-size:21px;margin:0 0 20px;line-height:1.6;color:var(--ink);}
-  .circle-choices{display:flex;flex-wrap:wrap;gap:16px;position:relative;max-width:880px;margin:0 auto;}
-  .circle-chip{
-    font-family:"Plus Jakarta Sans","Noto Sans TC",sans-serif;font-size:16.5px;font-weight:500;padding:14px 24px;
-    border-radius:48% 52% 51% 49% / 53% 47% 53% 47%;border:2.5px solid var(--grid-line);
-    background:var(--surface-2);color:var(--ink);cursor:pointer;min-width:96px;text-align:center;transition:all .15s ease;
-  }
-  .circle-chip:hover:not(.correct):not(.selected-wrong):not(:disabled){border-color:var(--seal);background:var(--surface); transform:translateY(-1px);}
-  .circle-chip.selected{border-color:var(--seal);background:var(--seal-soft);color:var(--seal);font-weight:700;}
-  .circle-chip.correct{border-color:#2D5A27 !important;background:rgba(45, 90, 39, 0.15) !important;color:#2D5A27 !important;font-weight:700;animation:popSuccess .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
-  .circle-chip.missed{border-color:#2D5A27;border-style:dashed;color:#2D5A27;}
-  .circle-chip.selected-wrong{border-color:#E63946 !important;background:rgba(230, 57, 70, 0.15) !important;color:#E63946 !important;text-decoration:line-through;}
-
   .mc-choices-container{display:flex;flex-direction:column;gap:14px;margin-top:12px;max-width:860px;margin-left:auto;margin-right:auto;}
   .mc-option-btn{
     padding:16px 22px;border-radius:14px;border:2px solid var(--grid-line);
     background:var(--surface-2);color:var(--ink);font-size:17px;font-weight:600;cursor:pointer;
-    text-align:left;display:flex;align-items:center;gap:14px;transition:all .15s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+    text-align:left;display:flex;align-items:center;gap:14px;transition:all .15s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.01);
   }
   .mc-option-btn:hover:not(:disabled){border-color:var(--seal);background:var(--surface); transform:translateY(-1px);}
   .mc-option-btn.selected{border-color:var(--seal);background:var(--seal-soft);color:var(--seal);}
   .mc-option-btn.correct{
-    border-color: #2D5A27 !important;
-    background: rgba(45, 90, 39, 0.15) !important;
-    color: #2D5A27 !important;
-    animation: popSuccess .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.3) inset !important;
+    border-color: #2D5A27 !important; background: rgba(45, 90, 39, 0.15) !important; color: #2D5A27 !important; animation: popSuccess .3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.3) inset !important;
   }
   .mc-option-btn.wrong{
-    border-color: #E63946 !important;
-    background: rgba(230, 57, 70, 0.15) !important;
-    color: #E63946 !important;
-    animation: shakeWrong .45s ease;
-    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.35) inset !important;
+    border-color: #E63946 !important; background: rgba(230, 57, 70, 0.15) !important; color: #E63946 !important; animation: shakeWrong .45s ease; box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.35) inset !important;
   }
   .mc-opt-prefix{
     width:32px;height:32px;border-radius:50%;background:var(--surface);
@@ -407,126 +338,62 @@
   .match-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 
   /* 寫字板版面 */
-  .draw-board-layout{
-    display:flex;
-    align-items:flex-start;
-    justify-content:center;
-    gap:20px;
-    width:100%;
-  }
-
+  .draw-board-layout{ display:flex; align-items:flex-start; justify-content:center; gap:20px; width:100%; }
   .draw-toolbar-vertical{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    padding:12px 8px;
-    background:var(--surface-2);
-    border:1.5px solid var(--grid-line);
-    border-radius:14px;
-    box-shadow:var(--shadow);
-    flex-shrink:0;
-    width:64px;
+    display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px 8px;
+    background:var(--surface-2); border:1.5px solid var(--grid-line); border-radius:14px; box-shadow:var(--shadow); flex-shrink:0; width:64px;
   }
   .tool-btn-v{
-    width:48px; height:42px;
-    border-radius:10px; border:1.5px solid var(--grid-line);
-    background:var(--surface); font-size:11.5px; font-weight:700;
-    cursor:pointer; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:2px; color:var(--ink);
-    transition:all .12s ease;
+    width:48px; height:42px; border-radius:10px; border:1.5px solid var(--grid-line);
+    background:var(--surface); font-size:11.5px; font-weight:700; cursor:pointer; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:2px; color:var(--ink); transition:all .12s ease;
   }
   .tool-btn-v:hover{border-color:var(--ink-soft); background:var(--surface-2);}
   .tool-btn-v.active{border-color:var(--seal); background:var(--seal-soft); color:var(--seal);}
   .tool-v-sep{width:36px; height:1px; background:var(--grid-line); margin:3px 0;}
 
-  .color-dot-grid{
-    display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; padding:2px;
-  }
-  .size-btn-group{
-    display:flex; flex-direction:column; gap:4px; width:100%; align-items:center;
-  }
+  .color-dot-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; padding:2px; }
+  .size-btn-group{ display:flex; flex-direction:column; gap:4px; width:100%; align-items:center; }
   .size-btn-v{
-    width:44px; padding:3px 0; font-size:11px; font-weight:700;
-    border-radius:6px; border:1px solid var(--grid-line);
-    background:var(--surface); cursor:pointer; color:var(--ink);
+    width:44px; padding:3px 0; font-size:11px; font-weight:700; border-radius:6px; border:1px solid var(--grid-line); background:var(--surface); cursor:pointer; color:var(--ink);
   }
   .size-btn-v.active{background:var(--seal); color:#fff; border-color:var(--seal);}
 
-  .grid-btn-group{
-    display:flex; flex-direction:column; gap:4px; width:100%; align-items:center;
-  }
+  .grid-btn-group{ display:flex; flex-direction:column; gap:4px; width:100%; align-items:center; }
   .grid-btn-v{
-    width:44px; padding:4px 0; font-size:11px; font-weight:700;
-    border-radius:6px; border:1px solid var(--grid-line);
-    background:var(--surface); cursor:pointer; color:var(--ink);
+    width:44px; padding:4px 0; font-size:11px; font-weight:700; border-radius:6px; border:1px solid var(--grid-line); background:var(--surface); cursor:pointer; color:var(--ink);
   }
   .grid-btn-v.active{background:var(--seal); color:#fff; border-color:var(--seal);}
 
   .canvas-stage-wrap{
-    position:relative;
-    width:100%;
-    max-width:min(680px, 72vh);
-    aspect-ratio:1 / 1;
-    background:transparent;
-    border:2.5px solid var(--seal-ring);
-    border-radius:18px;
-    overflow:hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-    flex-grow:1;
+    position:relative; width:100%; max-width:min(680px, 72vh); aspect-ratio:1 / 1;
+    background:transparent; border:2.5px solid var(--seal-ring); border-radius:18px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); flex-grow:1;
   }
   .canvas-stage-wrap.grid-tian{
-    background-image:
-      linear-gradient(to right, var(--seal-ring) 2px, transparent 2px),
-      linear-gradient(to bottom, var(--seal-ring) 2px, transparent 2px);
-    background-size:50% 50%;
+    background-image: linear-gradient(to right, var(--seal-ring) 2px, transparent 2px), linear-gradient(to bottom, var(--seal-ring) 2px, transparent 2px); background-size:50% 50%;
   }
   .canvas-stage-wrap.grid-jiu{
-    background-image:
-      linear-gradient(to right, var(--seal-ring) 2px, transparent 2px),
-      linear-gradient(to bottom, var(--seal-ring) 2px, transparent 2px);
-    background-size:33.333% 33.333%;
+    background-image: linear-gradient(to right, var(--seal-ring) 2px, transparent 2px), linear-gradient(to bottom, var(--seal-ring) 2px, transparent 2px); background-size:33.333% 33.333%;
   }
 
   .bg-img-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:1;}
   canvas#paint-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;touch-action:none;cursor:crosshair;}
-  
   .text-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
   
   .movable-text{
-    position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif;
-    font-weight:700;line-height:1;color:var(--ink);user-select:none;
-    padding:0 !important;border:1.5px dashed transparent;border-radius:4px;white-space:nowrap;
-    cursor:grab;transform:translate(-50%, -50%);
-    background: transparent !important;
-    width: max-content; max-width: max-content;
-    transition:border-color .15s ease;
+    position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif; font-weight:700;line-height:1;color:var(--ink);user-select:none; padding:0 !important;border:1.5px dashed transparent;border-radius:4px;white-space:nowrap; cursor:grab;transform:translate(-50%, -50%); background: transparent !important; width: max-content; max-width: max-content; transition:border-color .15s ease;
   }
-  .movable-text:hover, .movable-text.active{
-    border:1.5px dashed #1E88E5 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    cursor:move !important;
-  }
-  .movable-text.active{
-    border-color:var(--seal) !important;
-    cursor:grabbing !important;
-  }
+  .movable-text:hover, .movable-text.active{ border:1.5px dashed #1E88E5 !important; background: transparent !important; box-shadow: none !important; cursor:move !important; }
+  .movable-text.active{ border-color:var(--seal) !important; cursor:grabbing !important; }
 
   .resize-handle{
-    display:none;position:absolute;right:-7px;bottom:-7px;width:13px;height:13px;
-    background:#1E88E5;border:2px solid #FFFFFF;border-radius:50%;
-    cursor:nwse-resize !important;box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:10;
+    display:none;position:absolute;right:-7px;bottom:-7px;width:13px;height:13px; background:#1E88E5;border:2px solid #FFFFFF;border-radius:50%; cursor:nwse-resize !important;box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:10;
   }
-  .movable-text:hover .resize-handle,
-  .movable-text.active .resize-handle{
-    display:block;
-  }
+  .movable-text:hover .resize-handle, .movable-text.active .resize-handle{ display:block; }
 
   .multi-cursor-container{position:absolute;inset:0;pointer-events:none;z-index:99999;overflow:visible;}
   .peer-cursor{
-    position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px;
-    transform:translate(-50%,-50%);transition:left .06s linear, top .06s linear;
+    position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px; transform:translate(-50%,-50%);transition:left .06s linear, top .06s linear;
   }
   .peer-cursor-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 2px 8px rgba(0,0,0,0.35);}
   .peer-cursor-label{color:#fff;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
@@ -553,9 +420,7 @@
   .upload-box:hover{border-color:var(--seal);}
 
   .btn-theme-bg.active, .btn-theme-accent.active{
-    outline: 2.5px solid var(--ink) !important;
-    outline-offset: 2px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    outline: 2.5px solid var(--ink) !important; outline-offset: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
 </style>
 </head>
@@ -604,7 +469,7 @@
         <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display:none;">
       </div>
 
-      <!-- 大題與小題樹狀折疊清單（支援 PPT 插入輔助線拖曳排序） -->
+      <!-- 大題與小題樹狀折疊清單（支援 PPT 插入線拖曳重排） -->
       <div class="section-list" id="section-tree-list"></div>
     </aside>
     
@@ -724,16 +589,16 @@
     </div>
     <div class="dialog-body">
       <div class="type-toggle" id="section-type-toggle">
-        <button type="button" data-type="match" class="active">連連看大題</button>
-        <button type="button" data-type="choice">🔘 選擇題大題</button>
-        <button type="button" data-type="circle">圈出來大題</button>
-        <button type="button" data-type="board">✍️ 寫字板大題</button>
+        <button type="button" data-type="match" class="active">連連看</button>
+        <button type="button" data-type="choice">🔘 選擇題(支援多選)</button>
+        <button type="button" data-type="reorder">🔤 句子重組(排序)</button>
+        <button type="button" data-type="board">✍️ 寫字板</button>
       </div>
 
       <label for="f-sec-title">大題名稱</label>
-      <input type="text" id="f-sec-title" placeholder="例如：第一大題：生詞語意選擇" required>
+      <input type="text" id="f-sec-title" placeholder="例如：第一大題：句子重組練習" required>
       <label for="f-sec-desc">大題作答說明（選填）</label>
-      <textarea id="f-sec-desc" rows="2" placeholder="例如：請仔細閱讀題幹，選出最適合的答案"></textarea>
+      <textarea id="f-sec-desc" rows="2" placeholder="例如：請將下方詞語點擊組合成正確的句子"></textarea>
     </div>
     <div class="dialog-foot">
       <button type="button" class="btn btn-ghost" id="btn-cancel-section">取消</button>
@@ -750,7 +615,7 @@
     </div>
     <div class="dialog-body">
       <label for="f-title">小題名稱／標題</label>
-      <input type="text" id="f-title" placeholder="例如：第 1 題：「學生」的拼音" required>
+      <input type="text" id="f-title" placeholder="例如：第 1 題：今天天氣很好" required>
 
       <div id="match-fields">
         <div class="row-two">
@@ -764,18 +629,17 @@
 
       <div id="choice-fields" style="display:none;">
         <label>題目／題幹敘述</label>
-        <textarea id="f-choice-prompt" rows="2" placeholder="例如：下面哪一個是「謝謝」的正確拼音？"></textarea>
-        <label>選項（點擊單選指定唯一正解）</label>
+        <textarea id="f-choice-prompt" rows="2" placeholder="例如：下列哪些是水果？(可複選)"></textarea>
+        <label>選項（勾選代表正確答案，可勾多個）</label>
         <div id="choice-opt-rows"></div>
         <button type="button" class="add-row-btn" id="add-mc-opt">＋ 新增選項</button>
       </div>
 
-      <div id="circle-fields" style="display:none;">
-        <label>題目／提示文字</label>
-        <textarea id="f-prompt" rows="2" placeholder="例如：「謝謝」是什麼意思？"></textarea>
-        <label>選項（勾選代表正確答案）</label>
-        <div id="circle-rows"></div>
-        <button type="button" class="add-row-btn" id="add-circle-opt">＋ 新增選項</button>
+      <div id="reorder-fields" style="display:none;">
+        <label>題目提示／說明</label>
+        <textarea id="f-reorder-prompt" rows="2" placeholder="例如：請將下列詞語重組為正確句子"></textarea>
+        <label>正確句子語序（依正確順序填入詞語，用逗號或空格隔開）</label>
+        <input type="text" id="f-reorder-answer" placeholder="例如：我, 喜歡, 喝, 咖啡">
       </div>
 
       <div id="board-fields" style="display:none;">
@@ -1054,8 +918,7 @@
         var osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + idx * 0.12);
         g.gain.setValueAtTime(0.2, now + idx * 0.12); g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
-        osc.connect(g); g.connect(ctx.destination);
-        osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
+        osc.connect(g); g.connect(ctx.destination); osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
       });
     }catch(e){}
   }
@@ -1068,95 +931,49 @@
     fontSize: 36
   };
 
-  /* ================== 考卷式架構：加入 order 權重防止 Firebase 字母重排 ================== */
-  var STORAGE_FS_KEY = "hanyu-practice-fs-v2";
+  /* ================== 資料庫預設結構 (含多選選擇題與排序題) ================== */
+  var STORAGE_FS_KEY = "hanyu-practice-v3";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var DEFAULT_FS = {
     folders: {
       "f_thai": {
-        id: "f_thai",
-        parentId: null,
-        title: "115-1 對泰華語轉銜線上華語課",
-        desc: "泰國學生轉銜華語專案班級資料夾"
+        id: "f_thai", parentId: null, title: "115-1 對泰華語轉銜線上華語課", desc: "泰國學生轉銜華語專案班級資料夾"
       }
     },
     projects: {
       "proj_thai_l1": {
-        id: "proj_thai_l1",
-        folderId: "f_thai",
-        title: "第一課：見面問好",
-        desc: "依試卷大題分類：配對、語意單選與生字書寫",
+        id: "proj_thai_l1", folderId: "f_thai", title: "第一課：見面問好", desc: "支援多選題與句子重組排序題",
         currentQId: "q_1_1",
         sections: {
           "sec_1": {
-            id: "sec_1",
-            title: "第一大題：生詞配對",
-            type: "match",
-            order: 0,
-            collapsed: false,
+            id: "sec_1", title: "第一大題：生詞配對", type: "match", order: 0, collapsed: false,
             questions: {
               "q_1_1": {
-                id: "q_1_1",
-                title: "第 1 題：你好與見面禮貌語",
-                order: 0,
-                leftLabel: "生詞", rightLabel: "拼音",
+                id: "q_1_1", title: "第 1 題：禮貌用語", order: 0, leftLabel: "生詞", rightLabel: "拼音",
                 pairs: {
                   p1: {id:"p1", left:"你好", right:"nǐ hǎo"},
                   p2: {id:"p2", left:"謝謝", right:"xièxie"},
-                  p3: {id:"p3", left:"再見", right:"zàijiàn"},
-                  p4: {id:"p4", left:"老師", right:"lǎoshī"},
-                  p5: {id:"p5", left:"學生", right:"xuéshēng"}
+                  p3: {id:"p3", left:"再見", right:"zàijiàn"}
                 }
               }
             }
           },
           "sec_2": {
-            id: "sec_2",
-            title: "第二大題：語意選擇題",
-            type: "choice",
-            order: 1,
-            collapsed: false,
+            id: "sec_2", title: "第二大題：語意多選題", type: "choice", order: 1, collapsed: false,
             questions: {
               "q_2_1": {
-                id: "q_2_1",
-                title: "第 1 題：「學生」的意思",
-                order: 0,
-                prompt: "請選出「學生」的拼音與英文意思：",
-                choices: {
-                  c1: {id:"c1", text:"老師 (lǎoshī / Teacher)"},
-                  c2: {id:"c2", text:"學生 (xuéshēng / Student)"},
-                  c3: {id:"c3", text:"朋友 (péngyǒu / Friend)"}
-                },
-                answerId: "c2"
-              },
-              "q_2_2": {
-                id: "q_2_2",
-                title: "第 2 題：「謝謝」的拼音",
-                order: 1,
-                prompt: "下面哪一個是「謝謝」的正確拼音？",
-                choices: {
-                  c1: {id:"c1", text:"xièxie"},
-                  c2: {id:"c2", text:"zàijiàn"},
-                  c3: {id:"c3", text:"nǐ hǎo"}
-                },
-                answerId: "c1"
+                id: "q_2_1", title: "第 1 題：身分稱謂(複選)", order: 0, prompt: "下列哪些是學校裡的成員？(可複選)",
+                choices: { c1: {id:"c1", text:"老師"}, c2: {id:"c2", text:"學生"}, c3: {id:"c3", text:"機長"} },
+                answerIds: ["c1", "c2"]
               }
             }
           },
           "sec_3": {
-            id: "sec_3",
-            title: "第三大題：生字書寫示範",
-            type: "board",
-            order: 2,
-            collapsed: false,
+            id: "sec_3", title: "第三大題：句子重組排序", type: "reorder", order: 2, collapsed: false,
             questions: {
               "q_3_1": {
-                id: "q_3_1",
-                title: "第 1 題：漢字『好』書寫",
-                order: 0,
-                desc: "請在格線中練習書寫『好』字",
-                bgImage: "", gridType: "jiu"
+                id: "q_3_1", title: "第 1 題：自我介紹", order: 0, prompt: "請將下列詞語重組為正確句子", words: ["我", "是", "泰國", "人"]
               }
             }
           }
@@ -1205,11 +1022,9 @@
   var activeSectionForAdd = null;
   var editingSectionId = null;
 
-  // 拖曳狀態追蹤
   var draggedSecId = null;
   var draggedQ = null;
 
-  // 全域清除所有插入指示輔助線
   function clearAllDragIndicators(){
     document.querySelectorAll(".drag-indicator-top, .drag-indicator-bottom").forEach(function(el){
       el.classList.remove("drag-indicator-top", "drag-indicator-bottom");
@@ -1330,7 +1145,7 @@
     }
   }
 
-  /* 大廳／主舞台 切換邏輯 */
+  /*大廳切換*/
   var lobbyView = document.getElementById("lobby-view");
   var classroomView = document.getElementById("classroom-view");
 
@@ -1359,76 +1174,47 @@
     if(isStudent) return;
     if(inRoom()){
       if(confirm("目前正在進行線上連線，確定要結束連線並返回課次大廳嗎？")){
-        leaveRoom();
-        showLobby();
+        leaveRoom(); showLobby();
       }
-    } else {
-      showLobby();
-    }
+    } else { showLobby(); }
   };
 
-  /* 麵包屑導航路徑 */
+  /* 麵包屑 */
   var breadcrumbBar = document.getElementById("breadcrumb-bar");
   function renderBreadcrumb(){
     breadcrumbBar.innerHTML = "";
-    var path = [];
-    var cur = currentFolderId;
-
+    var path = []; var cur = currentFolderId;
     while(cur){
       var f = fsData.folders[cur];
-      if(f){
-        path.unshift(f);
-        cur = f.parentId;
-      } else {
-        break;
-      }
+      if(f){ path.unshift(f); cur = f.parentId; } else { break; }
     }
-
     var rootItem = document.createElement("span");
     rootItem.className = "breadcrumb-item" + (currentFolderId === null ? " active" : "");
     rootItem.innerHTML = "🏠 全部專案大廳";
     rootItem.onclick = function(){
-      if(currentFolderId !== null){
-        currentFolderId = null;
-        renderBreadcrumb();
-        renderLobbyGrid();
-      }
+      if(currentFolderId !== null){ currentFolderId = null; renderBreadcrumb(); renderLobbyGrid(); }
     };
     breadcrumbBar.appendChild(rootItem);
 
     path.forEach(function(folder, idx){
-      var sep = document.createElement("span");
-      sep.className = "breadcrumb-sep";
-      sep.textContent = "/";
+      var sep = document.createElement("span"); sep.className = "breadcrumb-sep"; sep.textContent = "/";
       breadcrumbBar.appendChild(sep);
-
       var item = document.createElement("span");
       var isLast = (idx === path.length - 1);
       item.className = "breadcrumb-item" + (isLast ? " active" : "");
       item.innerHTML = `📁 ${folder.title}`;
       if(!isLast){
-        item.onclick = function(){
-          currentFolderId = folder.id;
-          renderBreadcrumb();
-          renderLobbyGrid();
-        };
+        item.onclick = function(){ currentFolderId = folder.id; renderBreadcrumb(); renderLobbyGrid(); };
       }
       breadcrumbBar.appendChild(item);
     });
   }
 
-  /* 渲染大廳卡片 */
   var projectGrid = document.getElementById("project-grid");
   function renderLobbyGrid(){
     projectGrid.innerHTML = "";
-
-    var subFolders = Object.keys(fsData.folders)
-      .map(function(k){ return fsData.folders[k]; })
-      .filter(function(f){ return f.parentId === currentFolderId; });
-
-    var subProjects = Object.keys(fsData.projects)
-      .map(function(k){ return fsData.projects[k]; })
-      .filter(function(p){ return (p.folderId || null) === currentFolderId; });
+    var subFolders = Object.keys(fsData.folders).map(function(k){ return fsData.folders[k]; }).filter(function(f){ return f.parentId === currentFolderId; });
+    var subProjects = Object.keys(fsData.projects).map(function(k){ return fsData.projects[k]; }).filter(function(p){ return (p.folderId || null) === currentFolderId; });
 
     if(subFolders.length === 0 && subProjects.length === 0){
       projectGrid.innerHTML = `
@@ -1443,153 +1229,68 @@
     subFolders.forEach(function(folder){
       var childF = Object.keys(fsData.folders).filter(function(k){ return fsData.folders[k].parentId === folder.id; }).length;
       var childP = Object.keys(fsData.projects).filter(function(k){ return fsData.projects[k].folderId === folder.id; }).length;
-
-      var card = document.createElement("div");
-      card.className = "item-card is-folder";
+      var card = document.createElement("div"); card.className = "item-card is-folder";
       card.innerHTML = `
         <div>
-          <div class="item-card-head">
-            <h3 class="item-title zh">📁 ${folder.title}</h3>
-          </div>
-          <p class="item-desc">${folder.desc || "資料夾類別，點擊開啟以查看內部課次"}</p>
+          <div class="item-card-head"><h3 class="item-title zh">📁 ${folder.title}</h3></div>
+          <p class="item-desc">${folder.desc || "資料夾類別"}</p>
         </div>
         <div class="item-card-foot">
-          <span class="item-badge" style="background:var(--bamboo-soft); color:var(--bamboo);">
-            ${childF ? childF + ' 個子目錄 · ' : ''}${childP} 個課次
-          </span>
+          <span class="item-badge" style="background:var(--bamboo-soft); color:var(--bamboo);">${childF ? childF + ' 個子目錄 · ' : ''}${childP} 個課次</span>
           <div class="item-actions-btns">
-            <button type="button" class="btn btn-sm btn-ghost btn-edit-f" title="編輯資料夾">✏️</button>
-            <button type="button" class="btn btn-sm btn-ghost btn-del-f" title="刪除資料夾" style="color:var(--seal);">🗑️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-edit-f">✏️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-del-f" style="color:var(--seal);">🗑️</button>
             <button type="button" class="btn btn-sm btn-open-f" style="border:1px solid var(--bamboo); color:var(--bamboo); font-weight:700;">開啟 ➔</button>
           </div>
         </div>
       `;
-
-      card.querySelector(".btn-open-f").onclick = function(){
-        currentFolderId = folder.id;
-        renderBreadcrumb();
-        renderLobbyGrid();
-      };
-
-      card.querySelector(".btn-edit-f").onclick = function(e){
-        e.stopPropagation();
-        openFolderDialog(folder.id);
-      };
-
+      card.querySelector(".btn-open-f").onclick = function(){ currentFolderId = folder.id; renderBreadcrumb(); renderLobbyGrid(); };
+      card.querySelector(".btn-edit-f").onclick = function(e){ e.stopPropagation(); openFolderDialog(folder.id); };
       card.querySelector(".btn-del-f").onclick = function(e){
         e.stopPropagation();
-        var count = childF + childP;
-        var msg = count > 0 
-          ? `「${folder.title}」裡面還有 ${count} 個項目，刪除後內部所有內容將會一併清除，確定要刪除嗎？`
-          : `確定要刪除資料夾「${folder.title}」嗎？`;
-        
-        if(confirm(msg)){
-          deleteFolderRecursively(folder.id);
-          saveFS();
-          renderLobbyGrid();
-        }
+        if(confirm(`確定刪除資料夾「${folder.title}」？`)){ deleteFolderRecursively(folder.id); saveFS(); renderLobbyGrid(); }
       };
-
       projectGrid.appendChild(card);
     });
 
     subProjects.forEach(function(proj){
       var totalQ = 0;
-      Object.keys(proj.sections || {}).forEach(function(sid){
-        totalQ += Object.keys(proj.sections[sid].questions || {}).length;
-      });
-
-      var card = document.createElement("div");
-      card.className = "item-card";
+      Object.keys(proj.sections || {}).forEach(function(sid){ totalQ += Object.keys(proj.sections[sid].questions || {}).length; });
+      var card = document.createElement("div"); card.className = "item-card";
       card.innerHTML = `
         <div>
-          <div class="item-card-head">
-            <h3 class="item-title zh">📘 ${proj.title}</h3>
-          </div>
-          <p class="item-desc">${proj.desc || "點擊進入開始備課或線上教學練習"}</p>
+          <div class="item-card-head"><h3 class="item-title zh">📘 ${proj.title}</h3></div>
+          <p class="item-desc">${proj.desc || "線上教學練習"}</p>
         </div>
         <div class="item-card-foot">
           <span class="item-badge">📄 ${Object.keys(proj.sections||{}).length} 大題 · ${totalQ} 小題</span>
           <div class="item-actions-btns">
-            <button type="button" class="btn btn-sm btn-ghost btn-edit-p" title="編輯課次名稱與所屬資料夾">✏️</button>
-            <button type="button" class="btn btn-sm btn-ghost btn-del-p" title="刪除課次" style="color:var(--seal);">🗑️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-edit-p">✏️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-del-p" style="color:var(--seal);">🗑️</button>
             <button type="button" class="btn btn-sm btn-primary btn-enter-p">進入上課 →</button>
           </div>
         </div>
       `;
-
       card.querySelector(".btn-enter-p").onclick = function(){ openProject(proj.id); };
-      card.querySelector(".btn-edit-p").onclick = function(e){
-        e.stopPropagation();
-        openProjectDialog(proj.id);
-      };
+      card.querySelector(".btn-edit-p").onclick = function(e){ e.stopPropagation(); openProjectDialog(proj.id); };
       card.querySelector(".btn-del-p").onclick = function(e){
         e.stopPropagation();
-        if(confirm(`確定要刪除「${proj.title}」課次嗎？裡面的練習題將會被清除。`)){
-          delete fsData.projects[proj.id];
-          saveFS();
-          renderLobbyGrid();
-        }
+        if(confirm(`確定刪除「${proj.title}」？`)){ delete fsData.projects[proj.id]; saveFS(); renderLobbyGrid(); }
       };
-
       projectGrid.appendChild(card);
     });
   }
 
   function deleteFolderRecursively(folderId){
-    Object.keys(fsData.projects).forEach(function(pid){
-      if(fsData.projects[pid].folderId === folderId){
-        delete fsData.projects[pid];
-      }
-    });
-    Object.keys(fsData.folders).forEach(function(fid){
-      if(fsData.folders[fid].parentId === folderId){
-        deleteFolderRecursively(fid);
-      }
-    });
+    Object.keys(fsData.projects).forEach(function(pid){ if(fsData.projects[pid].folderId === folderId) delete fsData.projects[pid]; });
+    Object.keys(fsData.folders).forEach(function(fid){ if(fsData.folders[fid].parentId === folderId) deleteFolderRecursively(fid); });
     delete fsData.folders[folderId];
-  }
-
-  function populateFolderSelect(selectEl, selectedFolderId, excludeFolderId){
-    selectEl.innerHTML = "";
-    var rootOpt = document.createElement("option");
-    rootOpt.value = "";
-    rootOpt.textContent = "📂 最外層 (專案大廳根目錄)";
-    selectEl.appendChild(rootOpt);
-
-    function appendChildren(parentId, indent){
-      var children = Object.keys(fsData.folders)
-        .map(function(k){ return fsData.folders[k]; })
-        .filter(function(f){ return f.parentId === parentId; });
-
-      children.forEach(function(f){
-        if(excludeFolderId && (f.id === excludeFolderId || isDescendantOf(f.id, excludeFolderId))) return;
-        var opt = document.createElement("option");
-        opt.value = f.id;
-        opt.textContent = indent + "📁 " + f.title;
-        selectEl.appendChild(opt);
-        appendChildren(f.id, indent + "  ");
-      });
-    }
-
-    appendChildren(null, " ");
-    selectEl.value = selectedFolderId || "";
-  }
-
-  function isDescendantOf(folderId, ancestorId){
-    var cur = fsData.folders[folderId];
-    while(cur && cur.parentId){
-      if(cur.parentId === ancestorId) return true;
-      cur = fsData.folders[cur.parentId];
-    }
-    return false;
   }
 
   var folderDialog = document.getElementById("folder-dialog");
   function openFolderDialog(folderId){
     editingFolderId = folderId || null;
     document.getElementById("folder-dialog-title").textContent = editingFolderId ? "編輯資料夾" : "新增資料夾";
-    
     var parentSelect = document.getElementById("f-folder-parent");
     if(editingFolderId){
       var f = fsData.folders[editingFolderId];
@@ -1603,34 +1304,20 @@
     }
     folderDialog.showModal();
   }
-
   document.getElementById("btn-create-folder").onclick = function(){ openFolderDialog(null); };
   document.getElementById("btn-cancel-folder").onclick = function(){ folderDialog.close(); };
-
   document.getElementById("folder-form").onsubmit = function(e){
     e.preventDefault();
     var title = document.getElementById("f-folder-title").value.trim();
     var desc = document.getElementById("f-folder-desc").value.trim();
     var parentId = document.getElementById("f-folder-parent").value || null;
     if(!title) return;
-
     if(editingFolderId){
-      fsData.folders[editingFolderId].title = title;
-      fsData.folders[editingFolderId].desc = desc;
-      fsData.folders[editingFolderId].parentId = parentId;
+      fsData.folders[editingFolderId].title = title; fsData.folders[editingFolderId].desc = desc; fsData.folders[editingFolderId].parentId = parentId;
     } else {
-      var newFId = uid("f");
-      fsData.folders[newFId] = {
-        id: newFId,
-        parentId: parentId,
-        title: title,
-        desc: desc
-      };
+      var newFId = uid("f"); fsData.folders[newFId] = { id: newFId, parentId: parentId, title: title, desc: desc };
     }
-    saveFS();
-    folderDialog.close();
-    renderBreadcrumb();
-    renderLobbyGrid();
+    saveFS(); folderDialog.close(); renderBreadcrumb(); renderLobbyGrid();
   };
 
   var projectDialog = document.getElementById("project-dialog");
@@ -1638,7 +1325,6 @@
     editingProjectId = projId || null;
     document.getElementById("project-dialog-title").textContent = editingProjectId ? "編輯課次專案" : "新增課次專案";
     var projParentSelect = document.getElementById("f-proj-parent");
-
     if(editingProjectId){
       var p = fsData.projects[editingProjectId];
       document.getElementById("f-proj-title").value = p.title;
@@ -1651,85 +1337,46 @@
     }
     projectDialog.showModal();
   }
-
   document.getElementById("btn-create-project").onclick = function(){ openProjectDialog(null); };
   document.getElementById("btn-cancel-project").onclick = function(){ projectDialog.close(); };
-
   document.getElementById("project-form").onsubmit = function(e){
     e.preventDefault();
     var title = document.getElementById("f-proj-title").value.trim();
     var desc = document.getElementById("f-proj-desc").value.trim();
     var folderId = document.getElementById("f-proj-parent").value || null;
     if(!title) return;
-
     if(editingProjectId){
-      fsData.projects[editingProjectId].title = title;
-      fsData.projects[editingProjectId].desc = desc;
-      fsData.projects[editingProjectId].folderId = folderId;
+      fsData.projects[editingProjectId].title = title; fsData.projects[editingProjectId].desc = desc; fsData.projects[editingProjectId].folderId = folderId;
     } else {
       var newPId = uid("proj");
-      fsData.projects[newPId] = {
-        id: newPId,
-        folderId: folderId,
-        title: title,
-        desc: desc,
-        currentQId: "q_1_1",
-        sections: JSON.parse(JSON.stringify(DEFAULT_FS.projects["proj_thai_l1"].sections))
-      };
+      fsData.projects[newPId] = { id: newPId, folderId: folderId, title: title, desc: desc, currentQId: "q_1_1", sections: JSON.parse(JSON.stringify(DEFAULT_FS.projects["proj_thai_l1"].sections)) };
     }
-    saveFS();
-    projectDialog.close();
-    renderLobbyGrid();
+    saveFS(); projectDialog.close(); renderLobbyGrid();
   };
 
   /* 頂部控制列 */
   var topbarActions = document.getElementById("topbar-actions");
   function renderTopbar(){
     topbarActions.innerHTML = "";
-
     if(!isStudent && activeProjectId && !inRoom()){
-      var backBtn = document.createElement("button");
-      backBtn.className = "btn btn-sm btn-ghost";
-      backBtn.textContent = "◀ 課次大廳";
-      backBtn.onclick = showLobby;
-      topbarActions.appendChild(backBtn);
+      var backBtn = document.createElement("button"); backBtn.className = "btn btn-sm btn-ghost"; backBtn.textContent = "◀ 課次大廳"; backBtn.onclick = showLobby; topbarActions.appendChild(backBtn);
     }
-
     if(inRoom()){
       var c2 = document.createElement("div"); c2.className = "room-cluster";
       var onlineCount = 0;
-      if(roomData && roomData.presence){
-        Object.keys(roomData.presence).forEach(function(k){
-          if(roomData.presence[k].online) onlineCount++;
-        });
-      }
-      
-      c2.innerHTML = `
-        <span class="room-code">房間 <b>${activeRoomId}</b></span>
-        <span class="presence-dot ${onlineCount > 1 ? 'online' : ''}"></span>
-        <span style="font-size:12px;">${isStudent ? `已加入（${myName}）` : `在線：${onlineCount} 人`}</span>
-      `;
-
+      if(roomData && roomData.presence){ Object.keys(roomData.presence).forEach(function(k){ if(roomData.presence[k].online) onlineCount++; }); }
+      c2.innerHTML = `<span class="room-code">房間 <b>${activeRoomId}</b></span><span class="presence-dot ${onlineCount > 1 ? 'online' : ''}"></span><span style="font-size:12px;">${isStudent ? `已加入（${myName}）` : `在線：${onlineCount} 人`}</span>`;
       if(!isStudent){
-        var toggleOpen = document.createElement("label");
-        toggleOpen.className = "toggle" + (isOpenForStudent() ? " on" : "");
+        var toggleOpen = document.createElement("label"); toggleOpen.className = "toggle" + (isOpenForStudent() ? " on" : "");
         toggleOpen.innerHTML = '<span class="toggle-track"></span><span>' + (isOpenForStudent() ? "開放作答中" : "鎖定作答中") + '</span>';
-        toggleOpen.onclick = function(){
-          update(ref(db, "rooms/" + activeRoomId), { isOpen: !isOpenForStudent() });
-        };
+        toggleOpen.onclick = function(){ update(ref(db, "rooms/" + activeRoomId), { isOpen: !isOpenForStudent() }); };
         c2.appendChild(toggleOpen);
-
-        var toggleCursor = document.createElement("label");
-        toggleCursor.className = "toggle" + (cursorOn ? " on" : "");
+        var toggleCursor = document.createElement("label"); toggleCursor.className = "toggle" + (cursorOn ? " on" : "");
         toggleCursor.innerHTML = '<span class="toggle-track"></span><span>' + (cursorOn ? "指標分享中" : "指標已關閉") + '</span>';
-        toggleCursor.onclick = function(){
-          cursorOn = !cursorOn;
-          renderTopbar();
-        };
+        toggleCursor.onclick = function(){ cursorOn = !cursorOn; renderTopbar(); };
         c2.appendChild(toggleCursor);
       }
       topbarActions.appendChild(c2);
-
       if(!isStudent){
         var shareBtn = document.createElement("button"); shareBtn.className = "btn btn-sm btn-primary"; shareBtn.textContent = "🔗 複製學生連結";
         shareBtn.onclick = function(){
@@ -1737,17 +1384,11 @@
           navigator.clipboard.writeText(link).then(function(){ alert("✅ 學生連結已複製！傳給學生點開即可加入這課。"); });
         };
         topbarActions.appendChild(shareBtn);
-
-        var leaveBtn = document.createElement("button"); leaveBtn.className = "btn btn-sm btn-ghost"; leaveBtn.textContent = "結束連線";
-        leaveBtn.onclick = leaveRoom;
-        topbarActions.appendChild(leaveBtn);
+        var leaveBtn = document.createElement("button"); leaveBtn.className = "btn btn-sm btn-ghost"; leaveBtn.textContent = "結束連線"; leaveBtn.onclick = leaveRoom; topbarActions.appendChild(leaveBtn);
       }
     } else if(activeProjectId){
-      var btn = document.createElement("button"); btn.className = "btn btn-primary"; btn.textContent = "🔗 開新房間（上這課）";
-      btn.onclick = createRoom;
-      topbarActions.appendChild(btn);
+      var btn = document.createElement("button"); btn.className = "btn btn-primary"; btn.textContent = "🔗 開新房間（上這課）"; btn.onclick = createRoom; topbarActions.appendChild(btn);
     }
-
     if(!isStudent){
       var setBtn = document.createElement("button"); setBtn.className = "btn btn-sm btn-ghost"; setBtn.textContent = "⚙️ 設定";
       setBtn.onclick = function(){ document.getElementById("settings-dialog").showModal(); };
@@ -1759,69 +1400,42 @@
     var rId = String(Math.floor(1000 + Math.random() * 9000));
     activeRoomId = rId;
     var currentProj = fsData.projects[activeProjectId];
-
     await set(ref(db, "rooms/" + rId), {
-      project: currentProj,
-      sharedProgress: {},
-      isOpen: true,
-      theme: {
-        bgMode: currentBgMode,
-        accent: currentAccentColor
-      },
-      presence: { teacher: { online:true, name:"老師" } }
+      project: currentProj, sharedProgress: {}, isOpen: true, theme: { bgMode: currentBgMode, accent: currentAccentColor }, presence: { teacher: { online:true, name:"老師" } }
     });
-    attachPresence(rId, "teacher", "老師");
-    startRoom(rId, "teacher");
-    history.replaceState(null, "", "?room=" + rId);
-    renderTopbar();
+    attachPresence(rId, "teacher", "老師"); startRoom(rId, "teacher");
+    history.replaceState(null, "", "?room=" + rId); renderTopbar();
     var link = location.origin + location.pathname + "?room=" + rId + "&role=student";
-    navigator.clipboard.writeText(link).then(function(){ alert("✅ 房間已開好！\n學生連結已複製到剪貼簿，傳給學生點開即可加入。"); });
+    navigator.clipboard.writeText(link).then(function(){ alert("✅ 房間已開好！學生連結已複製。"); });
   }
 
   function leaveRoom(){
-    if(activeRoomId){
-      set(ref(db, "rooms/" + activeRoomId + "/presence/" + myId), { online: false });
-    }
-    activeRoomId = null; roomData = null;
-    history.replaceState(null, "", location.pathname);
+    if(activeRoomId) set(ref(db, "rooms/" + activeRoomId + "/presence/" + myId), { online: false });
+    activeRoomId = null; roomData = null; history.replaceState(null, "", location.pathname);
     renderTopbar();
-    if(activeProjectId) {
-      renderSidebar(); renderStage();
-    } else {
-      showLobby();
-    }
+    if(activeProjectId){ renderSidebar(); renderStage(); } else { showLobby(); }
   }
 
   function attachPresence(rId, id, name){
     var pRef = ref(db, "rooms/" + rId + "/presence/" + id);
-    set(pRef, { online: true, name: name });
-    onDisconnect(pRef).set({ online: false, name: name });
+    set(pRef, { online: true, name: name }); onDisconnect(pRef).set({ online: false, name: name });
   }
 
   function startRoom(rId, role){
     activeRoomId = rId; roomRole = role;
     onValue(ref(db, "rooms/" + rId), function(snap){
       roomData = snap.val() || {};
-
-      if(roomData.theme){
-        applyTheme(roomData.theme.bgMode || "light", roomData.theme.accent || "seal", false);
-      }
-
+      if(roomData.theme) applyTheme(roomData.theme.bgMode || "light", roomData.theme.accent || "seal", false);
       if(isStudent){
-        lobbyView.style.display = "none";
-        classroomView.style.display = "grid";
-        if(roomData.project){
-          document.getElementById("brand-sub").textContent = roomData.project.title;
-        }
+        lobbyView.style.display = "none"; classroomView.style.display = "grid";
+        if(roomData.project) document.getElementById("brand-sub").textContent = roomData.project.title;
       }
       renderTopbar(); renderSidebar(); renderStage();
     });
-    onValue(ref(db, "roomCursors/" + rId), function(snap){
-      renderMultiCursors(snap.val());
-    });
+    onValue(ref(db, "roomCursors/" + rId), function(snap){ renderMultiCursors(snap.val()); });
   }
 
-  /* ================== 側欄：大題與小題樹狀折疊目錄（PPT 式插入線拖曳重排） ================== */
+  /* ================== 側欄：大題與小題樹狀折疊清單（PPT式輔助線拖曳排序） ================== */
   var sectionTreeListEl = document.getElementById("section-tree-list");
   function renderSidebar(){
     if(isStudent) return;
@@ -1835,51 +1449,29 @@
       var sec = secs[secId];
       var qKeys = getSortedQuestionKeys(sec);
       var isCollapsed = !!sec.collapsed;
-      var tag = sec.type === "match" ? "連連看" : (sec.type === "choice" ? "選擇題" : (sec.type === "circle" ? "圈出來" : "寫字板"));
+      var tag = sec.type === "match" ? "連連看" : (sec.type === "choice" ? "選擇題" : (sec.type === "reorder" ? "句子重組" : "寫字板"));
 
-      var block = document.createElement("div");
-      block.className = "section-block";
-      block.setAttribute("draggable", "true");
+      var block = document.createElement("div"); block.className = "section-block"; block.setAttribute("draggable", "true");
 
-      // 大題拖曳處理
       block.ondragstart = function(e){
         if(draggedQ) return;
-        draggedSecId = secId;
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", "sec:" + secId);
+        draggedSecId = secId; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "sec:" + secId);
         block.classList.add("is-dragging");
       };
-
       block.ondragend = function(e){
-        block.classList.remove("is-dragging");
-        draggedSecId = null;
-        clearAllDragIndicators();
+        block.classList.remove("is-dragging"); draggedSecId = null; clearAllDragIndicators();
       };
-
       block.ondragover = function(e){
         if(!draggedSecId || draggedSecId === secId) return;
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-
-        // 計算滑鼠落在上半部或下半部
-        var rect = block.getBoundingClientRect();
-        var isTop = (e.clientY - rect.top) < (rect.height / 2);
-
-        block.classList.toggle("drag-indicator-top", isTop);
-        block.classList.toggle("drag-indicator-bottom", !isTop);
+        e.preventDefault(); e.dataTransfer.dropEffect = "move";
+        var rect = block.getBoundingClientRect(); var isTop = (e.clientY - rect.top) < (rect.height / 2);
+        block.classList.toggle("drag-indicator-top", isTop); block.classList.toggle("drag-indicator-bottom", !isTop);
       };
-
       block.ondragleave = function(e){
-        if(!block.contains(e.relatedTarget)){
-          block.classList.remove("drag-indicator-top", "drag-indicator-bottom");
-        }
+        if(!block.contains(e.relatedTarget)) block.classList.remove("drag-indicator-top", "drag-indicator-bottom");
       };
-
       block.ondrop = function(e){
-        e.preventDefault();
-        var isTop = block.classList.contains("drag-indicator-top");
-        clearAllDragIndicators();
-
+        e.preventDefault(); var isTop = block.classList.contains("drag-indicator-top"); clearAllDragIndicators();
         if(draggedSecId && draggedSecId !== secId){
           var currentSecKeys = getSortedSectionKeys();
           var fromIdx = currentSecKeys.indexOf(draggedSecId);
@@ -1888,23 +1480,18 @@
             var toIdx = currentSecKeys.indexOf(secId);
             if(!isTop) toIdx += 1;
             currentSecKeys.splice(toIdx, 0, draggedSecId);
-
-            currentSecKeys.forEach(function(k, idx){
-              secs[k].order = idx;
-            });
+            currentSecKeys.forEach(function(k, idx){ secs[k].order = idx; });
             writeSections(secs);
           }
         }
         draggedSecId = null;
       };
 
-      // 大題標題列
-      var head = document.createElement("div");
-      head.className = "section-head";
+      var head = document.createElement("div"); head.className = "section-head";
       head.innerHTML = `
         <div class="section-head-title">
           <span class="drag-handle-icon" title="按住拖曳大題重排">⋮⋮</span>
-          <span style="font-size:11px; transition:transform .15s ease;">${isCollapsed ? '▶' : '▼'}</span>
+          <span style="font-size:11px;">${isCollapsed ? '▶' : '▼'}</span>
           <span>${sec.title}</span>
           <span class="badge">${tag}</span>
         </div>
@@ -1914,138 +1501,67 @@
         </div>
       `;
 
-      head.onclick = function(e){
-        if(e.target.closest("button")) return;
-        sec.collapsed = !sec.collapsed;
-        writeSections(secs);
-      };
-
-      head.querySelector(".btn-add-subq").onclick = function(e){
-        e.stopPropagation();
-        openQuestionDialog(secId, null);
-      };
-
+      head.onclick = function(e){ if(e.target.closest("button")) return; sec.collapsed = !sec.collapsed; writeSections(secs); };
+      head.querySelector(".btn-add-subq").onclick = function(e){ e.stopPropagation(); openQuestionDialog(secId, null); };
       head.querySelector(".btn-del-sec").onclick = function(e){
         e.stopPropagation();
-        if(Object.keys(secs).length <= 1){
-          alert("試卷中至少要保留一大題喔！");
-          return;
-        }
-        if(confirm(`確定要刪除「${sec.title}」及其所有小題嗎？`)){
-          delete secs[secId];
-          var nextList = getAllQuestionsList();
-          var nextQId = nextList.length ? nextList[0].question.id : null;
-          writeSections(secs, nextQId);
+        if(Object.keys(secs).length <= 1){ alert("試卷中至少要保留一大題！"); return; }
+        if(confirm(`確定刪除大題「${sec.title}」？`)){
+          delete secs[secId]; var nextList = getAllQuestionsList(); writeSections(secs, nextList.length ? nextList[0].question.id : null);
         }
       };
-
       block.appendChild(head);
 
-      // 小題清單區塊
       if(!isCollapsed){
-        var body = document.createElement("div");
-        body.className = "section-body";
-
+        var body = document.createElement("div"); body.className = "section-body";
         if(qKeys.length === 0){
-          body.innerHTML = `<span style="font-size:12px; color:var(--ink-soft); padding:6px 8px;">（尚未加入小題）</span>`;
+          body.innerHTML = `<span style="font-size:12px; color:var(--ink-soft); padding:6px 8px;">（尚無小題）</span>`;
         } else {
           qKeys.forEach(function(qId, idx){
             var q = sec.questions[qId];
-            var qBtn = document.createElement("button");
-            qBtn.type = "button";
+            var qBtn = document.createElement("button"); qBtn.type = "button";
             qBtn.className = "question-item-btn" + (qId === currentQId ? " active" : "");
             qBtn.setAttribute("draggable", "true");
-
             qBtn.innerHTML = `
               <span style="display:flex; align-items:center; gap:4px;">
                 <span class="drag-handle-icon" title="按住拖曳小題重排">⋮⋮</span>
                 <span>${idx + 1}. ${q.title}</span>
               </span>
-              <span class="row-del btn-del-q" title="刪除此題" style="font-size:12px; padding:2px 4px;">✕</span>
+              <span class="row-del btn-del-q" title="刪除" style="font-size:12px; padding:2px 4px;">✕</span>
             `;
 
-            // 小題拖曳處理
             qBtn.ondragstart = function(e){
-              e.stopPropagation();
-              draggedQ = { secId: secId, qId: qId };
-              e.dataTransfer.effectAllowed = "move";
-              e.dataTransfer.setData("text/plain", "q:" + qId);
-              qBtn.classList.add("is-dragging");
+              e.stopPropagation(); draggedQ = { secId: secId, qId: qId }; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "q:" + qId); qBtn.classList.add("is-dragging");
             };
-
             qBtn.ondragend = function(e){
-              e.stopPropagation();
-              qBtn.classList.remove("is-dragging");
-              draggedQ = null;
-              clearAllDragIndicators();
+              e.stopPropagation(); qBtn.classList.remove("is-dragging"); draggedQ = null; clearAllDragIndicators();
             };
-
             qBtn.ondragover = function(e){
               if(!draggedQ || draggedQ.qId === qId) return;
-              e.preventDefault();
-              e.stopPropagation();
-              e.dataTransfer.dropEffect = "move";
-
-              var rect = qBtn.getBoundingClientRect();
-              var isTop = (e.clientY - rect.top) < (rect.height / 2);
-
-              qBtn.classList.toggle("drag-indicator-top", isTop);
-              qBtn.classList.toggle("drag-indicator-bottom", !isTop);
+              e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = "move";
+              var rect = qBtn.getBoundingClientRect(); var isTop = (e.clientY - rect.top) < (rect.height / 2);
+              qBtn.classList.toggle("drag-indicator-top", isTop); qBtn.classList.toggle("drag-indicator-bottom", !isTop);
             };
-
             qBtn.ondragleave = function(e){
-              e.stopPropagation();
-              if(!qBtn.contains(e.relatedTarget)){
-                qBtn.classList.remove("drag-indicator-top", "drag-indicator-bottom");
-              }
+              e.stopPropagation(); if(!qBtn.contains(e.relatedTarget)) qBtn.classList.remove("drag-indicator-top", "drag-indicator-bottom");
             };
-
             qBtn.ondrop = function(e){
-              e.preventDefault();
-              e.stopPropagation();
-              var isTop = qBtn.classList.contains("drag-indicator-top");
-              clearAllDragIndicators();
-
+              e.preventDefault(); e.stopPropagation(); var isTop = qBtn.classList.contains("drag-indicator-top"); clearAllDragIndicators();
               if(draggedQ && draggedQ.qId !== qId){
-                // 1. 同一大題內重排
                 if(draggedQ.secId === secId){
-                  var qList = getSortedQuestionKeys(sec);
-                  var fromIdx = qList.indexOf(draggedQ.qId);
+                  var qList = getSortedQuestionKeys(sec); var fromIdx = qList.indexOf(draggedQ.qId);
                   if(fromIdx > -1){
-                    qList.splice(fromIdx, 1);
-                    var toIdx = qList.indexOf(qId);
-                    if(!isTop) toIdx += 1;
-                    qList.splice(toIdx, 0, draggedQ.qId);
-
-                    qList.forEach(function(k, orderIdx){
-                      sec.questions[k].order = orderIdx;
-                    });
+                    qList.splice(fromIdx, 1); var toIdx = qList.indexOf(qId); if(!isTop) toIdx += 1; qList.splice(toIdx, 0, draggedQ.qId);
+                    qList.forEach(function(k, orderIdx){ sec.questions[k].order = orderIdx; });
                     writeSections(secs);
                   }
-                } 
-                // 2. 跨大題移動 (限相同題型大題)
-                else if(secs[draggedQ.secId] && secs[draggedQ.secId].type === sec.type){
+                } else if(secs[draggedQ.secId] && secs[draggedQ.secId].type === sec.type){
                   var movingQ = secs[draggedQ.secId].questions[draggedQ.qId];
                   if(movingQ){
                     delete secs[draggedQ.secId].questions[draggedQ.qId];
-                    var oldQList = getSortedQuestionKeys(secs[draggedQ.secId]);
-                    oldQList.forEach(function(k, orderIdx){
-                      secs[draggedQ.secId].questions[k].order = orderIdx;
-                    });
-
-                    var newQList = getSortedQuestionKeys(sec);
-                    var toIdx = newQList.indexOf(qId);
-                    if(!isTop) toIdx += 1;
-                    if(toIdx < 0) toIdx = 0;
-
-                    newQList.splice(toIdx, 0, draggedQ.qId);
-                    if(!sec.questions) sec.questions = {};
-                    sec.questions[draggedQ.qId] = movingQ;
-
-                    newQList.forEach(function(k, orderIdx){
-                      sec.questions[k].order = orderIdx;
-                    });
-
+                    var newQList = getSortedQuestionKeys(sec); var toIdx = newQList.indexOf(qId); if(!isTop) toIdx += 1; if(toIdx < 0) toIdx = 0;
+                    newQList.splice(toIdx, 0, draggedQ.qId); sec.questions[draggedQ.qId] = movingQ;
+                    newQList.forEach(function(k, orderIdx){ sec.questions[k].order = orderIdx; });
                     writeSections(secs);
                   }
                 }
@@ -2053,54 +1569,37 @@
               draggedQ = null;
             };
 
-            qBtn.onclick = function(e){
-              if(e.target.closest(".btn-del-q")) return;
-              setCurrentQ(qId);
-            };
-
+            qBtn.onclick = function(e){ if(e.target.closest(".btn-del-q")) return; setCurrentQ(qId); };
             qBtn.querySelector(".btn-del-q").onclick = function(e){
               e.stopPropagation();
-              if(qKeys.length <= 1 && Object.keys(secs).length <= 1){
-                alert("試卷中至少要保留一小題喔！");
-                return;
-              }
-              if(confirm(`確定刪除「${q.title}」嗎？`)){
-                delete sec.questions[qId];
-                var nextList = getAllQuestionsList();
-                var nextQId = nextList.length ? nextList[0].question.id : null;
-                writeSections(secs, nextQId);
+              if(qKeys.length <= 1 && Object.keys(secs).length <= 1){ alert("至少保留一題！"); return; }
+              if(confirm(`確定刪除「${q.title}」？`)){
+                delete sec.questions[qId]; var nextList = getAllQuestionsList(); writeSections(secs, nextList.length ? nextList[0].question.id : null);
               }
             };
-
             body.appendChild(qBtn);
           });
         }
         block.appendChild(body);
       }
-
       sectionTreeListEl.appendChild(block);
     });
   }
 
-  /* 主舞台渲染與考卷翻頁導覽 */
+  /* 主舞台渲染 */
   var stageEl = document.getElementById("stage");
   function renderStage(){
     var currentInfo = getCurrentQInfo();
     stageEl.innerHTML = "";
     if(!currentInfo) return;
 
-    var sec = currentInfo.section;
-    var q = currentInfo.question;
-    var allList = getAllQuestionsList();
-    var currentIndex = allList.findIndex(function(it){ return it.question.id === q.id; });
+    var sec = currentInfo.section; var q = currentInfo.question;
+    var allList = getAllQuestionsList(); var currentIndex = allList.findIndex(function(it){ return it.question.id === q.id; });
 
-    var navBar = document.createElement("div");
-    navBar.className = "stage-header-nav";
+    var navBar = document.createElement("div"); navBar.className = "stage-header-nav";
     navBar.innerHTML = `
       <div style="font-size:13.5px; font-weight:700; color:var(--seal); display:flex; align-items:center; gap:6px;">
-        <span>📝 ${sec.title}</span>
-        <span style="opacity:0.4;">/</span>
-        <span style="color:var(--ink);">${q.title}</span>
+        <span>📝 ${sec.title}</span><span style="opacity:0.4;">/</span><span style="color:var(--ink);">${q.title}</span>
       </div>
       <div class="nav-page-group">
         <button type="button" class="btn btn-sm btn-ghost btn-prev-q" ${currentIndex <= 0 ? 'disabled style="opacity:0.4;"' : ''}>◀ 上一題</button>
@@ -2108,13 +1607,8 @@
         <button type="button" class="btn btn-sm btn-ghost btn-next-q" ${currentIndex >= allList.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>下一題 ▶</button>
       </div>
     `;
-
-    navBar.querySelector(".btn-prev-q").onclick = function(){
-      if(currentIndex > 0) setCurrentQ(allList[currentIndex - 1].question.id);
-    };
-    navBar.querySelector(".btn-next-q").onclick = function(){
-      if(currentIndex < allList.length - 1) setCurrentQ(allList[currentIndex + 1].question.id);
-    };
+    navBar.querySelector(".btn-prev-q").onclick = function(){ if(currentIndex > 0) setCurrentQ(allList[currentIndex - 1].question.id); };
+    navBar.querySelector(".btn-next-q").onclick = function(){ if(currentIndex < allList.length - 1) setCurrentQ(allList[currentIndex + 1].question.id); };
     stageEl.appendChild(navBar);
 
     var head = document.createElement("div"); head.className = "stage-head";
@@ -2124,81 +1618,59 @@
       var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.onclick = function(){
-        writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
+        writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, reorderUserWords:[], revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
       };
       actWrap.appendChild(resetBtn);
 
-      if(sec.type === "circle" || sec.type === "choice"){
+      if(sec.type === "choice" || sec.type === "reorder"){
         var revBtn = document.createElement("button"); revBtn.className = "btn btn-sm btn-primary"; revBtn.textContent = "公布答案";
-        revBtn.onclick = function(){
-          writeProgress(q.id, { revealed: true });
-        };
+        revBtn.onclick = function(){ writeProgress(q.id, { revealed: true }); };
         actWrap.appendChild(revBtn);
       }
       head.appendChild(actWrap);
     }
     stageEl.appendChild(head);
 
-    var boardArea = document.createElement("div");
-    boardArea.className = "board-area";
-    boardArea.id = "board-area";
-    stageEl.appendChild(boardArea);
-
-    var cursorBox = document.createElement("div");
-    cursorBox.className = "multi-cursor-container";
-    cursorBox.id = "multi-cursor-box";
-    boardArea.appendChild(cursorBox);
+    var boardArea = document.createElement("div"); boardArea.className = "board-area"; boardArea.id = "board-area"; stageEl.appendChild(boardArea);
+    var cursorBox = document.createElement("div"); cursorBox.className = "multi-cursor-container"; cursorBox.id = "multi-cursor-box"; boardArea.appendChild(cursorBox);
 
     if(sec.type === "match") renderMatchBoard(q, boardArea);
     else if(sec.type === "choice") renderChoiceBoard(q, boardArea);
-    else if(sec.type === "circle") renderCircleBoard(q, boardArea);
+    else if(sec.type === "reorder") renderReorderBoard(q, boardArea);
     else if(sec.type === "board") renderDrawBoard(q, boardArea);
 
     applyStageZoom(currentZoomRatio);
   }
 
-  /* 選擇題 */
+  /* 選擇題（支援多選複選） */
   function renderChoiceBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
-    var currentPick = progress.choicePick || null;
-    var choiceStatus = progress.choiceStatus || null;
+    var multiPicks = progress.multiPicks || {};
     var isRevealed = !!progress.revealed;
+    var correctIds = q.answerIds || (q.answerId ? [q.answerId] : []);
 
     var wrap = document.createElement("div");
     wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || q.title}</p>`;
-
-    var cBox = document.createElement("div"); 
-    cBox.className = "mc-choices-container";
+    var cBox = document.createElement("div"); cBox.className = "mc-choices-container";
 
     var keys = Object.keys(q.choices || {}).sort();
     var letters = ["A", "B", "C", "D", "E", "F"];
 
     keys.forEach(function(cid, idx){
       var c = q.choices[cid];
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mc-option-btn";
-      btn.dataset.cid = cid;
+      var btn = document.createElement("button"); btn.type = "button"; btn.className = "mc-option-btn"; btn.dataset.cid = cid;
 
-      var isThisPicked = (currentPick === cid);
-      var isCorrectAnswer = (q.answerId === cid);
+      var isPicked = !!multiPicks[cid];
+      var isCorrect = correctIds.indexOf(cid) !== -1;
 
       if(isRevealed){
-        if(isCorrectAnswer) {
-          btn.classList.add("correct");
-        } else if(isThisPicked && !isCorrectAnswer) {
-          btn.classList.add("wrong");
-        }
+        if(isCorrect) btn.classList.add("correct");
+        else if(isPicked && !isCorrect) btn.classList.add("wrong");
         btn.disabled = true;
-      } else if(isThisPicked){
-        if(choiceStatus === "correct" || (choiceStatus !== "wrong" && isCorrectAnswer)){
-          btn.classList.add("correct");
-        } else {
-          btn.classList.add("wrong");
-        }
+      } else {
+        if(isPicked) btn.classList.add("selected");
       }
-
       if(!interactive) btn.disabled = true;
 
       btn.innerHTML = `
@@ -2208,23 +1680,12 @@
 
       btn.onclick = function(){
         if(!interactive || isRevealed) return;
-        if(isCorrectAnswer){
-          playCorrectSound();
-          writeProgress(q.id, { 
-            choicePick: cid, 
-            choiceStatus: "correct",
-            lastChoiceWrong: null 
-          });
-        } else {
-          playWrongSound();
-          writeProgress(q.id, { 
-            choicePick: cid, 
-            choiceStatus: "wrong",
-            lastChoiceWrong: { cid: cid, t: Date.now(), who: myName } 
-          });
+        multiPicks[cid] = !multiPicks[cid];
+        if(multiPicks[cid]){
+          if(isCorrect) playCorrectSound(); else playWrongSound();
         }
+        writeProgress(q.id, { multiPicks: multiPicks });
       };
-
       cBox.appendChild(btn);
     });
 
@@ -2236,16 +1697,103 @@
       note.textContent = "✅ 正確答案已標示為綠色。";
       wrap.appendChild(note);
     }
+    container.appendChild(wrap);
+  }
+
+  /* 排序題（句子重組） */
+  function renderReorderBoard(q, container){
+    var progress = getProgress(q.id);
+    var interactive = canInteract();
+    var isRevealed = !!progress.revealed;
+    var correctWords = q.words || [];
+    
+    // 初始化或從進度讀取詞語順序
+    if(!progress._shuffledWords || progress._qIdSaved !== q.id){
+      progress.userWords = [];
+      progress.poolWords = correctWords.slice().sort(function(){ return Math.random() - 0.5; });
+      progress._shuffledWords = true;
+      progress._qIdSaved = q.id;
+    }
+
+    var userWords = progress.userWords || [];
+    var poolWords = progress.poolWords || [];
+
+    var wrap = document.createElement("div");
+    wrap.className = "reorder-container";
+    wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || "請將下列詞語重組為正確句子："}</p>`;
+
+    // 已選區（上方放置槽）
+    var slotZone = document.createElement("div");
+    slotZone.className = "reorder-slot-zone";
+    if(userWords.length === 0){
+      slotZone.innerHTML = `<span style="font-size:14px; color:var(--ink-soft);">點擊下方詞語依序排列到這裡...</span>`;
+    } else {
+      userWords.forEach(function(w, idx){
+        var chip = document.createElement("div");
+        chip.className = "reorder-chip" + (isRevealed ? " correct-done" : " placed");
+        chip.textContent = w;
+        if(!isRevealed && interactive){
+          chip.onclick = function(){
+            userWords.splice(idx, 1);
+            poolWords.push(w);
+            writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+          };
+        }
+        slotZone.appendChild(chip);
+      });
+    }
+    wrap.appendChild(slotZone);
+
+    // 備選字庫區（下方可點擊的詞語）
+    var poolZone = document.createElement("div");
+    poolZone.style.cssText = "display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; min-height:50px;";
+    
+    if(poolWords.length === 0 && !isRevealed){
+      var checkBtn = document.createElement("button");
+      checkBtn.className = "btn btn-primary";
+      checkBtn.textContent = "🔍 確認檢查答案";
+      checkBtn.onclick = function(){
+        var isMatch = userWords.length === correctWords.length && userWords.every(function(val, i){ return val === correctWords[i]; });
+        if(isMatch){
+          playCorrectSound();
+          alert("🎉 太棒了！句子重組完全正確！");
+          writeProgress(q.id, { revealed: true });
+        } else {
+          playWrongSound();
+          slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
+          setTimeout(function(){
+            slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.remove("wrong-shake"); });
+          }, 500);
+        }
+      };
+      poolZone.appendChild(checkBtn);
+    } else {
+      poolWords.forEach(function(w, idx){
+        var chip = document.createElement("div");
+        chip.className = "reorder-chip";
+        chip.textContent = w;
+        if(isRevealed){
+          chip.classList.add("correct-done");
+        } else if(interactive){
+          chip.onclick = function(){
+            poolWords.splice(idx, 1);
+            userWords.push(w);
+            writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+          };
+        }
+        poolZone.appendChild(chip);
+      });
+    }
+    wrap.appendChild(poolZone);
+
+    if(isRevealed){
+      var note = document.createElement("p");
+      note.style.fontSize = "13px"; note.style.color = "var(--bamboo)"; note.style.marginTop = "10px"; note.style.fontWeight = "700";
+      note.textContent = "✅ 正確解答： " + correctWords.join(" ");
+      wrap.appendChild(note);
+    }
 
     container.appendChild(wrap);
-
-    var lastChoiceWrong = progress.lastChoiceWrong;
-    if(lastChoiceWrong && lastChoiceWrong.t && (Date.now() - lastChoiceWrong.t < 1200)){
-      var wBtn = cBox.querySelector(`.mc-option-btn[data-cid="${lastChoiceWrong.cid}"]`);
-      if(wBtn && !wBtn.classList.contains("wrong")){
-        wBtn.classList.add("wrong");
-      }
-    }
   }
 
   /* 寫字板功能 */
@@ -2256,33 +1804,21 @@
     var currentGrid = progress.gridType || q.gridType || "jiu";
     var currentBg = progress.bgImage || q.bgImage || "";
 
-    var layout = document.createElement("div");
-    layout.className = "draw-board-layout";
+    var layout = document.createElement("div"); layout.className = "draw-board-layout";
 
-    var vToolbar = document.createElement("div");
-    vToolbar.className = "draw-toolbar-vertical";
+    var vToolbar = document.createElement("div"); vToolbar.className = "draw-toolbar-vertical";
     vToolbar.innerHTML = `
-      <button type="button" class="tool-btn-v ${boardState.tool==='pen'?'active':''}" data-tool="pen" title="畫筆">
-        <span>✏️</span><span style="font-size:10px;">畫筆</span>
-      </button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='text'?'active':''}" data-tool="text" title="打字">
-        <span>🔤</span><span style="font-size:10px;">打字</span>
-      </button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='stroke-eraser'?'active':''}" data-tool="stroke-eraser" title="筆畫整條擦除">
-        <span>🪄</span><span style="font-size:10px;">筆畫擦</span>
-      </button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部橡皮擦">
-        <span>🧽</span><span style="font-size:10px;">局部擦</span>
-      </button>
+      <button type="button" class="tool-btn-v ${boardState.tool==='pen'?'active':''}" data-tool="pen" title="畫筆"><span>✏️</span><span style="font-size:10px;">畫筆</span></button>
+      <button type="button" class="tool-btn-v ${boardState.tool==='text'?'active':''}" data-tool="text" title="打字"><span>🔤</span><span style="font-size:10px;">打字</span></button>
+      <button type="button" class="tool-btn-v ${boardState.tool==='stroke-eraser'?'active':''}" data-tool="stroke-eraser" title="筆畫整條擦除"><span>🪄</span><span style="font-size:10px;">筆畫擦</span></button>
+      <button type="button" class="tool-btn-v ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部橡皮擦"><span>🧽</span><span style="font-size:10px;">局部擦</span></button>
       <div class="tool-v-sep"></div>
-
       <div class="grid-btn-group">
         <button type="button" class="grid-btn-v ${currentGrid==='none'?'active':''}" data-grid="none">無格</button>
         <button type="button" class="grid-btn-v ${currentGrid==='tian'?'active':''}" data-grid="tian">田字</button>
         <button type="button" class="grid-btn-v ${currentGrid==='jiu'?'active':''}" data-grid="jiu">九宮</button>
       </div>
       <div class="tool-v-sep"></div>
-
       <div class="color-dot-grid">
         <div class="color-dot ${boardState.color==='#B23B32'?'active':''}" data-color="#B23B32" style="background:#B23B32;" title="紅色"></div>
         <div class="color-dot ${(boardState.color==='#2A333C'||boardState.color==='#E5EAE6'||boardState.color==='#FFFFFF')?'active':''}" id="btn-theme-dark-color" data-color="#2A333C" style="background:#2A333C;" title="黑/白"></div>
@@ -2291,14 +1827,12 @@
         <div class="color-dot ${boardState.color==='#FB8C00'?'active':''}" data-color="#FB8C00" style="background:#FB8C00;" title="橘色"></div>
       </div>
       <div class="tool-v-sep"></div>
-
       <div class="size-btn-group">
         <button type="button" class="size-btn-v ${boardState.size===3?'active':''}" data-size="3">細</button>
         <button type="button" class="size-btn-v ${boardState.size===6?'active':''}" data-size="6">中</button>
         <button type="button" class="size-btn-v ${boardState.size===12?'active':''}" data-size="12">粗</button>
       </div>
       <div class="tool-v-sep"></div>
-
       <select class="board-font-select" style="width:48px; padding:2px; font-size:11px; text-align:center; background:var(--surface); border-radius:6px; border:1px solid var(--grid-line);">
         <option value="24" ${boardState.fontSize===24?'selected':''}>24</option>
         <option value="32" ${boardState.fontSize===32?'selected':''}>32</option>
@@ -2308,19 +1842,11 @@
         <option value="84" ${boardState.fontSize===84?'selected':''}>84</option>
       </select>
       <div class="tool-v-sep"></div>
-
-      <button type="button" class="tool-btn-v" id="btn-upload-bg" title="上傳底圖">
-        <span>📷</span><span style="font-size:9.5px;">底圖</span>
-      </button>
-      <button type="button" class="tool-btn-v" id="btn-remove-bg" style="display:${currentBg ? 'flex' : 'none'}; color:#E63946;" title="清除底圖">
-        <span>✕</span><span style="font-size:9.5px;">清底圖</span>
-      </button>
+      <button type="button" class="tool-btn-v" id="btn-upload-bg" title="上傳底圖"><span>📷</span><span style="font-size:9.5px;">底圖</span></button>
+      <button type="button" class="tool-btn-v" id="btn-remove-bg" style="display:${currentBg ? 'flex' : 'none'}; color:#E63946;" title="清除底圖"><span>✕</span><span style="font-size:9.5px;">清底圖</span></button>
       <input type="file" id="board-bg-file" accept="image/*" style="display:none;">
       <div class="tool-v-sep"></div>
-
-      <button type="button" class="tool-btn-v" id="btn-clear-draw" style="color:var(--seal);" title="清空畫布">
-        <span>🗑️</span><span style="font-size:9.5px;">清空</span>
-      </button>
+      <button type="button" class="tool-btn-v" id="btn-clear-draw" style="color:var(--seal);" title="清空畫布"><span>🗑️</span><span style="font-size:9.5px;">清空</span></button>
     `;
 
     layout.appendChild(vToolbar);
@@ -2328,20 +1854,15 @@
     var cWrap = document.createElement("div"); 
     cWrap.className = "canvas-stage-wrap " + (currentGrid === 'tian' ? 'grid-tian' : (currentGrid === 'jiu' ? 'grid-jiu' : ''));
     if(currentBg){
-      var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg;
-      cWrap.appendChild(img);
+      var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg; cWrap.appendChild(img);
     }
     var canvas = document.createElement("canvas"); canvas.id = "paint-canvas";
     var textLayer = document.createElement("div"); textLayer.className = "text-layer";
-    cWrap.appendChild(canvas);
-    cWrap.appendChild(textLayer);
-    layout.appendChild(cWrap);
-    container.appendChild(layout);
+    cWrap.appendChild(canvas); cWrap.appendChild(textLayer);
+    layout.appendChild(cWrap); container.appendChild(layout);
 
     var ctx = canvas.getContext("2d");
-    var isDrawing = false;
-    var currentPath = [];
-    var activeSelectedTextId = null;
+    var isDrawing = false; var currentPath = []; var activeSelectedTextId = null;
 
     vToolbar.querySelectorAll(".tool-btn-v").forEach(function(b){
       b.onclick = function(){
@@ -2349,8 +1870,7 @@
         vToolbar.querySelectorAll(".tool-btn-v").forEach(function(x){
           if(x.id !== "btn-upload-bg" && x.id !== "btn-remove-bg" && x.id !== "btn-clear-draw") x.classList.remove("active");
         });
-        b.classList.add("active");
-        boardState.tool = b.dataset.tool;
+        b.classList.add("active"); boardState.tool = b.dataset.tool;
         canvas.style.cursor = (boardState.tool === "text" ? "text" : (boardState.tool.includes("eraser") ? "cell" : "crosshair"));
       };
     });
@@ -2360,28 +1880,19 @@
     var bgFileInput = vToolbar.querySelector("#board-bg-file");
 
     if(btnUploadBg && bgFileInput){
-      btnUploadBg.onclick = function(e){
-        e.preventDefault(); e.stopPropagation();
-        bgFileInput.click();
-      };
+      btnUploadBg.onclick = function(e){ e.preventDefault(); e.stopPropagation(); bgFileInput.click(); };
       bgFileInput.onchange = function(e){
-        var file = e.target.files[0];
-        if(!file) return;
+        var file = e.target.files[0]; if(!file) return;
         var reader = new FileReader();
         reader.onload = function(evt){
           var img = new Image();
           img.onload = function(){
             var c = document.createElement("canvas");
             var scale = Math.min(1, 1000 / img.width);
-            c.width = Math.round(img.width * scale);
-            c.height = Math.round(img.height * scale);
-            var cx = c.getContext("2d");
-            cx.drawImage(img, 0, 0, c.width, c.height);
+            c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+            var cx = c.getContext("2d"); cx.drawImage(img, 0, 0, c.width, c.height);
             var b64 = c.toDataURL("image/jpeg", 0.8);
-            q.bgImage = b64;
-            writeProgress(q.id, { bgImage: b64 });
-            writeSections(getSections());
-            renderStage();
+            q.bgImage = b64; writeProgress(q.id, { bgImage: b64 }); writeSections(getSections()); renderStage();
           };
           img.src = evt.target.result;
         };
@@ -2391,42 +1902,25 @@
 
     if(btnRemoveBg){
       btnRemoveBg.onclick = function(e){
-        e.preventDefault(); e.stopPropagation();
-        q.bgImage = "";
-        writeProgress(q.id, { bgImage: "" });
-        writeSections(getSections());
-        renderStage();
+        e.preventDefault(); e.stopPropagation(); q.bgImage = ""; writeProgress(q.id, { bgImage: "" }); writeSections(getSections()); renderStage();
       };
     }
 
     var darkColorDot = vToolbar.querySelector("#btn-theme-dark-color");
     if(darkColorDot){
       if(currentBgMode === "dark"){
-        darkColorDot.style.background = "#E5EAE6";
-        darkColorDot.dataset.color = "#FFFFFF";
-        if(boardState.color === "#2A333C") boardState.color = "#FFFFFF";
+        darkColorDot.style.background = "#E5EAE6"; darkColorDot.dataset.color = "#FFFFFF"; if(boardState.color === "#2A333C") boardState.color = "#FFFFFF";
       } else {
-        darkColorDot.style.background = "#2A333C";
-        darkColorDot.dataset.color = "#2A333C";
-        if(boardState.color === "#FFFFFF") boardState.color = "#2A333C";
+        darkColorDot.style.background = "#2A333C"; darkColorDot.dataset.color = "#2A333C"; if(boardState.color === "#FFFFFF") boardState.color = "#2A333C";
       }
     }
 
-    function getScaleRatio(){
-      var w = cWrap.clientWidth || canvas.width || 640;
-      return Math.max(0.4, w / 640);
-    }
-
+    function getScaleRatio(){ var w = cWrap.clientWidth || canvas.width || 640; return Math.max(0.4, w / 640); }
     function resizeCanvas(){
       var r = cWrap.getBoundingClientRect();
-      if(r.width > 0 && r.height > 0){
-        canvas.width = r.width; canvas.height = r.height;
-        redrawStrokes();
-        renderTexts();
-      }
+      if(r.width > 0 && r.height > 0){ canvas.width = r.width; canvas.height = r.height; redrawStrokes(); renderTexts(); }
     }
-    requestAnimationFrame(resizeCanvas);
-    window.addEventListener("resize", resizeCanvas);
+    requestAnimationFrame(resizeCanvas); window.addEventListener("resize", resizeCanvas);
 
     function redrawStrokes(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -2434,43 +1928,24 @@
       strokes.forEach(function(st){
         if(!st.points || st.points.length < 2) return;
         ctx.save();
-        if(st.isEraser){
-          ctx.globalCompositeOperation = "destination-out";
-          ctx.lineWidth = Math.max(2, st.size * 2.5 * scale);
-        } else {
-          ctx.globalCompositeOperation = "source-over";
-          ctx.strokeStyle = st.color;
-          ctx.lineWidth = Math.max(1, st.size * scale);
-        }
-        ctx.lineCap = "round"; ctx.lineJoin = "round";
-        ctx.beginPath();
+        if(st.isEraser){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, st.size * 2.5 * scale); }
+        else { ctx.globalCompositeOperation = "source-over"; ctx.strokeStyle = st.color; ctx.lineWidth = Math.max(1, st.size * scale); }
+        ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath();
         ctx.moveTo(st.points[0].x * canvas.width / 100, st.points[0].y * canvas.height / 100);
-        for(var i=1; i<st.points.length; i++){
-          ctx.lineTo(st.points[i].x * canvas.width / 100, st.points[i].y * canvas.height / 100);
-        }
-        ctx.stroke();
-        ctx.restore();
+        for(var i=1; i<st.points.length; i++){ ctx.lineTo(st.points[i].x * canvas.width / 100, st.points[i].y * canvas.height / 100); }
+        ctx.stroke(); ctx.restore();
       });
     }
 
     function renderTexts(){
       textLayer.innerHTML = "";
       var scale = getScaleRatio();
-
       texts.forEach(function(t, idx){
         var div = document.createElement("div");
         div.className = "movable-text" + (t.id === activeSelectedTextId ? " active" : "");
-        div.style.left = t.x + "%";
-        div.style.top = t.y + "%";
-        div.style.color = t.color || "var(--ink)";
-        
-        var baseSize = t.fontSize || 36;
-        div.style.fontSize = Math.round(baseSize * scale) + "px";
-
-        div.innerHTML = `
-          <span class="text-content">${t.text}</span>
-          <div class="resize-handle" title="按住拖動縮放字體"></div>
-        `;
+        div.style.left = t.x + "%"; div.style.top = t.y + "%"; div.style.color = t.color || "var(--ink)";
+        var baseSize = t.fontSize || 36; div.style.fontSize = Math.round(baseSize * scale) + "px";
+        div.innerHTML = `<span class="text-content">${t.text}</span><div class="resize-handle" title="按住拖動縮放字體"></div>`;
 
         var handle = div.querySelector(".resize-handle");
         handle.onmousedown = function(e){
@@ -2485,83 +1960,55 @@
             var currentDist = Math.hypot(ev.clientX - centerX, ev.clientY - centerY);
             var ratio = currentDist / startDist;
             var newSize = Math.max(16, Math.min(120, Math.round(startSize * ratio)));
-            t.fontSize = newSize;
-            div.style.fontSize = Math.round(newSize * scale) + "px";
+            t.fontSize = newSize; div.style.fontSize = Math.round(newSize * scale) + "px";
             var fontSelect = vToolbar.querySelector(".board-font-select");
             if(fontSelect) fontSelect.value = String(newSize);
           }
-
           function onResizeUp(){
-            window.removeEventListener("mousemove", onResizeMove);
-            window.removeEventListener("mouseup", onResizeUp);
+            window.removeEventListener("mousemove", onResizeMove); window.removeEventListener("mouseup", onResizeUp);
             writeProgress(q.id, { texts: texts });
           }
-
-          window.addEventListener("mousemove", onResizeMove);
-          window.addEventListener("mouseup", onResizeUp);
+          window.addEventListener("mousemove", onResizeMove); window.addEventListener("mouseup", onResizeUp);
         };
 
         div.onmousedown = function(e){
           e.stopPropagation();
-
           if(boardState.tool === "stroke-eraser"){
-            texts.splice(idx, 1);
-            writeProgress(q.id, { texts: texts });
-            return;
+            texts.splice(idx, 1); writeProgress(q.id, { texts: texts }); return;
           }
-
-          activeSelectedTextId = t.id;
-          div.classList.add("active");
+          activeSelectedTextId = t.id; div.classList.add("active");
           var fontSelect = vToolbar.querySelector(".board-font-select");
           if(fontSelect) fontSelect.value = String(t.fontSize || 36);
 
-          var startX = e.clientX, startY = e.clientY;
-          var origX = t.x, origY = t.y;
+          var startX = e.clientX, startY = e.clientY; var origX = t.x, origY = t.y;
           var rect = cWrap.getBoundingClientRect();
-
           function onMove(ev){
-            var dx = (ev.clientX - startX) / rect.width * 100;
-            var dy = (ev.clientY - startY) / rect.height * 100;
-            t.x = Math.max(5, Math.min(95, origX + dx));
-            t.y = Math.max(5, Math.min(95, origY + dy));
-            div.style.left = t.x + "%";
-            div.style.top = t.y + "%";
+            var dx = (ev.clientX - startX) / rect.width * 100; var dy = (ev.clientY - startY) / rect.height * 100;
+            t.x = Math.max(5, Math.min(95, origX + dx)); t.y = Math.max(5, Math.min(95, origY + dy));
+            div.style.left = t.x + "%"; div.style.top = t.y + "%";
           }
-
           function onUp(){
-            div.classList.remove("active");
-            window.removeEventListener("mousemove", onMove);
-            window.removeEventListener("mouseup", onUp);
+            div.classList.remove("active"); window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp);
             writeProgress(q.id, { texts: texts });
           }
-
-          window.addEventListener("mousemove", onMove);
-          window.addEventListener("mouseup", onUp);
+          window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", onUp);
         };
-
         textLayer.appendChild(div);
       });
     }
 
     function getPos(e){
       var r = cWrap.getBoundingClientRect();
-      var cx = e.touches ? e.touches[0].clientX : e.clientX;
-      var cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: (cx - r.left) / r.width * 100,
-        y: (cy - r.top) / r.height * 100
-      };
+      var cx = e.touches ? e.touches[0].clientX : e.clientX; var cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: (cx - r.left) / r.width * 100, y: (cy - r.top) / r.height * 100 };
     }
 
     function checkStrokeHit(p){
       for(var i = strokes.length - 1; i >= 0; i--){
         var pts = strokes[i].points;
         for(var j=0; j<pts.length; j++){
-          var dist = Math.hypot(pts[j].x - p.x, pts[j].y - p.y);
-          if(dist < 3.5){
-            strokes.splice(i, 1);
-            writeProgress(q.id, { strokes: strokes });
-            return true;
+          if(Math.hypot(pts[j].x - p.x, pts[j].y - p.y) < 3.5){
+            strokes.splice(i, 1); writeProgress(q.id, { strokes: strokes }); return true;
           }
         }
       }
@@ -2570,55 +2017,30 @@
 
     canvas.onmousedown = function(e){
       if(!canInteract()) return;
-      var p = getPos(e);
-      activeSelectedTextId = null;
-
-      if(boardState.tool === "stroke-eraser"){
-        checkStrokeHit(p);
-        return;
-      }
+      var p = getPos(e); activeSelectedTextId = null;
+      if(boardState.tool === "stroke-eraser"){ checkStrokeHit(p); return; }
       if(boardState.tool === "text"){
         var txt = prompt("請輸入文字內容（漢字或拼音）：");
         if(txt && txt.trim()){
-          texts.push({ 
-            id: uid("t"), 
-            text: txt.trim(), 
-            x: p.x, 
-            y: p.y, 
-            color: boardState.color, 
-            fontSize: boardState.fontSize || 36 
-          });
+          texts.push({ id: uid("t"), text: txt.trim(), x: p.x, y: p.y, color: boardState.color, fontSize: boardState.fontSize || 36 });
           writeProgress(q.id, { texts: texts });
         }
         return;
       }
-
-      isDrawing = true;
-      currentPath = [p];
+      isDrawing = true; currentPath = [p];
     };
 
     window.onmousemove = function(e){
       if(!isDrawing) return;
-      var p = getPos(e);
-      currentPath.push(p);
-
-      var scale = getScaleRatio();
-      ctx.save();
-      if(boardState.tool === "pixel-eraser"){
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.lineWidth = Math.max(2, boardState.size * 2.5 * scale);
-      } else {
-        ctx.globalCompositeOperation = "source-over";
-        ctx.strokeStyle = boardState.color;
-        ctx.lineWidth = Math.max(1, boardState.size * scale);
-      }
-      ctx.lineCap = "round"; ctx.lineJoin = "round";
-      ctx.beginPath();
+      var p = getPos(e); currentPath.push(p);
+      var scale = getScaleRatio(); ctx.save();
+      if(boardState.tool === "pixel-eraser"){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, boardState.size * 2.5 * scale); }
+      else { ctx.globalCompositeOperation = "source-over"; ctx.strokeStyle = boardState.color; ctx.lineWidth = Math.max(1, boardState.size * scale); }
+      ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath();
       var pts = currentPath;
       if(pts.length >= 2){
         ctx.moveTo(pts[pts.length-2].x * canvas.width / 100, pts[pts.length-2].y * canvas.height / 100);
-        ctx.lineTo(p.x * canvas.width / 100, p.y * canvas.height / 100);
-        ctx.stroke();
+        ctx.lineTo(p.x * canvas.width / 100, p.y * canvas.height / 100); ctx.stroke();
       }
       ctx.restore();
     };
@@ -2627,13 +2049,7 @@
       if(!isDrawing) return;
       isDrawing = false;
       if(currentPath.length >= 2){
-        strokes.push({
-          id: uid("st"),
-          points: currentPath,
-          color: boardState.color,
-          size: boardState.size,
-          isEraser: boardState.tool === "pixel-eraser"
-        });
+        strokes.push({ id: uid("st"), points: currentPath, color: boardState.color, size: boardState.size, isEraser: boardState.tool === "pixel-eraser" });
         writeProgress(q.id, { strokes: strokes });
       }
       currentPath = [];
@@ -2645,10 +2061,7 @@
         boardState.fontSize = Number(fontSelect.value);
         if(activeSelectedTextId){
           var selObj = texts.find(function(item){ return item.id === activeSelectedTextId; });
-          if(selObj){
-            selObj.fontSize = boardState.fontSize;
-            writeProgress(q.id, { texts: texts });
-          }
+          if(selObj){ selObj.fontSize = boardState.fontSize; writeProgress(q.id, { texts: texts }); }
         }
       };
     }
@@ -2656,8 +2069,7 @@
     vToolbar.querySelectorAll(".grid-btn-v").forEach(function(gb){
       gb.onclick = function(){
         vToolbar.querySelectorAll(".grid-btn-v").forEach(function(x){ x.classList.remove("active"); });
-        gb.classList.add("active");
-        var gType = gb.dataset.grid;
+        gb.classList.add("active"); var gType = gb.dataset.grid;
         cWrap.className = "canvas-stage-wrap " + (gType === 'tian' ? 'grid-tian' : (gType === 'jiu' ? 'grid-jiu' : ''));
         writeProgress(q.id, { gridType: gType });
       };
@@ -2665,17 +2077,15 @@
 
     vToolbar.querySelectorAll(".color-dot").forEach(function(d){
       d.onclick = function(){
-        toolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
-        d.classList.add("active");
-        boardState.color = d.dataset.color;
+        vToolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
+        d.classList.add("active"); boardState.color = d.dataset.color;
       };
     });
 
     vToolbar.querySelectorAll(".size-btn-v").forEach(function(sBtn){
       sBtn.onclick = function(){
         vToolbar.querySelectorAll(".size-btn-v").forEach(function(x){ x.classList.remove("active"); });
-        sBtn.classList.add("active");
-        boardState.size = Number(sBtn.dataset.size);
+        sBtn.classList.add("active"); boardState.size = Number(sBtn.dataset.size);
       };
     });
 
@@ -2683,8 +2093,7 @@
     if(clearBtn){
       clearBtn.onclick = function(){
         if(confirm("確定要清空畫布上的所有內容嗎？")){
-          strokes = []; texts = [];
-          writeProgress(q.id, { strokes: strokes, texts: texts });
+          strokes = []; texts = []; writeProgress(q.id, { strokes: strokes, texts: texts });
         }
       };
     }
@@ -2714,21 +2123,14 @@
       var btn = document.createElement("button"); btn.type="button"; 
       var isMatched = !!matched[pid];
       btn.className = "match-item zh" + (isMatched ? " matched" : "");
-      btn.textContent = p.left; 
-      btn.dataset.id = pid; btn.dataset.side = "left";
+      btn.textContent = p.left; btn.dataset.id = pid; btn.dataset.side = "left";
 
-      var userWhoSelectedL = Object.keys(selections).find(function(uid){
-        return selections[uid] && selections[uid].left === pid;
-      });
+      var userWhoSelectedL = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].left === pid; });
       if(userWhoSelectedL && !isMatched){
         btn.classList.add("selected");
-        var uInfoL = selections[userWhoSelectedL];
-        var uColorL = getColorForStudent(uInfoL.name || "學生", uInfoL.role);
-        btn.style.borderColor = uColorL;
-        btn.style.boxShadow = "0 0 0 3.5px " + uColorL + "44 inset";
-      } else if(!isMatched){
-        btn.style.boxShadow = "";
-      }
+        var uInfoL = selections[userWhoSelectedL]; var uColorL = getColorForStudent(uInfoL.name || "學生", uInfoL.role);
+        btn.style.borderColor = uColorL; btn.style.boxShadow = "0 0 0 3.5px " + uColorL + "44 inset";
+      } else if(!isMatched){ btn.style.boxShadow = ""; }
 
       if(isMatched || !interactive) btn.disabled = true;
 
@@ -2748,21 +2150,14 @@
       var btn = document.createElement("button"); btn.type="button"; 
       var isMatched = !!matched[pid];
       btn.className = "match-item" + (isMatched ? " matched" : "");
-      btn.textContent = p.right; 
-      btn.dataset.id = pid; btn.dataset.side = "right";
+      btn.textContent = p.right; btn.dataset.id = pid; btn.dataset.side = "right";
 
-      var userWhoSelectedR = Object.keys(selections).find(function(uid){
-        return selections[uid] && selections[uid].right === pid;
-      });
+      var userWhoSelectedR = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].right === pid; });
       if(userWhoSelectedR && !isMatched){
         btn.classList.add("selected");
-        var uInfoR = selections[userWhoSelectedR];
-        var uColorR = getColorForStudent(uInfoR.name || "學生", uInfoR.role);
-        btn.style.borderColor = uColorR;
-        btn.style.boxShadow = "0 0 0 3.5px " + uColorR + "44 inset";
-      } else if(!isMatched){
-        btn.style.boxShadow = "";
-      }
+        var uInfoR = selections[userWhoSelectedR]; var uColorR = getColorForStudent(uInfoR.name || "學生", uInfoR.role);
+        btn.style.borderColor = uColorR; btn.style.boxShadow = "0 0 0 3.5px " + uColorR + "44 inset";
+      } else if(!isMatched){ btn.style.boxShadow = ""; }
 
       if(isMatched || !interactive) btn.disabled = true;
 
@@ -2781,50 +2176,33 @@
       if(currentMySel && currentMySel.left && currentMySel.right){
         var newSelections = Object.assign({}, getProgress(q.id).selections || {});
         delete newSelections[myId];
-
         if(currentMySel.left === currentMySel.right){
-          playCorrectSound();
-          matched[currentMySel.left] = true;
+          playCorrectSound(); matched[currentMySel.left] = true;
           writeProgress(q.id, { matched: matched, lastWrong: null, selections: newSelections });
-
-          if(Object.keys(matched).length === pIds.length){
-            setTimeout(playVictorySound, 400);
-          }
+          if(Object.keys(matched).length === pIds.length){ setTimeout(playVictorySound, 400); }
         } else {
           playWrongSound();
-          writeProgress(q.id, { 
-            lastWrong: { left: currentMySel.left, right: currentMySel.right, t: Date.now(), who: myName },
-            selections: newSelections
-          });
+          writeProgress(q.id, { lastWrong: { left: currentMySel.left, right: currentMySel.right, t: Date.now(), who: myName }, selections: newSelections });
         }
       }
     }
 
-    cols.appendChild(lCol); cols.appendChild(rCol);
-    wrap.appendChild(cols);
-    container.appendChild(wrap);
+    cols.appendChild(lCol); cols.appendChild(rCol); wrap.appendChild(cols); container.appendChild(wrap);
 
     var lastWrong = progress.lastWrong;
     if(lastWrong && lastWrong.t && (Date.now() - lastWrong.t < 1200)){
       var wLeft = lCol.querySelector(`.match-item[data-id="${lastWrong.left}"]`);
       var wRight = rCol.querySelector(`.match-item[data-id="${lastWrong.right}"]`);
       if(wLeft && wRight){
-        wLeft.classList.add("wrong");
-        wRight.classList.add("wrong");
-        setTimeout(function(){
-          if(wLeft) wLeft.classList.remove("wrong", "selected");
-          if(wRight) wRight.classList.remove("wrong", "selected");
-        }, 600);
+        wLeft.classList.add("wrong"); wRight.classList.add("wrong");
+        setTimeout(function(){ if(wLeft) wLeft.classList.remove("wrong", "selected"); if(wRight) wRight.classList.remove("wrong", "selected"); }, 600);
       }
     }
 
     function drawLines(){
-      var rect = wrap.getBoundingClientRect();
-      svg.setAttribute("viewBox","0 0 "+rect.width+" "+rect.height);
-      svg.innerHTML = "";
+      var rect = wrap.getBoundingClientRect(); svg.setAttribute("viewBox","0 0 "+rect.width+" "+rect.height); svg.innerHTML = "";
       Object.keys(matched).forEach(function(pid){
-        var l = lCol.querySelector(`.match-item[data-id="${pid}"]`);
-        var r = rCol.querySelector(`.match-item[data-id="${pid}"]`);
+        var l = lCol.querySelector(`.match-item[data-id="${pid}"]`); var r = rCol.querySelector(`.match-item[data-id="${pid}"]`);
         if(!l || !r) return;
         var lr = l.getBoundingClientRect(), rr = r.getBoundingClientRect();
         var x1 = lr.right - rect.left, y1 = lr.top + lr.height/2 - rect.top;
@@ -2832,94 +2210,27 @@
         var mx = (x1+x2)/2;
         var path = document.createElementNS("http://www.w3.org/2000/svg","path");
         path.setAttribute("d", "M"+x1+","+y1+" C "+mx+","+y1+" "+mx+","+y2+" "+x2+","+y2);
-        path.setAttribute("stroke", "#2D5A27"); path.setAttribute("stroke-width","3.5");
-        path.setAttribute("fill","none"); path.setAttribute("stroke-linecap","round");
+        path.setAttribute("stroke", "#2D5A27"); path.setAttribute("stroke-width","3.5"); path.setAttribute("fill","none"); path.setAttribute("stroke-linecap","round");
         svg.appendChild(path);
       });
     }
-    requestAnimationFrame(drawLines);
-    window.addEventListener("resize", drawLines);
-  }
-
-  /* 圈選題 */
-  function renderCircleBoard(q, container){
-    var progress = getProgress(q.id);
-    var selected = progress.selected || {};
-    var interactive = canInteract();
-    var correctIds = q.correctIds || [];
-
-    var wrap = document.createElement("div");
-    wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || q.title}</p>`;
-    var cBox = document.createElement("div"); cBox.className = "circle-choices";
-
-    Object.keys(q.choices || {}).forEach(function(cid){
-      var c = q.choices[cid];
-      var btn = document.createElement("button"); 
-      var isSel = !!selected[cid];
-      var isCorrect = correctIds.indexOf(cid) !== -1;
-
-      btn.className = "circle-chip";
-      btn.textContent = c.text;
-
-      if(progress.revealed){
-        if(isCorrect && isSel) btn.classList.add("correct");
-        else if(isCorrect && !isSel) btn.classList.add("missed");
-        else if(!isCorrect && isSel) btn.classList.add("selected-wrong");
-        btn.disabled = true;
-      } else {
-        if(isSel) btn.classList.add("selected");
-        if(!interactive) btn.disabled = true;
-      }
-
-      btn.onclick = function(){
-        if(!interactive || progress.revealed) return;
-        selected[cid] = !selected[cid];
-        if(selected[cid]){
-          if(isCorrect) playCorrectSound();
-          else playWrongSound();
-        }
-        writeProgress(q.id, { selected: selected });
-      };
-      cBox.appendChild(btn);
-    });
-    wrap.appendChild(cBox);
-
-    if(progress.revealed){
-      var note = document.createElement("p");
-      note.style.fontSize = "13px"; note.style.color = "var(--ink-soft)"; note.style.marginTop = "14px";
-      note.textContent = "綠色實線＝答對；綠色虛線＝漏選答案；劃線＝選錯。";
-      wrap.appendChild(note);
-    }
-
-    container.appendChild(wrap);
+    requestAnimationFrame(drawLines); window.addEventListener("resize", drawLines);
   }
 
   /* 遠端游標 */
   function renderMultiCursors(cursorData){
     var container = document.getElementById("multi-cursor-box");
-    if(!container) return;
-    container.innerHTML = "";
+    if(!container) return; container.innerHTML = "";
     if(!cursorData || !cursorOn) return;
-
     Object.keys(cursorData).forEach(function(peerId){
       if(peerId === myId) return;
-
-      var c = cursorData[peerId];
-      if(!c || c.x == null) return;
-
+      var c = cursorData[peerId]; if(!c || c.x == null) return;
       var isTeacherCursor = (c.role === "teacher" || peerId === "teacher");
       var displayName = isTeacherCursor ? "👑 老師" : (c.name || "學生");
       var color = isTeacherCursor ? "#B23B32" : getColorForStudent(displayName, "student");
-
-      var el = document.createElement("div");
-      el.className = "peer-cursor";
-      el.style.left = c.x + "%";
-      el.style.top = c.y + "%";
-
-      el.innerHTML = `
-        <span class="peer-cursor-dot" style="background:${color};"></span>
-        <span class="peer-cursor-label" style="background:${color};">${displayName}</span>
-      `;
+      var el = document.createElement("div"); el.className = "peer-cursor";
+      el.style.left = c.x + "%"; el.style.top = c.y + "%";
+      el.innerHTML = `<span class="peer-cursor-dot" style="background:${color};"></span><span class="peer-cursor-label" style="background:${color};">${displayName}</span>`;
       container.appendChild(el);
     });
   }
@@ -2927,169 +2238,74 @@
   var lastM = 0;
   function handleCursorMove(clientX, clientY){
     if(!inRoom() || !cursorOn) return;
-    var now = Date.now();
-    if(now - lastM < 40) return;
-    lastM = now;
-
-    var boardArea = document.getElementById("board-area");
-    if(!boardArea) return;
-    var r = boardArea.getBoundingClientRect();
-    if(r.width === 0 || r.height === 0) return;
-
-    var x = ((clientX - r.left) / r.width) * 100;
-    var y = ((clientY - r.top) / r.height) * 100;
-
-    if(x < -10 || x > 110 || y < -10 || y > 110){
-      update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: null, y: null });
-      return;
-    }
-
-    x = Math.max(0, Math.min(100, x));
-    y = Math.max(0, Math.min(100, y));
-
-    update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { 
-      x: x, 
-      y: y, 
-      name: myName,
-      role: roomRole 
-    });
+    var now = Date.now(); if(now - lastM < 40) return; lastM = now;
+    var boardArea = document.getElementById("board-area"); if(!boardArea) return;
+    var r = boardArea.getBoundingClientRect(); if(r.width === 0 || r.height === 0) return;
+    var x = ((clientX - r.left) / r.width) * 100; var y = ((clientY - r.top) / r.height) * 100;
+    if(x < -10 || x > 110 || y < -10 || y > 110){ update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: null, y: null }); return; }
+    x = Math.max(0, Math.min(100, x)); y = Math.max(0, Math.min(100, y));
+    update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: x, y: y, name: myName, role: roomRole });
   }
+  window.addEventListener("mousemove", function(e){ handleCursorMove(e.clientX, e.clientY); });
+  window.addEventListener("touchmove", function(e){ if(e.touches && e.touches[0]){ handleCursorMove(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
 
-  window.addEventListener("mousemove", function(e){
-    handleCursorMove(e.clientX, e.clientY);
-  });
-
-  window.addEventListener("touchmove", function(e){
-    if(e.touches && e.touches[0]){
-      handleCursorMove(e.touches[0].clientX, e.touches[0].clientY);
-    }
-  }, { passive: true });
-
-  /* 畫面縮放按鈕監聽 */
+  /* 縮放按鈕 */
   var btnZoomIn = document.getElementById("btn-zoom-in");
   var btnZoomOut = document.getElementById("btn-zoom-out");
   var btnZoomReset = document.getElementById("zoom-percent-text");
-
   if(btnZoomIn) btnZoomIn.onclick = function(){ applyStageZoom(currentZoomRatio + 0.1); };
   if(btnZoomOut) btnZoomOut.onclick = function(){ applyStageZoom(currentZoomRatio - 0.1); };
   if(btnZoomReset) btnZoomReset.onclick = function(){ applyStageZoom(1.0); };
 
-  /* 設定面板操作 */
-  var soundSelect = document.getElementById("setting-sound-style");
-  soundSelect.value = currentSoundStyle;
-
-  soundSelect.onchange = function(){
-    currentSoundStyle = soundSelect.value;
-    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
-  };
-
-  document.querySelectorAll(".btn-theme-bg").forEach(function(b){
-    b.onclick = function(){
-      applyTheme(b.dataset.bg, currentAccentColor, true);
-    };
-  });
-
-  document.querySelectorAll(".btn-theme-accent").forEach(function(b){
-    b.onclick = function(){
-      applyTheme(currentBgMode, b.dataset.accent, true);
-    };
-  });
-
+  /* 設定面板 */
+  var soundSelect = document.getElementById("setting-sound-style"); soundSelect.value = currentSoundStyle;
+  soundSelect.onchange = function(){ currentSoundStyle = soundSelect.value; localStorage.setItem("hanyu_sound_style", currentSoundStyle); };
+  document.querySelectorAll(".btn-theme-bg").forEach(function(b){ b.onclick = function(){ applyTheme(b.dataset.bg, currentAccentColor, true); }; });
+  document.querySelectorAll(".btn-theme-accent").forEach(function(b){ b.onclick = function(){ applyTheme(currentBgMode, b.dataset.accent, true); }; });
+  
   var testSoundBtn = document.getElementById("btn-test-sound");
   if(testSoundBtn){
     testSoundBtn.onclick = function(e){
-      e.preventDefault();
-      var ctx = getAudioContext();
-      if(ctx.state === 'suspended'){
-        ctx.resume().then(runTest);
-      } else {
-        runTest();
-      }
-
-      function runTest(){
-        var previewStyle = soundSelect ? soundSelect.value : currentSoundStyle;
-        playTone(previewStyle, true);
-        setTimeout(function(){
-          playTone(previewStyle, false);
-        }, 600);
-      }
+      e.preventDefault(); var ctx = getAudioContext();
+      if(ctx.state === 'suspended') ctx.resume().then(runTest); else runTest();
+      function runTest(){ var prev = soundSelect ? soundSelect.value : currentSoundStyle; playTone(prev, true); setTimeout(function(){ playTone(prev, false); }, 600); }
     };
   }
+  document.getElementById("btn-close-settings").onclick = function(){ currentSoundStyle = soundSelect.value; localStorage.setItem("hanyu_sound_style", currentSoundStyle); document.getElementById("settings-dialog").close(); };
 
-  document.getElementById("btn-close-settings").onclick = function(){
-    currentSoundStyle = soundSelect.value;
-    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
-    document.getElementById("settings-dialog").close();
-  };
-
-  /* 大題新增／編輯彈窗 */
+  /* 大題新增彈窗 */
   var sectionDialog = document.getElementById("section-dialog");
   var sectionTypeToggle = document.getElementById("section-type-toggle");
   var currentSectionType = "match";
-
   sectionTypeToggle.querySelectorAll("button").forEach(function(b){
-    b.onclick = function(){
-      sectionTypeToggle.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); });
-      b.classList.add("active");
-      currentSectionType = b.dataset.type;
-    };
+    b.onclick = function(){ sectionTypeToggle.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); }); b.classList.add("active"); currentSectionType = b.dataset.type; };
   });
-
   document.getElementById("btn-new-section").onclick = function(){
-    editingSectionId = null;
-    document.getElementById("f-sec-title").value = "";
-    document.getElementById("f-sec-desc").value = "";
-    document.getElementById("section-dialog-title").textContent = "新增試卷大題";
-    sectionDialog.showModal();
+    editingSectionId = null; document.getElementById("f-sec-title").value = ""; document.getElementById("f-sec-desc").value = "";
+    document.getElementById("section-dialog-title").textContent = "新增試卷大題"; sectionDialog.showModal();
   };
-
   document.getElementById("btn-cancel-section").onclick = function(){ sectionDialog.close(); };
-
   document.getElementById("section-form").onsubmit = function(e){
     e.preventDefault();
-    var title = document.getElementById("f-sec-title").value.trim();
-    var desc = document.getElementById("f-sec-desc").value.trim();
+    var title = document.getElementById("f-sec-title").value.trim(); var desc = document.getElementById("f-sec-desc").value.trim();
     if(!title) return;
-
     var secs = Object.assign({}, getSections());
-    if(editingSectionId){
-      secs[editingSectionId].title = title;
-      secs[editingSectionId].desc = desc;
-    } else {
-      var newSecId = uid("sec");
-      var defaultQId = uid("q");
-      var currentKeys = Object.keys(secs);
-
+    if(editingSectionId){ secs[editingSectionId].title = title; secs[editingSectionId].desc = desc; }
+    else {
+      var newSecId = uid("sec"); var defaultQId = uid("q"); var currentKeys = Object.keys(secs);
       var defaultQ = { id: defaultQId, title: "第 1 題", order: 0 };
       if(currentSectionType === "match"){
-        defaultQ.leftLabel = "生詞"; defaultQ.rightLabel = "拼音";
-        defaultQ.pairs = { p1: {id:"p1", left:"你好", right:"nǐ hǎo"} };
+        defaultQ.leftLabel = "生詞"; defaultQ.rightLabel = "拼音"; defaultQ.pairs = { p1: {id:"p1", left:"你好", right:"nǐ hǎo"} };
       } else if(currentSectionType === "choice"){
-        defaultQ.prompt = "請選出正確的答案：";
-        defaultQ.choices = { c1: {id:"c1", text:"選項 A"}, c2: {id:"c2", text:"選項 B"} };
-        defaultQ.answerId = "c1";
-      } else if(currentSectionType === "circle"){
-        defaultQ.prompt = "請圈出符合的項目：";
-        defaultQ.choices = { c1: {id:"c1", text:"選項 1"}, c2: {id:"c2", text:"選項 2"} };
-        defaultQ.correctIds = ["c1"];
+        defaultQ.prompt = "請選出正確的答案(可複選)："; defaultQ.choices = { c1: {id:"c1", text:"選項 A"}, c2: {id:"c2", text:"選項 B"} }; defaultQ.answerIds = ["c1"];
+      } else if(currentSectionType === "reorder"){
+        defaultQ.prompt = "請將下列詞語重組為正確句子"; defaultQ.words = ["我", "愛", "學", "華語"];
       } else {
-        defaultQ.desc = "漢字臨摹與書寫練習";
-        defaultQ.bgImage = ""; defaultQ.gridType = "jiu";
+        defaultQ.desc = "漢字臨摹與書寫練習"; defaultQ.bgImage = ""; defaultQ.gridType = "jiu";
       }
-
-      secs[newSecId] = {
-        id: newSecId,
-        title: title,
-        desc: desc,
-        type: currentSectionType,
-        order: currentKeys.length,
-        collapsed: false,
-        questions: { [defaultQId]: defaultQ }
-      };
-
+      secs[newSecId] = { id: newSecId, title: title, desc: desc, type: currentSectionType, order: currentKeys.length, collapsed: false, questions: { [defaultQId]: defaultQ } };
       writeSections(secs, defaultQId);
     }
-
     sectionDialog.close();
   };
 
@@ -3097,15 +2313,15 @@
   var editorDialog = document.getElementById("editor-dialog");
   var matchFields = document.getElementById("match-fields");
   var choiceFields = document.getElementById("choice-fields");
-  var circleFields = document.getElementById("circle-fields");
+  var reorderFields = document.getElementById("reorder-fields");
   var boardFields = document.getElementById("board-fields");
   var uploadedBase64 = "";
 
   var choiceOptRows = document.getElementById("choice-opt-rows");
-  function addChoiceOptRow(text, isAnswer){
+  function addChoiceOptRow(text, isChecked){
     var row = document.createElement("div"); row.className = "choice-row";
     row.innerHTML = `
-      <input type="radio" name="mc_correct_radio" ${isAnswer ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--bamboo);">
+      <input type="checkbox" class="mc-correct-chk" ${isChecked ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--bamboo);" title="勾選代表正確答案(可多選)">
       <input type="text" class="mc-opt-text" placeholder="輸入選項內容" value="${text || ''}">
       <button type="button" class="row-del">✕</button>
     `;
@@ -3113,19 +2329,6 @@
     choiceOptRows.appendChild(row);
   }
   document.getElementById("add-mc-opt").onclick = function(){ addChoiceOptRow("", false); };
-
-  var circleRows = document.getElementById("circle-rows");
-  function addCircleOptRow(text, isChecked){
-    var row = document.createElement("div"); row.className = "choice-row";
-    row.innerHTML = `
-      <input type="checkbox" class="circle-opt-check" ${isChecked ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--seal);">
-      <input type="text" class="circle-opt-text" placeholder="輸入選項文字" value="${text || ''}">
-      <button type="button" class="row-del">✕</button>
-    `;
-    row.querySelector(".row-del").onclick = function(){ if(circleRows.children.length > 2) row.remove(); };
-    circleRows.appendChild(row);
-  }
-  document.getElementById("add-circle-opt").onclick = function(){ addCircleOptRow("", false); };
 
   var pairRows = document.getElementById("pair-rows");
   function addPairRow(l, r){
@@ -3143,52 +2346,40 @@
   var fileInput = document.getElementById("f-board-img");
   document.getElementById("upload-box").onclick = function(){ fileInput.click(); };
   fileInput.onchange = function(e){
-    var f = e.target.files[0];
-    if(!f) return;
+    var f = e.target.files[0]; if(!f) return;
     var reader = new FileReader();
     reader.onload = function(evt){
       var img = new Image();
       img.onload = function(){
-        var c = document.createElement("canvas");
-        var scale = Math.min(1, 900 / img.width);
-        c.width = Math.round(img.width * scale);
-        c.height = Math.round(img.height * scale);
-        var cx = c.getContext("2d");
-        cx.drawImage(img, 0, 0, c.width, c.height);
+        var c = document.createElement("canvas"); var scale = Math.min(1, 900 / img.width);
+        c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+        var cx = c.getContext("2d"); cx.drawImage(img, 0, 0, c.width, c.height);
         uploadedBase64 = c.toDataURL("image/jpeg", 0.75);
         document.getElementById("upload-tip").textContent = "✅ 已上傳圖片：" + f.name;
       };
       img.src = evt.target.result;
     };
-    reader.readAsDataURL(f);
+    reader.readAsDataURL(file);
   };
 
   function openQuestionDialog(sectionId, editQuestionId){
     activeSectionForAdd = sectionId;
-    var secs = getSections();
-    var sec = secs[sectionId];
-    if(!sec) return;
-
+    var secs = getSections(); var sec = secs[sectionId]; if(!sec) return;
     var secType = sec.type;
     matchFields.style.display = secType === "match" ? "" : "none";
     choiceFields.style.display = secType === "choice" ? "" : "none";
-    circleFields.style.display = secType === "circle" ? "" : "none";
+    reorderFields.style.display = secType === "reorder" ? "" : "none";
     boardFields.style.display = secType === "board" ? "" : "none";
 
-    uploadedBase64 = "";
-    document.getElementById("upload-tip").textContent = "📷 點擊上傳背景圖片（JPG/PNG）";
-    pairRows.innerHTML = ""; choiceOptRows.innerHTML = ""; circleRows.innerHTML = "";
+    uploadedBase64 = ""; document.getElementById("upload-tip").textContent = "📷 點擊上傳背景圖片（JPG/PNG）";
+    pairRows.innerHTML = ""; choiceOptRows.innerHTML = "";
 
     var count = Object.keys(sec.questions || {}).length;
     document.getElementById("f-title").value = `第 ${count + 1} 題`;
-
     addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie");
     addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false);
-    addCircleOptRow("選項 1", true); addCircleOptRow("選項 2", false);
-
     editorDialog.showModal();
   }
-
   document.getElementById("btn-cancel").onclick = function(){ editorDialog.close(); };
 
   document.getElementById("editor-form").onsubmit = function(e){
@@ -3196,247 +2387,139 @@
     var title = document.getElementById("f-title").value.trim();
     if(!title || !activeSectionForAdd) return;
 
-    var secs = Object.assign({}, getSections());
-    var sec = secs[activeSectionForAdd];
-    if(!sec) return;
-
-    var newQId = uid("q");
-    var qKeys = Object.keys(sec.questions || {});
+    var secs = Object.assign({}, getSections()); var sec = secs[activeSectionForAdd]; if(!sec) return;
+    var newQId = uid("q"); var qKeys = Object.keys(sec.questions || {});
     var newQ = { id: newQId, title: title, order: qKeys.length };
 
     if(sec.type === "board"){
-      newQ.desc = document.getElementById("f-board-desc").value.trim();
-      newQ.bgImage = uploadedBase64;
-      newQ.gridType = "jiu";
+      newQ.desc = document.getElementById("f-board-desc").value.trim(); newQ.bgImage = uploadedBase64; newQ.gridType = "jiu";
     } else if(sec.type === "choice"){
-      var choices = {}; var ansId = null;
+      var choices = {}; var answerIds = [];
       choiceOptRows.querySelectorAll(".choice-row").forEach(function(r, idx){
         var txt = r.querySelector(".mc-opt-text").value.trim();
-        var isRadio = r.querySelector("input[type='radio']").checked;
+        var isChecked = r.querySelector(".mc-correct-chk").checked;
         if(txt){
-          var cid = "c" + (idx + 1);
-          choices[cid] = { id: cid, text: txt };
-          if(isRadio) ansId = cid;
+          var cid = "c" + (idx + 1); choices[cid] = { id: cid, text: txt };
+          if(isChecked) answerIds.push(cid);
         }
       });
-      if(!ansId) ansId = Object.keys(choices)[0];
+      if(answerIds.length === 0 && Object.keys(choices).length > 0) answerIds.push(Object.keys(choices)[0]);
       newQ.prompt = document.getElementById("f-choice-prompt").value.trim() || title;
-      newQ.choices = choices;
-      newQ.answerId = ansId;
+      newQ.choices = choices; newQ.answerIds = answerIds;
+    } else if(sec.type === "reorder"){
+      var rawStr = document.getElementById("f-reorder-answer").value.trim();
+      var words = rawStr ? rawStr.split(/[,，\s]+/).filter(Boolean) : ["我", "是", "學生"];
+      newQ.prompt = document.getElementById("f-reorder-prompt").value.trim() || title;
+      newQ.words = words;
     } else if(sec.type === "match"){
       var pairs = {};
       pairRows.querySelectorAll(".pair-row").forEach(function(r, idx){
-        var l = r.querySelector(".pair-left").value.trim();
-        var rt = r.querySelector(".pair-right").value.trim();
+        var l = r.querySelector(".pair-left").value.trim(); var rt = r.querySelector(".pair-right").value.trim();
         if(l && rt) pairs["p" + (idx + 1)] = { id: "p" + (idx + 1), left: l, right: rt };
       });
       newQ.leftLabel = document.getElementById("f-left-label").value.trim() || "生詞";
       newQ.rightLabel = document.getElementById("f-right-label").value.trim() || "拼音／意思";
       newQ.pairs = pairs;
-    } else {
-      var cChoices = {}; var corIds = [];
-      circleRows.querySelectorAll(".choice-row").forEach(function(r, idx){
-        var txt = r.querySelector(".circle-opt-text").value.trim();
-        var isChk = r.querySelector(".circle-opt-check").checked;
-        if(txt){
-          var cid = "c" + (idx + 1);
-          cChoices[cid] = { id: cid, text: txt };
-          if(isChk) corIds.push(cid);
-        }
-      });
-      newQ.prompt = document.getElementById("f-prompt").value.trim() || title;
-      newQ.choices = cChoices;
-      newQ.correctIds = corIds;
     }
 
     if(!sec.questions) sec.questions = {};
-    sec.questions[newQId] = newQ;
-    writeSections(secs, newQId);
-    editorDialog.close();
+    sec.questions[newQId] = newQ; writeSections(secs, newQId); editorDialog.close();
   };
 
-  /* Excel 批次操作 */
+  /* Excel 匯入 */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
-
   excelInput.onchange = function(e){
-    var file = e.target.files[0];
-    if(!file) return;
-
+    var file = e.target.files[0]; if(!file) return;
     var reader = new FileReader();
     reader.onload = function(evt){
       try {
-        var data = new Uint8Array(evt.target.result);
-        var wb = XLSX.read(data, { type: 'array' });
-        var ws = wb.Sheets[wb.SheetNames[0]];
-        var rows = XLSX.utils.sheet_to_json(ws);
-
+        var data = new Uint8Array(evt.target.result); var wb = XLSX.read(data, { type: 'array' });
+        var ws = wb.Sheets[wb.SheetNames[0]]; var rows = XLSX.utils.sheet_to_json(ws);
         if(!rows || rows.length === 0){ alert("Excel 檔案內沒有資料！"); return; }
-
-        var newSections = Object.assign({}, getSections());
-        var grouped = {};
-
+        var newSections = Object.assign({}, getSections()); var grouped = {};
         rows.forEach(function(row){
-          var secTitle = row["大題名稱"] || row["Section"] || "第一大題：生詞測驗";
+          var secTitle = row["大題名稱"] || row["Section"] || "第一大題";
           var type = (row["題型"] || row["Type"] || "match").toLowerCase();
-          if(!grouped[secTitle]){
-            grouped[secTitle] = { title: secTitle, type: type, questions: {} };
-          }
-          var qTitle = row["小題名稱"] || row["Question"] || ("第 " + (Object.keys(grouped[secTitle].questions).length + 1) + " 題");
-          if(!grouped[secTitle].questions[qTitle]){
-            grouped[secTitle].questions[qTitle] = { title: qTitle, rows: [] };
-          }
+          if(!grouped[secTitle]) grouped[secTitle] = { title: secTitle, type: type, questions: {} };
+          var qTitle = row["小題名稱"] || row["Question"] || "第 1 題";
+          if(!grouped[secTitle].questions[qTitle]) grouped[secTitle].questions[qTitle] = { title: qTitle, rows: [] };
           grouped[secTitle].questions[qTitle].rows.push(row);
         });
-
-        var firstNewQId = null;
-        var secOrder = Object.keys(newSections).length;
+        var firstNewQId = null; var secOrder = Object.keys(newSections).length;
         Object.keys(grouped).forEach(function(secTitle){
-          var gSec = grouped[secTitle];
-          var newSecId = uid("sec");
-          var questionsObj = {};
-
-          var qOrder = 0;
+          var gSec = grouped[secTitle]; var newSecId = uid("sec"); var questionsObj = {}; var qOrder = 0;
           Object.keys(gSec.questions).forEach(function(qTitle){
-            var gQ = gSec.questions[qTitle];
-            var newQId = uid("q");
-            if(!firstNewQId) firstNewQId = newQId;
-
+            var gQ = gSec.questions[qTitle]; var newQId = uid("q"); if(!firstNewQId) firstNewQId = newQId;
             if(gSec.type === "match"){
               var pairs = {};
               gQ.rows.forEach(function(it, idx){
-                var pid = "p" + (idx + 1);
-                var l = it["左欄生詞"] || it["Left"] || "";
-                var r = it["右欄拼音或意思"] || it["Right"] || "";
+                var pid = "p" + (idx + 1); var l = it["左欄生詞"] || ""; var r = it["右欄拼音或意思"] || "";
                 if(l && r) pairs[pid] = { id: pid, left: String(l), right: String(r) };
               });
-              questionsObj[newQId] = {
-                id: newQId, title: qTitle, order: qOrder++, leftLabel: "生詞", rightLabel: "拼音／意思", pairs: pairs
-              };
-            } else if(gSec.type === "choice"){
-              var it = gQ.rows[0];
-              var rawChoices = String(it["選項(逗號分開)"] || it["Choices"] || "").split(/[,，、]/);
-              var answer = String(it["正確答案"] || it["Answer"] || "").trim();
-              var choices = {}, answerId = null;
-              rawChoices.forEach(function(cText, cIdx){
-                var cid = "c" + (cIdx + 1);
-                var trimTxt = cText.trim();
-                if(trimTxt){
-                  choices[cid] = { id: cid, text: trimTxt };
-                  if(trimTxt === answer) answerId = cid;
-                }
-              });
-              if(!answerId && Object.keys(choices).length) answerId = Object.keys(choices)[0];
-              questionsObj[newQId] = {
-                id: newQId, title: qTitle, order: qOrder++, prompt: it["題目說明"] || qTitle, choices: choices, answerId: answerId
-              };
+              questionsObj[newQId] = { id: newQId, title: qTitle, order: qOrder++, leftLabel: "生詞", rightLabel: "拼音", pairs: pairs };
+            } else if(gSec.type === "reorder"){
+              var it = gQ.rows[0]; var wStr = it["正確句子"] || it["Words"] || "我,是,學生";
+              questionsObj[newQId] = { id: newQId, title: qTitle, order: qOrder++, prompt: it["題目說明"] || qTitle, words: wStr.split(/[,，\s]+/) };
             }
           });
-
-          newSections[newSecId] = {
-            id: newSecId, title: secTitle, type: gSec.type, order: secOrder++, collapsed: false, questions: questionsObj
-          };
+          newSections[newSecId] = { id: newSecId, title: secTitle, type: gSec.type, order: secOrder++, collapsed: false, questions: questionsObj };
         });
-
-        writeSections(newSections, firstNewQId);
-        alert("🎉 成功由 Excel 匯入試卷大題題庫！");
-      } catch(err){ alert("解析失敗，請確認檔案格式。"); }
+        writeSections(newSections, firstNewQId); alert("🎉 成功由 Excel 匯入題庫！");
+      } catch(err){ alert("解析失敗。"); }
     };
     reader.readAsArrayBuffer(file);
   };
 
   document.getElementById("btn-dl-template").onclick = function(){
     var templateData = [
-      { "大題名稱": "第一大題：生詞配對", "題型": "match", "小題名稱": "第1題", "左欄生詞": "你好", "右欄拼音或意思": "nǐ hǎo", "題目說明": "", "選項(逗號分開)": "", "正確答案": "" },
-      { "大題名稱": "第一大題：生詞配對", "題型": "match", "小題名稱": "第1題", "左欄生詞": "謝謝", "右欄拼音或意思": "xièxie", "題目說明": "", "選項(逗號分開)": "", "正確答案": "" },
-      { "大題名稱": "第二大題：語意選擇題", "題型": "choice", "小題名稱": "第1題", "左欄生詞": "", "右欄拼音或意思": "", "題目說明": "「謝謝」是什麼意思？", "選項(逗號分開)": "Hello, Thank you, Goodbye", "正確答案": "Thank you" }
+      { "大題名稱": "第一大題：生詞配對", "題型": "match", "小題名稱": "第1題", "左欄生詞": "你好", "右欄拼音或意思": "nǐ hǎo" },
+      { "大題名稱": "第三大題：句子重組", "題型": "reorder", "小題名稱": "第1題", "正確句子": "我,愛,學,華語" }
     ];
-    var ws = XLSX.utils.json_to_sheet(templateData);
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "考卷範本");
-    XLSX.writeFile(wb, "生詞練習台_試卷大題題庫範本.xlsx");
+    var ws = XLSX.utils.json_to_sheet(templateData); var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "範本"); XLSX.writeFile(wb, "生詞練習台_範本.xlsx");
   };
 
   document.getElementById("btn-export-excel").onclick = function(){
-    var secs = getSections();
-    var secKeys = getSortedSectionKeys();
-    var exportRows = [];
+    var secs = getSections(); var secKeys = getSortedSectionKeys(); var exportRows = [];
     secKeys.forEach(function(sid){
-      var sec = secs[sid];
-      var qKeys = getSortedQuestionKeys(sec);
+      var sec = secs[sid]; var qKeys = getSortedQuestionKeys(sec);
       qKeys.forEach(function(qid){
         var q = sec.questions[qid];
         if(sec.type === "match" && q.pairs){
           Object.keys(q.pairs).forEach(function(pid){
-            exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": q.pairs[pid].left, "右欄拼音或意思": q.pairs[pid].right, "題目說明": "", "選項(逗號分開)": "", "正確答案": "" });
+            exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": q.pairs[pid].left, "右欄拼音或意思": q.pairs[pid].right });
           });
-        } else if(sec.type === "choice" && q.choices){
-          var cTexts = Object.keys(q.choices).map(function(cid){ return q.choices[cid].text; }).join(", ");
-          var ansText = q.choices[q.answerId] ? q.choices[q.answerId].text : "";
-          exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": "", "右欄拼音或意思": "", "題目說明": q.prompt || "", "選項(逗號分開)": cTexts, "正確答案": ansText });
+        } else if(sec.type === "reorder" && q.words){
+          exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "正確句子": q.words.join(",") });
         }
       });
     });
-    if(exportRows.length === 0){ alert("目前沒有可匯出的題目。"); return; }
-    var ws = XLSX.utils.json_to_sheet(exportRows);
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "題庫備份");
-    XLSX.writeFile(wb, "生詞題庫備份_" + new Date().toISOString().slice(0,10) + ".xlsx");
+    if(exportRows.length === 0){ alert("無題目可匯出"); return; }
+    var ws = XLSX.utils.json_to_sheet(exportRows); var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "題庫"); XLSX.writeFile(wb, "題庫備份.xlsx");
   };
 
-  /* 學生自填姓名引導 */
   function handleStudentJoin(){
     if(!urlRoom) return;
-    if(urlName){
-      myName = decodeURIComponent(urlName);
-      attachPresence(urlRoom, myId, myName);
-      startRoom(urlRoom, "student");
-      return;
-    }
+    if(urlName){ myName = decodeURIComponent(urlName); attachPresence(urlRoom, myId, myName); startRoom(urlRoom, "student"); return; }
     var nameDialog = document.getElementById("student-name-dialog");
-    if(nameDialog){
-      if(typeof nameDialog.showModal === "function"){
-        try { nameDialog.showModal(); } catch(e){}
-      } else {
-        nameDialog.setAttribute("open", "");
-      }
-    }
+    if(nameDialog){ if(typeof nameDialog.showModal === "function") try{nameDialog.showModal();}catch(e){} else nameDialog.setAttribute("open",""); }
     var submitBtn = document.getElementById("btn-submit-student-name");
     if(submitBtn){
       submitBtn.onclick = function(){
-        var input = document.getElementById("input-student-name");
-        var entered = input ? input.value.trim() : "";
+        var input = document.getElementById("input-student-name"); var entered = input ? input.value.trim() : "";
         if(!entered) entered = "學生 " + Math.floor(10 + Math.random()*90);
-        myName = entered;
-        if(nameDialog){
-          try { nameDialog.close(); } catch(e){}
-          nameDialog.removeAttribute("open");
-        }
-        attachPresence(urlRoom, myId, myName);
-        startRoom(urlRoom, "student");
+        myName = entered; if(nameDialog){ try{nameDialog.close();}catch(e){} nameDialog.removeAttribute("open"); }
+        attachPresence(urlRoom, myId, myName); startRoom(urlRoom, "student");
       };
     }
   }
 
-  function onFirebaseReady(cb){
-    if(window.__firebaseReady){
-      cb();
-    } else {
-      window.addEventListener("firebase-bridge-ready", cb);
-    }
-  }
-
-  if(isStudent){
-    lobbyView.style.display = "none";
-    onFirebaseReady(handleStudentJoin);
-  } else if(urlRoom){
-    onFirebaseReady(function(){
-      attachPresence(urlRoom, "teacher", "老師");
-      startRoom(urlRoom, "teacher");
-    });
-  } else {
-    showLobby();
-  }
+  function onFirebaseReady(cb){ if(window.__firebaseReady) cb(); else window.addEventListener("firebase-bridge-ready", cb); }
+  if(isStudent){ lobbyView.style.display = "none"; onFirebaseReady(handleStudentJoin); }
+  else if(urlRoom){ onFirebaseReady(function(){ attachPresence(urlRoom, "teacher", "老師"); startRoom(urlRoom, "teacher"); }); }
+  else { showLobby(); }
 })();
 </script>
 </body>
