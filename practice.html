@@ -133,8 +133,8 @@
   }
   .item-card.is-folder:hover{border-color:var(--bamboo);}
 
-  /* 教學主舞台佈局：提高空間利用率，放寬大白板 */
-  .layout{flex:1;display:grid;grid-template-columns:270px 1fr;min-height:0;}
+  /* 教學主舞台佈局 */
+  .layout{flex:1;display:grid;grid-template-columns:280px 1fr;min-height:0;}
   .app.student-mode .layout, .app.present .layout{grid-template-columns:1fr;}
   .app.student-mode .sidebar, .app.present .sidebar{display:none;}
 
@@ -145,7 +145,7 @@
   .btn-new{width:100%;justify-content:center;padding:11px 16px; font-weight:700;}
   .sidebar-excel-group{display:flex;flex-direction:column;gap:6px;margin-bottom:4px;}
   
-  /* 試卷考題清單 */
+  /* 試卷考題清單 (支援平滑拖曳重排) */
   .section-list{display:flex;flex-direction:column;gap:10px;}
   .section-block{
     border:1.5px solid var(--grid-line);border-radius:12px;
@@ -166,19 +166,26 @@
     padding:10px 12px;background:var(--surface-2);
     display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none;
   }
+  
+  /* 關鍵防止拖曳閃爍：內部文字節點設為 pointer-events: none */
   .section-head-title{
     font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px;
+    pointer-events:none;
   }
+  .section-head-title *{ pointer-events:none; }
   .section-head-actions{display:flex;align-items:center;gap:4px;}
+  .section-head-actions button{ pointer-events:auto; }
+
   .section-body{
     padding:6px 8px;display:flex;flex-direction:column;gap:4px;background:var(--surface);
   }
   
   .drag-handle-icon{
-    color:var(--ink-soft);opacity:0.4;font-size:13px;cursor:grab;margin-right:2px;user-select:none;
+    color:var(--ink-soft);opacity:0.45;font-size:13px;cursor:grab;margin-right:2px;user-select:none;
+    pointer-events:none;
   }
   .section-head:hover .drag-handle-icon, .question-item-btn:hover .drag-handle-icon{
-    opacity:0.85;
+    opacity:0.9;
   }
 
   .question-item-btn{
@@ -199,8 +206,11 @@
     background:var(--seal-soft) !important;
     color:var(--seal);
   }
+  .question-item-btn > span:first-child{ pointer-events:none; }
+  .question-item-btn > span:first-child *{ pointer-events:none; }
+  .question-item-btn .btn-del-q{ pointer-events:auto; }
 
-  /* 舞台主區域：極大化利用空間，支援平滑縮放 */
+  /* 舞台主區域 */
   .stage-wrap{
     overflow-y:auto; overflow-x:hidden;
     padding:18px clamp(12px, 2.5vw, 28px);
@@ -218,7 +228,7 @@
     transition:transform .15s ease-out;
   }
 
-  /* 浮動畫面縮放調節控制器 (Zoom Controller) */
+  /* 浮動畫面縮放調節控制器 */
   .zoom-floating-widget{
     position:fixed; bottom:24px; right:28px;
     display:flex; align-items:center; gap:4px;
@@ -256,7 +266,7 @@
     margin:0 auto;
   }
 
-  /* 連連看：均勻擴展空間 */
+  /* 連連看 */
   .match-board{position:relative; width:100%; max-width:880px; margin:0 auto;}
   .match-cols{
     display:flex;
@@ -351,7 +361,7 @@
   }
   .match-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 
-  /* ================= 寫字板：直列側欄 + 巨幅白板版面 ================= */
+  /* 寫字板版面 */
   .draw-board-layout{
     display:flex;
     align-items:flex-start;
@@ -360,7 +370,6 @@
     width:100%;
   }
 
-  /* 直立精實側邊工具列 (Docked Vertical Toolbar) */
   .draw-toolbar-vertical{
     display:flex;
     flex-direction:column;
@@ -409,7 +418,6 @@
   }
   .grid-btn-v.active{background:var(--seal); color:#fff; border-color:var(--seal);}
 
-  /* 大白板容器（放大尺寸，不浪費空間） */
   .canvas-stage-wrap{
     position:relative;
     width:100%;
@@ -440,7 +448,6 @@
   
   .text-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
   
-  /* 緊貼文字大小、背景全透明、拖曳時無白色遮塊 */
   .movable-text{
     position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif;
     font-weight:700;line-height:1;color:var(--ink);user-select:none;
@@ -462,7 +469,7 @@
   }
 
   .resize-handle{
-    display:none;position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;
+    display:none;position:absolute;right:-7px;bottom:-7px;width:13px;height:13px;
     background:#1E88E5;border:2px solid #FFFFFF;border-radius:50%;
     cursor:nwse-resize !important;box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:10;
   }
@@ -521,7 +528,7 @@
     <div class="topbar-actions" id="topbar-actions"></div>
   </header>
 
-  <!-- 專案大廳 (含資料夾階層收納) -->
+  <!-- 專案大廳 -->
   <div class="lobby-wrap" id="lobby-view">
     <div class="lobby-header">
       <div>
@@ -552,13 +559,14 @@
         <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display:none;">
       </div>
 
+      <!-- 大題與小題樹狀折疊清單（完整支援拖曳重排） -->
       <div class="section-list" id="section-tree-list"></div>
     </aside>
     
     <main class="stage-wrap">
       <div class="stage" id="stage"></div>
 
-      <!-- 線上課畫面縮放調節控制器 (Zoom Controller) -->
+      <!-- 線上課畫面縮放調節控制器 -->
       <div class="zoom-floating-widget" id="zoom-widget">
         <button type="button" class="zoom-floating-btn" id="btn-zoom-out" title="縮小畫面 (Zoom Out)">−</button>
         <span class="zoom-floating-value" id="zoom-percent-text" title="點擊重置為 100%">100%</span>
@@ -781,7 +789,7 @@
 (function(){
   "use strict";
 
-  /* ================== 畫面縮放控制引擎 (Zoom Controller) ================== */
+  /* ================== 畫面縮放控制引擎 ================== */
   var currentZoomRatio = parseFloat(localStorage.getItem("hanyu_zoom_ratio")) || 1.0;
 
   function applyStageZoom(ratio){
@@ -796,7 +804,6 @@
       zoomText.textContent = Math.round(currentZoomRatio * 100) + "%";
     }
     localStorage.setItem("hanyu_zoom_ratio", currentZoomRatio);
-    // 觸發視窗重繪以確保白板比例自適應重算
     window.dispatchEvent(new Event("resize"));
   }
 
@@ -1002,8 +1009,7 @@
         var osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + idx * 0.12);
         g.gain.setValueAtTime(0.2, now + idx * 0.12); g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
-        osc.connect(g); g.connect(ctx.destination);
-        osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
+        osc.connect(g); g.connect(ctx.destination); osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
       });
     }catch(e){}
   }
@@ -1016,7 +1022,7 @@
     fontSize: 36
   };
 
-  /* ================== 考卷式架構：大題 (Sections) 包覆小題 (Questions) ================== */
+  /* ================== 考卷式架構：加入 order 權重防止 Firebase 字母重排 ================== */
   var STORAGE_FS_KEY = "hanyu-practice-fs-v2";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
@@ -1041,11 +1047,13 @@
             id: "sec_1",
             title: "第一大題：生詞配對",
             type: "match",
+            order: 0,
             collapsed: false,
             questions: {
               "q_1_1": {
                 id: "q_1_1",
                 title: "第 1 題：你好與見面禮貌語",
+                order: 0,
                 leftLabel: "生詞", rightLabel: "拼音",
                 pairs: {
                   p1: {id:"p1", left:"你好", right:"nǐ hǎo"},
@@ -1061,11 +1069,13 @@
             id: "sec_2",
             title: "第二大題：語意選擇題",
             type: "choice",
+            order: 1,
             collapsed: false,
             questions: {
               "q_2_1": {
                 id: "q_2_1",
                 title: "第 1 題：「學生」的意思",
+                order: 0,
                 prompt: "請選出「學生」的拼音與英文意思：",
                 choices: {
                   c1: {id:"c1", text:"老師 (lǎoshī / Teacher)"},
@@ -1077,6 +1087,7 @@
               "q_2_2": {
                 id: "q_2_2",
                 title: "第 2 題：「謝謝」的拼音",
+                order: 1,
                 prompt: "下面哪一個是「謝謝」的正確拼音？",
                 choices: {
                   c1: {id:"c1", text:"xièxie"},
@@ -1091,11 +1102,13 @@
             id: "sec_3",
             title: "第三大題：生字書寫示範",
             type: "board",
+            order: 2,
             collapsed: false,
             questions: {
               "q_3_1": {
                 id: "q_3_1",
                 title: "第 1 題：漢字『好』書寫",
+                order: 0,
                 desc: "請在格線中練習書寫『好』字",
                 bgImage: "", gridType: "jiu"
               }
@@ -1146,6 +1159,7 @@
   var activeSectionForAdd = null;
   var editingSectionId = null;
 
+  // 拖曳狀態追蹤
   var draggedSecId = null;
   var draggedQ = null;
 
@@ -1166,12 +1180,34 @@
     var proj = getActiveProject();
     return (proj && proj.sections) || {};
   }
+
+  // 嚴格依據 order 數值排序大題與小題
+  function getSortedSectionKeys(){
+    var secs = getSections();
+    return Object.keys(secs).sort(function(a, b){
+      var oA = (secs[a].order !== undefined) ? secs[a].order : 999;
+      var oB = (secs[b].order !== undefined) ? secs[b].order : 999;
+      return oA - oB;
+    });
+  }
+
+  function getSortedQuestionKeys(sec){
+    var questions = sec.questions || {};
+    return Object.keys(questions).sort(function(a, b){
+      var oA = (questions[a].order !== undefined) ? questions[a].order : 999;
+      var oB = (questions[b].order !== undefined) ? questions[b].order : 999;
+      return oA - oB;
+    });
+  }
+
   function getAllQuestionsList(){
     var secs = getSections();
+    var secKeys = getSortedSectionKeys();
     var list = [];
-    Object.keys(secs).forEach(function(secId){
+    secKeys.forEach(function(secId){
       var sec = secs[secId];
-      Object.keys(sec.questions || {}).forEach(function(qId){
+      var qKeys = getSortedQuestionKeys(sec);
+      qKeys.forEach(function(qId){
         var q = sec.questions[qId];
         list.push({ section: sec, question: q });
       });
@@ -1733,18 +1769,19 @@
     });
   }
 
-  /* ================== 側欄：大題與小題樹狀折疊目錄（支援拖曳重排） ================== */
+  /* ================== 側欄：大題與小題樹狀折疊目錄（支援完全拖曳重排） ================== */
   var sectionTreeListEl = document.getElementById("section-tree-list");
   function renderSidebar(){
     if(isStudent) return;
     sectionTreeListEl.innerHTML = "";
     var secs = getSections();
+    var secKeys = getSortedSectionKeys();
     var currentInfo = getCurrentQInfo();
     var currentQId = currentInfo ? currentInfo.question.id : null;
 
-    Object.keys(secs).forEach(function(secId){
+    secKeys.forEach(function(secId){
       var sec = secs[secId];
-      var qKeys = Object.keys(sec.questions || {});
+      var qKeys = getSortedQuestionKeys(sec);
       var isCollapsed = !!sec.collapsed;
       var tag = sec.type === "match" ? "連連看" : (sec.type === "choice" ? "選擇題" : (sec.type === "circle" ? "圈出來" : "寫字板"));
 
@@ -1752,44 +1789,55 @@
       block.className = "section-block";
       block.setAttribute("draggable", "true");
 
+      // 大題拖曳開始與結束
       block.ondragstart = function(e){
-        if(draggedQ) return;
+        if(draggedQ) return; // 優先給小題拖曳處理
         draggedSecId = secId;
         e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", "sec:" + secId);
         block.classList.add("is-dragging");
       };
+
       block.ondragend = function(e){
         block.classList.remove("is-dragging");
         draggedSecId = null;
         document.querySelectorAll(".section-block").forEach(function(el){ el.classList.remove("drag-over"); });
       };
+
       block.ondragover = function(e){
         if(!draggedSecId || draggedSecId === secId) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
         block.classList.add("drag-over");
       };
+
       block.ondragleave = function(e){
-        block.classList.remove("drag-over");
+        // 避免子節點穿透誤判
+        if(!block.contains(e.relatedTarget)){
+          block.classList.remove("drag-over");
+        }
       };
+
       block.ondrop = function(e){
         e.preventDefault();
         block.classList.remove("drag-over");
         if(draggedSecId && draggedSecId !== secId){
-          var secKeys = Object.keys(secs);
-          var fromIdx = secKeys.indexOf(draggedSecId);
-          var toIdx = secKeys.indexOf(secId);
+          var currentSecKeys = getSortedSectionKeys();
+          var fromIdx = currentSecKeys.indexOf(draggedSecId);
+          var toIdx = currentSecKeys.indexOf(secId);
           if(fromIdx > -1 && toIdx > -1){
-            secKeys.splice(fromIdx, 1);
-            secKeys.splice(toIdx, 0, draggedSecId);
-            var newSecs = {};
-            secKeys.forEach(function(k){ newSecs[k] = secs[k]; });
-            writeSections(newSecs);
+            currentSecKeys.splice(fromIdx, 1);
+            currentSecKeys.splice(toIdx, 0, draggedSecId);
+            currentSecKeys.forEach(function(k, idx){
+              secs[k].order = idx;
+            });
+            writeSections(secs);
           }
         }
         draggedSecId = null;
       };
 
+      // 大題標題列
       var head = document.createElement("div");
       head.className = "section-head";
       head.innerHTML = `
@@ -1806,7 +1854,7 @@
       `;
 
       head.onclick = function(e){
-        if(e.target.closest("button") || e.target.closest(".drag-handle-icon")) return;
+        if(e.target.closest("button")) return;
         sec.collapsed = !sec.collapsed;
         writeSections(secs);
       };
@@ -1832,6 +1880,7 @@
 
       block.appendChild(head);
 
+      // 小題清單區塊
       if(!isCollapsed){
         var body = document.createElement("div");
         body.className = "section-body";
@@ -1854,58 +1903,80 @@
               <span class="row-del btn-del-q" title="刪除此題" style="font-size:12px; padding:2px 4px;">✕</span>
             `;
 
+            // 小題拖曳開始
             qBtn.ondragstart = function(e){
-              e.stopPropagation();
+              e.stopPropagation(); // 阻止向上冒泡觸發大題拖曳
               draggedQ = { secId: secId, qId: qId };
               e.dataTransfer.effectAllowed = "move";
+              e.dataTransfer.setData("text/plain", "q:" + qId);
               qBtn.classList.add("is-dragging");
             };
+
             qBtn.ondragend = function(e){
               e.stopPropagation();
               qBtn.classList.remove("is-dragging");
               draggedQ = null;
               document.querySelectorAll(".question-item-btn").forEach(function(el){ el.classList.remove("drag-over"); });
             };
+
             qBtn.ondragover = function(e){
               if(!draggedQ || draggedQ.qId === qId) return;
-              e.preventDefault(); e.stopPropagation();
+              e.preventDefault();
+              e.stopPropagation();
               e.dataTransfer.dropEffect = "move";
               qBtn.classList.add("drag-over");
             };
+
             qBtn.ondragleave = function(e){
               e.stopPropagation();
-              qBtn.classList.remove("drag-over");
+              if(!qBtn.contains(e.relatedTarget)){
+                qBtn.classList.remove("drag-over");
+              }
             };
+
             qBtn.ondrop = function(e){
-              e.preventDefault(); e.stopPropagation();
+              e.preventDefault();
+              e.stopPropagation();
               qBtn.classList.remove("drag-over");
 
               if(draggedQ && draggedQ.qId !== qId){
+                // 同一大題內重排
                 if(draggedQ.secId === secId){
-                  var qList = Object.keys(sec.questions);
+                  var qList = getSortedQuestionKeys(sec);
                   var fromIdx = qList.indexOf(draggedQ.qId);
                   var toIdx = qList.indexOf(qId);
                   if(fromIdx > -1 && toIdx > -1){
                     qList.splice(fromIdx, 1);
                     qList.splice(toIdx, 0, draggedQ.qId);
-                    var newQuestions = {};
-                    qList.forEach(function(k){ newQuestions[k] = sec.questions[k]; });
-                    sec.questions = newQuestions;
+                    qList.forEach(function(k, orderIdx){
+                      sec.questions[k].order = orderIdx;
+                    });
                     writeSections(secs);
                   }
                 } 
+                // 跨大題移動 (限相同題型大題)
                 else if(secs[draggedQ.secId] && secs[draggedQ.secId].type === sec.type){
                   var movingQ = secs[draggedQ.secId].questions[draggedQ.qId];
                   if(movingQ){
                     delete secs[draggedQ.secId].questions[draggedQ.qId];
-                    var qList = Object.keys(sec.questions);
-                    var toIdx = qList.indexOf(qId);
-                    qList.splice(toIdx, 0, draggedQ.qId);
-                    var newQuestions = {};
-                    qList.forEach(function(k){ 
-                      newQuestions[k] = (k === draggedQ.qId) ? movingQ : sec.questions[k]; 
+                    // 重排舊大題小題 order
+                    var oldQList = getSortedQuestionKeys(secs[draggedQ.secId]);
+                    oldQList.forEach(function(k, orderIdx){
+                      secs[draggedQ.secId].questions[k].order = orderIdx;
                     });
-                    sec.questions = newQuestions;
+
+                    // 插入至新大題指定位置
+                    var newQList = getSortedQuestionKeys(sec);
+                    var toIdx = newQList.indexOf(qId);
+                    if(toIdx === -1) toIdx = newQList.length;
+                    newQList.splice(toIdx, 0, draggedQ.qId);
+
+                    if(!sec.questions) sec.questions = {};
+                    sec.questions[draggedQ.qId] = movingQ;
+                    newQList.forEach(function(k, orderIdx){
+                      sec.questions[k].order = orderIdx;
+                    });
+
                     writeSections(secs);
                   }
                 }
@@ -2014,7 +2085,6 @@
     else if(sec.type === "circle") renderCircleBoard(q, boardArea);
     else if(sec.type === "board") renderDrawBoard(q, boardArea);
 
-    // 套用已儲存的縮放比率
     applyStageZoom(currentZoomRatio);
   }
 
@@ -2109,7 +2179,7 @@
     }
   }
 
-  /* ================= 寫字板：直立側欄工具列 + 放大白板 ================= */
+  /* 寫字板功能 */
   function renderDrawBoard(q, container){
     var progress = getProgress(q.id);
     var strokes = progress.strokes || [];
@@ -2120,7 +2190,6 @@
     var layout = document.createElement("div");
     layout.className = "draw-board-layout";
 
-    // 左側直立緊湊型工具列
     var vToolbar = document.createElement("div");
     vToolbar.className = "draw-toolbar-vertical";
     vToolbar.innerHTML = `
@@ -2138,7 +2207,6 @@
       </button>
       <div class="tool-v-sep"></div>
 
-      <!-- 格線切換 -->
       <div class="grid-btn-group">
         <button type="button" class="grid-btn-v ${currentGrid==='none'?'active':''}" data-grid="none">無格</button>
         <button type="button" class="grid-btn-v ${currentGrid==='tian'?'active':''}" data-grid="tian">田字</button>
@@ -2146,7 +2214,6 @@
       </div>
       <div class="tool-v-sep"></div>
 
-      <!-- 色票 -->
       <div class="color-dot-grid">
         <div class="color-dot ${boardState.color==='#B23B32'?'active':''}" data-color="#B23B32" style="background:#B23B32;" title="紅色"></div>
         <div class="color-dot ${(boardState.color==='#2A333C'||boardState.color==='#E5EAE6'||boardState.color==='#FFFFFF')?'active':''}" id="btn-theme-dark-color" data-color="#2A333C" style="background:#2A333C;" title="黑/白"></div>
@@ -2156,7 +2223,6 @@
       </div>
       <div class="tool-v-sep"></div>
 
-      <!-- 筆畫粗細 -->
       <div class="size-btn-group">
         <button type="button" class="size-btn-v ${boardState.size===3?'active':''}" data-size="3">細</button>
         <button type="button" class="size-btn-v ${boardState.size===6?'active':''}" data-size="6">中</button>
@@ -2164,7 +2230,6 @@
       </div>
       <div class="tool-v-sep"></div>
 
-      <!-- 字號選單 -->
       <select class="board-font-select" style="width:48px; padding:2px; font-size:11px; text-align:center; background:var(--surface); border-radius:6px; border:1px solid var(--grid-line);">
         <option value="24" ${boardState.fontSize===24?'selected':''}>24</option>
         <option value="32" ${boardState.fontSize===32?'selected':''}>32</option>
@@ -2175,7 +2240,6 @@
       </select>
       <div class="tool-v-sep"></div>
 
-      <!-- 獨立底圖操作按鈕 -->
       <button type="button" class="tool-btn-v" id="btn-upload-bg" title="上傳底圖">
         <span>📷</span><span style="font-size:9.5px;">底圖</span>
       </button>
@@ -2192,7 +2256,6 @@
 
     layout.appendChild(vToolbar);
 
-    // 放大版白板容器
     var cWrap = document.createElement("div"); 
     cWrap.className = "canvas-stage-wrap " + (currentGrid === 'tian' ? 'grid-tian' : (currentGrid === 'jiu' ? 'grid-jiu' : ''));
     if(currentBg){
@@ -2211,7 +2274,6 @@
     var currentPath = [];
     var activeSelectedTextId = null;
 
-    // 工具按鈕事件綁定
     vToolbar.querySelectorAll(".tool-btn-v").forEach(function(b){
       b.onclick = function(){
         if(b.id === "btn-upload-bg" || b.id === "btn-remove-bg" || b.id === "btn-clear-draw") return;
@@ -2534,7 +2596,7 @@
 
     vToolbar.querySelectorAll(".color-dot").forEach(function(d){
       d.onclick = function(){
-        vToolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
+        toolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
         d.classList.add("active");
         boardState.color = d.dataset.color;
       };
@@ -2834,7 +2896,7 @@
     }
   }, { passive: true });
 
-  /* 畫面縮放按鈕監聽 (Zoom Listeners) */
+  /* 畫面縮放按鈕監聽 */
   var btnZoomIn = document.getElementById("btn-zoom-in");
   var btnZoomOut = document.getElementById("btn-zoom-out");
   var btnZoomReset = document.getElementById("zoom-percent-text");
@@ -2927,8 +2989,9 @@
     } else {
       var newSecId = uid("sec");
       var defaultQId = uid("q");
+      var currentKeys = Object.keys(secs);
 
-      var defaultQ = { id: defaultQId, title: "第 1 題" };
+      var defaultQ = { id: defaultQId, title: "第 1 題", order: 0 };
       if(currentSectionType === "match"){
         defaultQ.leftLabel = "生詞"; defaultQ.rightLabel = "拼音";
         defaultQ.pairs = { p1: {id:"p1", left:"你好", right:"nǐ hǎo"} };
@@ -2950,6 +3013,7 @@
         title: title,
         desc: desc,
         type: currentSectionType,
+        order: currentKeys.length,
         collapsed: false,
         questions: { [defaultQId]: defaultQ }
       };
@@ -3068,7 +3132,8 @@
     if(!sec) return;
 
     var newQId = uid("q");
-    var newQ = { id: newQId, title: title };
+    var qKeys = Object.keys(sec.questions || {});
+    var newQ = { id: newQId, title: title, order: qKeys.length };
 
     if(sec.type === "board"){
       newQ.desc = document.getElementById("f-board-desc").value.trim();
@@ -3121,7 +3186,7 @@
     editorDialog.close();
   };
 
-  /* Excel 批次操作 */
+  /* Excel 批次操作 (對齊大題與小題試卷架構) */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
 
@@ -3156,11 +3221,13 @@
         });
 
         var firstNewQId = null;
+        var secOrder = Object.keys(newSections).length;
         Object.keys(grouped).forEach(function(secTitle){
           var gSec = grouped[secTitle];
           var newSecId = uid("sec");
           var questionsObj = {};
 
+          var qOrder = 0;
           Object.keys(gSec.questions).forEach(function(qTitle){
             var gQ = gSec.questions[qTitle];
             var newQId = uid("q");
@@ -3175,7 +3242,7 @@
                 if(l && r) pairs[pid] = { id: pid, left: String(l), right: String(r) };
               });
               questionsObj[newQId] = {
-                id: newQId, title: qTitle, leftLabel: "生詞", rightLabel: "拼音／意思", pairs: pairs
+                id: newQId, title: qTitle, order: qOrder++, leftLabel: "生詞", rightLabel: "拼音／意思", pairs: pairs
               };
             } else if(gSec.type === "choice"){
               var it = gQ.rows[0];
@@ -3192,13 +3259,13 @@
               });
               if(!answerId && Object.keys(choices).length) answerId = Object.keys(choices)[0];
               questionsObj[newQId] = {
-                id: newQId, title: qTitle, prompt: it["題目說明"] || qTitle, choices: choices, answerId: answerId
+                id: newQId, title: qTitle, order: qOrder++, prompt: it["題目說明"] || qTitle, choices: choices, answerId: answerId
               };
             }
           });
 
           newSections[newSecId] = {
-            id: newSecId, title: secTitle, type: gSec.type, collapsed: false, questions: questionsObj
+            id: newSecId, title: secTitle, type: gSec.type, order: secOrder++, collapsed: false, questions: questionsObj
           };
         });
 
@@ -3223,10 +3290,12 @@
 
   document.getElementById("btn-export-excel").onclick = function(){
     var secs = getSections();
+    var secKeys = getSortedSectionKeys();
     var exportRows = [];
-    Object.keys(secs).forEach(function(sid){
+    secKeys.forEach(function(sid){
       var sec = secs[sid];
-      Object.keys(sec.questions || {}).forEach(function(qid){
+      var qKeys = getSortedQuestionKeys(sec);
+      qKeys.forEach(function(qid){
         var q = sec.questions[qid];
         if(sec.type === "match" && q.pairs){
           Object.keys(q.pairs).forEach(function(pid){
@@ -3280,7 +3349,6 @@
     }
   }
 
-  /* 彈性載入機制 */
   function onFirebaseReady(cb){
     if(window.__firebaseReady){
       cb();
