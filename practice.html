@@ -153,9 +153,7 @@
     cursor:grab; position:relative;
   }
   .section-block:active{cursor:grabbing;}
-  .section-block.is-dragging{
-    opacity:0.35;border:1.5px dashed var(--seal);
-  }
+  .section-block.is-dragging{ opacity:0.35;border:1.5px dashed var(--seal); }
 
   .section-block.drag-indicator-top::before {
     content: ""; position: absolute; top: -2.5px; left: 4px; right: 4px; height: 3.5px;
@@ -209,7 +207,7 @@
 
   .question-item-btn > span:first-child{ pointer-events:none; }
   .question-item-btn > span:first-child *{ pointer-events:none; }
-  .question-item-btn .btn-del-q{ pointer-events:auto; }
+  .question-item-btn .q-action-btns{ pointer-events:auto; display:flex; gap:4px; }
 
   /* 舞台主區域 */
   .stage-wrap{
@@ -469,7 +467,6 @@
         <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display:none;">
       </div>
 
-      <!-- 大題與小題樹狀折疊清單（支援 PPT 插入線拖曳重排） -->
       <div class="section-list" id="section-tree-list"></div>
     </aside>
     
@@ -590,15 +587,15 @@
     <div class="dialog-body">
       <div class="type-toggle" id="section-type-toggle">
         <button type="button" data-type="match" class="active">連連看</button>
-        <button type="button" data-type="choice">🔘 選擇題(支援多選)</button>
-        <button type="button" data-type="reorder">🔤 句子重組(排序)</button>
+        <button type="button" data-type="choice">🔘 選擇題(複選)</button>
+        <button type="button" data-type="reorder">🔤 句子重組</button>
         <button type="button" data-type="board">✍️ 寫字板</button>
       </div>
 
       <label for="f-sec-title">大題名稱</label>
-      <input type="text" id="f-sec-title" placeholder="例如：第一大題：句子重組練習" required>
+      <input type="text" id="f-sec-title" placeholder="例如：第一大題：句子重組" required>
       <label for="f-sec-desc">大題作答說明（選填）</label>
-      <textarea id="f-sec-desc" rows="2" placeholder="例如：請將下方詞語點擊組合成正確的句子"></textarea>
+      <textarea id="f-sec-desc" rows="2" placeholder="例如：請將詞語排序"></textarea>
     </div>
     <div class="dialog-foot">
       <button type="button" class="btn btn-ghost" id="btn-cancel-section">取消</button>
@@ -607,15 +604,15 @@
   </form>
 </dialog>
 
-<!-- 小題題目編輯彈窗 -->
+<!-- 小題題目編輯／編輯現有題目彈窗 -->
 <dialog class="dialog-modal" id="editor-dialog">
   <form id="editor-form">
     <div class="dialog-head">
-      <h2 id="editor-dialog-title">新增小題題目</h2>
+      <h2 id="editor-dialog-title">編輯題目</h2>
     </div>
     <div class="dialog-body">
       <label for="f-title">小題名稱／標題</label>
-      <input type="text" id="f-title" placeholder="例如：第 1 題：今天天氣很好" required>
+      <input type="text" id="f-title" placeholder="例如：第 1 題" required>
 
       <div id="match-fields">
         <div class="row-two">
@@ -629,7 +626,7 @@
 
       <div id="choice-fields" style="display:none;">
         <label>題目／題幹敘述</label>
-        <textarea id="f-choice-prompt" rows="2" placeholder="例如：下列哪些是水果？(可複選)"></textarea>
+        <textarea id="f-choice-prompt" rows="2" placeholder="例如：下列哪些是正確的？(可複選)"></textarea>
         <label>選項（勾選代表正確答案，可勾多個）</label>
         <div id="choice-opt-rows"></div>
         <button type="button" class="add-row-btn" id="add-mc-opt">＋ 新增選項</button>
@@ -638,7 +635,7 @@
       <div id="reorder-fields" style="display:none;">
         <label>題目提示／說明</label>
         <textarea id="f-reorder-prompt" rows="2" placeholder="例如：請將下列詞語重組為正確句子"></textarea>
-        <label>正確句子語序（依正確順序填入詞語，用逗號或空格隔開）</label>
+        <label>正確句子語序（用逗號或空格隔開）</label>
         <input type="text" id="f-reorder-answer" placeholder="例如：我, 喜歡, 喝, 咖啡">
       </div>
 
@@ -654,7 +651,7 @@
     </div>
     <div class="dialog-foot">
       <button type="button" class="btn btn-ghost" id="btn-cancel">取消</button>
-      <button type="submit" class="btn btn-primary">儲存小題</button>
+      <button type="submit" class="btn btn-primary">儲存變更</button>
     </div>
   </form>
 </dialog>
@@ -918,7 +915,8 @@
         var osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + idx * 0.12);
         g.gain.setValueAtTime(0.2, now + idx * 0.12); g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
-        osc.connect(g); g.connect(ctx.destination); osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
       });
     }catch(e){}
   }
@@ -931,7 +929,7 @@
     fontSize: 36
   };
 
-  /* ================== 資料庫預設結構 (含多選選擇題與排序題) ================== */
+  /* ================== 資料庫載入與儲存 ================== */
   var STORAGE_FS_KEY = "hanyu-practice-v3";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
@@ -943,7 +941,7 @@
     },
     projects: {
       "proj_thai_l1": {
-        id: "proj_thai_l1", folderId: "f_thai", title: "第一課：見面問好", desc: "支援多選題與句子重組排序題",
+        id: "proj_thai_l1", folderId: "f_thai", title: "第一課：見面問好", desc: "支援複選與句子重組",
         currentQId: "q_1_1",
         sections: {
           "sec_1": {
@@ -1021,6 +1019,7 @@
   var editingProjectId = null;
   var activeSectionForAdd = null;
   var editingSectionId = null;
+  var editingQuestionId = null; // 記錄目前正在編輯的小題 ID
 
   var draggedSecId = null;
   var draggedQ = null;
@@ -1145,7 +1144,7 @@
     }
   }
 
-  /*大廳切換*/
+  /* 大廳切換 */
   var lobbyView = document.getElementById("lobby-view");
   var classroomView = document.getElementById("classroom-view");
 
@@ -1435,7 +1434,7 @@
     onValue(ref(db, "roomCursors/" + rId), function(snap){ renderMultiCursors(snap.val()); });
   }
 
-  /* ================== 側欄：大題與小題樹狀折疊清單（PPT式輔助線拖曳排序） ================== */
+  /* ================== 側欄：大題與小題樹狀清單（含拖曳重排與編輯按鈕） ================== */
   var sectionTreeListEl = document.getElementById("section-tree-list");
   function renderSidebar(){
     if(isStudent) return;
@@ -1527,7 +1526,10 @@
                 <span class="drag-handle-icon" title="按住拖曳小題重排">⋮⋮</span>
                 <span>${idx + 1}. ${q.title}</span>
               </span>
-              <span class="row-del btn-del-q" title="刪除" style="font-size:12px; padding:2px 4px;">✕</span>
+              <span class="q-action-btns">
+                <span class="row-del btn-edit-q" title="編輯此題" style="font-size:12px; padding:2px 4px; color:var(--ink-soft);">✏️</span>
+                <span class="row-del btn-del-q" title="刪除" style="font-size:12px; padding:2px 4px;">✕</span>
+              </span>
             `;
 
             qBtn.ondragstart = function(e){
@@ -1569,7 +1571,16 @@
               draggedQ = null;
             };
 
-            qBtn.onclick = function(e){ if(e.target.closest(".btn-del-q")) return; setCurrentQ(qId); };
+            qBtn.onclick = function(e){
+              if(e.target.closest(".q-action-btns")) return;
+              setCurrentQ(qId);
+            };
+
+            qBtn.querySelector(".btn-edit-q").onclick = function(e){
+              e.stopPropagation();
+              openQuestionDialog(secId, qId);
+            };
+
             qBtn.querySelector(".btn-del-q").onclick = function(e){
               e.stopPropagation();
               if(qKeys.length <= 1 && Object.keys(secs).length <= 1){ alert("至少保留一題！"); return; }
@@ -1642,7 +1653,7 @@
     applyStageZoom(currentZoomRatio);
   }
 
-  /* 選擇題（支援多選複選） */
+  /* 選擇題（支援複選） */
   function renderChoiceBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
@@ -1700,14 +1711,13 @@
     container.appendChild(wrap);
   }
 
-  /* 排序題（句子重組） */
+  /* 排序題（句子重組 - 排滿即自動即時判定） */
   function renderReorderBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
     var isRevealed = !!progress.revealed;
     var correctWords = q.words || [];
     
-    // 初始化或從進度讀取詞語順序
     if(!progress._shuffledWords || progress._qIdSaved !== q.id){
       progress.userWords = [];
       progress.poolWords = correctWords.slice().sort(function(){ return Math.random() - 0.5; });
@@ -1722,7 +1732,6 @@
     wrap.className = "reorder-container";
     wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || "請將下列詞語重組為正確句子："}</p>`;
 
-    // 已選區（上方放置槽）
     var slotZone = document.createElement("div");
     slotZone.className = "reorder-slot-zone";
     if(userWords.length === 0){
@@ -1744,52 +1753,49 @@
     }
     wrap.appendChild(slotZone);
 
-    // 備選字庫區（下方可點擊的詞語）
     var poolZone = document.createElement("div");
     poolZone.style.cssText = "display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; min-height:50px;";
     
-    if(poolWords.length === 0 && !isRevealed){
-      var checkBtn = document.createElement("button");
-      checkBtn.className = "btn btn-primary";
-      checkBtn.textContent = "🔍 確認檢查答案";
-      checkBtn.onclick = function(){
-        var isMatch = userWords.length === correctWords.length && userWords.every(function(val, i){ return val === correctWords[i]; });
-        if(isMatch){
-          playCorrectSound();
-          alert("🎉 太棒了！句子重組完全正確！");
-          writeProgress(q.id, { revealed: true });
-        } else {
-          playWrongSound();
-          slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
-          setTimeout(function(){
-            slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.remove("wrong-shake"); });
-          }, 500);
-        }
-      };
-      poolZone.appendChild(checkBtn);
-    } else {
-      poolWords.forEach(function(w, idx){
-        var chip = document.createElement("div");
-        chip.className = "reorder-chip";
-        chip.textContent = w;
-        if(isRevealed){
-          chip.classList.add("correct-done");
-        } else if(interactive){
-          chip.onclick = function(){
-            poolWords.splice(idx, 1);
-            userWords.push(w);
-            writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
-          };
-        }
-        poolZone.appendChild(chip);
-      });
-    }
+    poolWords.forEach(function(w, idx){
+      var chip = document.createElement("div");
+      chip.className = "reorder-chip";
+      chip.textContent = w;
+      if(isRevealed){
+        chip.classList.add("correct-done");
+      } else if(interactive){
+        chip.onclick = function(){
+          poolWords.splice(idx, 1);
+          userWords.push(w);
+          
+          // 檢查是否排滿所有字，若排滿則自動進行對錯即時判定！
+          if(userWords.length === correctWords.length){
+            var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
+            if(isMatch){
+              playCorrectSound();
+              writeProgress(q.id, { userWords: userWords, poolWords: poolWords, revealed: true });
+              return;
+            } else {
+              playWrongSound();
+              slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
+              setTimeout(function(){
+                // 答錯自動退回重排
+                writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
+              }, 500);
+              return;
+            }
+          }
+
+          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+        };
+      }
+      poolZone.appendChild(chip);
+    });
     wrap.appendChild(poolZone);
 
     if(isRevealed){
       var note = document.createElement("p");
       note.style.fontSize = "13px"; note.style.color = "var(--bamboo)"; note.style.marginTop = "10px"; note.style.fontWeight = "700";
-      note.textContent = "✅ 正確解答： " + correctWords.join(" ");
+      note.textContent = "🎉 答對了！正確解答： " + correctWords.join(" ");
       wrap.appendChild(note);
     }
 
@@ -2297,7 +2303,7 @@
       if(currentSectionType === "match"){
         defaultQ.leftLabel = "生詞"; defaultQ.rightLabel = "拼音"; defaultQ.pairs = { p1: {id:"p1", left:"你好", right:"nǐ hǎo"} };
       } else if(currentSectionType === "choice"){
-        defaultQ.prompt = "請選出正確的答案(可複選)："; defaultQ.choices = { c1: {id:"c1", text:"選項 A"}, c2: {id:"c2", text:"選項 B"} }; defaultQ.answerIds = ["c1"];
+        defaultQ.prompt = "請選出正確答案(可複選)："; defaultQ.choices = { c1: {id:"c1", text:"選項 A"}, c2: {id:"c2", text:"選項 B"} }; defaultQ.answerIds = ["c1"];
       } else if(currentSectionType === "reorder"){
         defaultQ.prompt = "請將下列詞語重組為正確句子"; defaultQ.words = ["我", "愛", "學", "華語"];
       } else {
@@ -2309,7 +2315,7 @@
     sectionDialog.close();
   };
 
-  /* 小題題目編輯彈窗 */
+  /* ================== 小題題目編輯彈窗（支援新增與編輯現有題目） ================== */
   var editorDialog = document.getElementById("editor-dialog");
   var matchFields = document.getElementById("match-fields");
   var choiceFields = document.getElementById("choice-fields");
@@ -2364,8 +2370,10 @@
 
   function openQuestionDialog(sectionId, editQuestionId){
     activeSectionForAdd = sectionId;
+    editingQuestionId = editQuestionId || null;
     var secs = getSections(); var sec = secs[sectionId]; if(!sec) return;
     var secType = sec.type;
+
     matchFields.style.display = secType === "match" ? "" : "none";
     choiceFields.style.display = secType === "choice" ? "" : "none";
     reorderFields.style.display = secType === "reorder" ? "" : "none";
@@ -2374,12 +2382,57 @@
     uploadedBase64 = ""; document.getElementById("upload-tip").textContent = "📷 點擊上傳背景圖片（JPG/PNG）";
     pairRows.innerHTML = ""; choiceOptRows.innerHTML = "";
 
-    var count = Object.keys(sec.questions || {}).length;
-    document.getElementById("f-title").value = `第 ${count + 1} 題`;
-    addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie");
-    addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false);
+    if(editingQuestionId){
+      // 編輯現有題目模式
+      document.getElementById("editor-dialog-title").textContent = "編輯現有題目";
+      var q = sec.questions[editingQuestionId];
+      document.getElementById("f-title").value = q.title || "";
+
+      if(secType === "match"){
+        document.getElementById("f-left-label").value = q.leftLabel || "生詞";
+        document.getElementById("f-right-label").value = q.rightLabel || "拼音／意思";
+        var pKeys = Object.keys(q.pairs || {});
+        if(pKeys.length === 0) addPairRow("", "");
+        pKeys.forEach(function(pk){
+          addPairRow(q.pairs[pk].left, q.pairs[pk].right);
+        });
+      } else if(secType === "choice"){
+        document.getElementById("f-choice-prompt").value = q.prompt || "";
+        var ansIds = q.answerIds || (q.answerId ? [q.answerId] : []);
+        var cKeys = Object.keys(q.choices || {});
+        if(cKeys.length === 0) addChoiceOptRow("", false);
+        cKeys.forEach(function(ck){
+          var isCorrect = ansIds.indexOf(ck) !== -1;
+          addChoiceOptRow(q.choices[ck].text, isCorrect);
+        });
+      } else if(secType === "reorder"){
+        document.getElementById("f-reorder-prompt").value = q.prompt || "";
+        document.getElementById("f-reorder-answer").value = q.words ? q.words.join(", ") : "";
+      } else if(secType === "board"){
+        document.getElementById("f-board-desc").value = q.desc || "";
+        if(q.bgImage){
+          uploadedBase64 = q.bgImage;
+          document.getElementById("upload-tip").textContent = "✅ 已載入現有底圖";
+        }
+      }
+    } else {
+      // 新增題目模式
+      document.getElementById("editor-dialog-title").textContent = "新增小題題目";
+      var count = Object.keys(sec.questions || {}).length;
+      document.getElementById("f-title").value = `第 ${count + 1} 題`;
+      if(secType === "match"){
+        addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie");
+      } else if(secType === "choice"){
+        addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false);
+      } else if(secType === "reorder"){
+        document.getElementById("f-reorder-prompt").value = "請將下列詞語重組為正確句子";
+        document.getElementById("f-reorder-answer").value = "我, 愛, 學, 華語";
+      }
+    }
+
     editorDialog.showModal();
   }
+
   document.getElementById("btn-cancel").onclick = function(){ editorDialog.close(); };
 
   document.getElementById("editor-form").onsubmit = function(e){
@@ -2388,11 +2441,17 @@
     if(!title || !activeSectionForAdd) return;
 
     var secs = Object.assign({}, getSections()); var sec = secs[activeSectionForAdd]; if(!sec) return;
-    var newQId = uid("q"); var qKeys = Object.keys(sec.questions || {});
-    var newQ = { id: newQId, title: title, order: qKeys.length };
+
+    var qId = editingQuestionId || uid("q");
+    var qKeys = Object.keys(sec.questions || {});
+    var existingOrder = (editingQuestionId && sec.questions[editingQuestionId]) ? sec.questions[editingQuestionId].order : qKeys.length;
+
+    var newQ = { id: qId, title: title, order: existingOrder };
 
     if(sec.type === "board"){
-      newQ.desc = document.getElementById("f-board-desc").value.trim(); newQ.bgImage = uploadedBase64; newQ.gridType = "jiu";
+      newQ.desc = document.getElementById("f-board-desc").value.trim();
+      newQ.bgImage = uploadedBase64 || (editingQuestionId && sec.questions[editingQuestionId] ? sec.questions[editingQuestionId].bgImage : "");
+      newQ.gridType = "jiu";
     } else if(sec.type === "choice"){
       var choices = {}; var answerIds = [];
       choiceOptRows.querySelectorAll(".choice-row").forEach(function(r, idx){
@@ -2423,10 +2482,12 @@
     }
 
     if(!sec.questions) sec.questions = {};
-    sec.questions[newQId] = newQ; writeSections(secs, newQId); editorDialog.close();
+    sec.questions[qId] = newQ;
+    writeSections(secs, qId);
+    editorDialog.close();
   };
 
-  /* Excel 匯入 */
+  /* Excel 匯入／匯出 */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
   excelInput.onchange = function(e){
@@ -2465,7 +2526,7 @@
           });
           newSections[newSecId] = { id: newSecId, title: secTitle, type: gSec.type, order: secOrder++, collapsed: false, questions: questionsObj };
         });
-        writeSections(newSections, firstNewQId); alert("🎉 成功由 Excel 匯入題庫！");
+        writeSections(newSections, firstNewQId); alert("🎉 成功由 Excel 匯入試卷大題題庫！");
       } catch(err){ alert("解析失敗。"); }
     };
     reader.readAsArrayBuffer(file);
