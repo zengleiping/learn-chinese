@@ -38,7 +38,7 @@
   /* topbar */
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
-    padding:16px 36px;background:var(--surface);
+    padding:14px 32px;background:var(--surface);
     border-bottom:1px solid var(--grid-line); gap:16px; flex-wrap:wrap;
   }
   .brand{display:flex;align-items:center;gap:14px;cursor:pointer;}
@@ -76,7 +76,7 @@
   .toggle.on .toggle-track{background:var(--bamboo);border-color:var(--bamboo);}
   .toggle.on .toggle-track::after{transform:translateX(16px);}
 
-  /* 專案大廳 */
+  /* 專案大廳 (含資料夾階層收納) */
   .lobby-wrap{
     flex:1;padding:48px clamp(20px, 5vw, 64px);
     max-width:1200px;margin:0 auto;width:100%;
@@ -134,33 +134,46 @@
   .item-card.is-folder:hover{border-color:var(--bamboo);}
 
   /* 教學主舞台佈局 */
-  .layout{flex:1;display:grid;grid-template-columns:280px 1fr;min-height:0;}
+  .layout{flex:1;display:grid;grid-template-columns:300px 1fr;min-height:0;}
   .app.student-mode .layout, .app.present .layout{grid-template-columns:1fr;}
   .app.student-mode .sidebar, .app.present .sidebar{display:none;}
 
   .sidebar{
-    background:var(--surface); border-right:1px solid var(--grid-line); padding:20px;
+    background:var(--surface); border-right:1px solid var(--grid-line); padding:18px 14px;
     display:flex;flex-direction:column;gap:12px;overflow-y:auto;
   }
-  .btn-new{width:100%;justify-content:center;padding:12px 16px; font-weight:700;}
-  .sidebar-excel-group{display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
+  .btn-new{width:100%;justify-content:center;padding:11px 16px; font-weight:700;}
+  .sidebar-excel-group{display:flex;flex-direction:column;gap:6px;margin-bottom:4px;}
   
-  .set-list{display:flex;flex-direction:column;gap:10px;}
-  .set-card{
-    text-align:left;border:1.5px solid var(--grid-line);background:var(--surface);
-    border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:6px;
-    color:var(--ink); transition:all .15s ease;
+  /* 試卷考題樹狀結構清單 (大題包覆小題) */
+  .section-list{display:flex;flex-direction:column;gap:12px;}
+  .section-block{
+    border:1.5px solid var(--grid-line);border-radius:12px;
+    background:var(--surface);overflow:hidden;transition:border-color .15s ease;
   }
-  .set-card:hover{border-color:var(--ink-soft); background:var(--surface-2);}
-  .set-card.active{border-color:var(--seal);background:var(--seal-soft); color:var(--seal);}
-  .set-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .set-card-title{font-size:14.5px;font-weight:600;}
-  .badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--ink-soft);}
-  .set-card.active .badge{background:var(--seal);color:#fff;}
-  .set-card-del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:6px;align-self:flex-end;}
-  .set-card-del:hover{color:var(--seal); background:rgba(0,0,0,0.05);}
+  .section-block:hover{border-color:var(--ink-soft);}
+  .section-head{
+    padding:10px 12px;background:var(--surface-2);cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none;
+  }
+  .section-head-title{
+    font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px;
+  }
+  .section-head-actions{display:flex;align-items:center;gap:4px;}
+  .section-body{
+    padding:6px 8px;display:flex;flex-direction:column;gap:4px;background:var(--surface);
+  }
+  .question-item-btn{
+    padding:8px 12px;border-radius:8px;border:1px solid transparent;background:transparent;
+    font-size:13px;font-weight:500;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+    color:var(--ink);transition:all .12s ease;
+  }
+  .question-item-btn:hover{background:var(--surface-2);}
+  .question-item-btn.active{
+    background:var(--seal-soft);color:var(--seal);font-weight:700;border-color:var(--seal-ring);
+  }
 
-  .stage-wrap{overflow-y:auto;padding:36px clamp(20px,4vw,40px);display:flex;justify-content:center;}
+  .stage-wrap{overflow-y:auto;padding:32px clamp(16px,3vw,36px);display:flex;justify-content:center;}
   
   .stage{
     width:100%;max-width:880px;
@@ -170,7 +183,13 @@
     padding:clamp(20px,4vw,36px); box-shadow:var(--shadow); min-height:520px; position:relative;
   }
 
-  .stage-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+  /* 考卷翻頁導航列 */
+  .stage-header-nav{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--grid-line);gap:12px;flex-wrap:wrap;
+  }
+  .nav-page-group{display:flex;align-items:center;gap:8px;}
+  .stage-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
   .stage-title{font-size:22px;font-weight:700;margin:0 0 6px;color:var(--ink);}
   .stage-sub{font-size:13.5px;color:var(--ink-soft);margin:0;}
   .stage-actions{display:flex;gap:10px;}
@@ -222,7 +241,7 @@
     box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.35) inset !important;
   }
 
-  /* 選擇題高對比與鮮明對錯回饋 */
+  /* 選擇題與圈選題 */
   .circle-prompt{font-family:"LXGW WenKai TC",serif;font-size:21px;margin:0 0 20px;line-height:1.6;color:var(--ink);}
   .circle-choices{display:flex;flex-wrap:wrap;gap:16px;position:relative;}
   .circle-chip{
@@ -246,7 +265,6 @@
   .mc-option-btn:hover:not(:disabled){border-color:var(--seal);background:var(--surface); transform:translateY(-1px);}
   .mc-option-btn.selected{border-color:var(--seal);background:var(--seal-soft);color:var(--seal);}
   
-  /* 答對：翠綠色；答錯：高對比大紅色（修復看錯問題） */
   .mc-option-btn.correct{
     border-color: #2D5A27 !important;
     background: rgba(45, 90, 39, 0.15) !important;
@@ -341,7 +359,7 @@
   
   .text-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
   
-  /* 徹底清除拖動時的白色遮罩底色，緊貼字體大小 */
+  /* 緊貼文字大小、背景全透明、拖曳時無白色遮塊 */
   .movable-text{
     position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif;
     font-weight:700;line-height:1;color:var(--ink);user-select:none;
@@ -435,16 +453,14 @@
       </div>
     </div>
 
-    <!-- 麵包屑導航路徑 -->
     <div class="breadcrumb-bar" id="breadcrumb-bar"></div>
-
     <div class="project-grid" id="project-grid"></div>
   </div>
 
   <!-- 教學主舞台 -->
   <div class="layout" id="classroom-view" style="display:none;">
     <aside class="sidebar" id="sidebar">
-      <button class="btn btn-primary btn-new" id="btn-new" type="button">＋ 新增題目</button>
+      <button class="btn btn-primary btn-new" id="btn-new-section" type="button">＋ 新增大題</button>
 
       <div class="sidebar-excel-group">
         <button type="button" class="btn btn-sm" id="btn-import-excel" style="width:100%; justify-content:center;">📊 匯入 Excel 題庫</button>
@@ -455,7 +471,8 @@
         <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display:none;">
       </div>
 
-      <div class="set-list" id="set-list"></div>
+      <!-- 大題樹狀折疊清單 -->
+      <div class="section-list" id="section-tree-list"></div>
     </aside>
     <main class="stage-wrap">
       <div class="stage" id="stage"></div>
@@ -558,22 +575,41 @@
   </div>
 </dialog>
 
-<!-- 題目手動編輯彈窗 -->
+<!-- 大題手動新增／編輯彈窗 -->
+<dialog class="dialog-modal" id="section-dialog">
+  <form id="section-form">
+    <div class="dialog-head">
+      <h2 id="section-dialog-title">新增試卷大題</h2>
+    </div>
+    <div class="dialog-body">
+      <div class="type-toggle" id="section-type-toggle">
+        <button type="button" data-type="match" class="active">連連看大題</button>
+        <button type="button" data-type="choice">🔘 選擇題大題</button>
+        <button type="button" data-type="circle">圈出來大題</button>
+        <button type="button" data-type="board">✍️ 寫字板大題</button>
+      </div>
+
+      <label for="f-sec-title">大題名稱</label>
+      <input type="text" id="f-sec-title" placeholder="例如：第一大題：生詞語意選擇" required>
+      <label for="f-sec-desc">大題作答說明（選填）</label>
+      <textarea id="f-sec-desc" rows="2" placeholder="例如：請仔細閱讀題幹，選出最適合的答案"></textarea>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" class="btn btn-ghost" id="btn-cancel-section">取消</button>
+      <button type="submit" class="btn btn-primary">儲存大題</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- 小題題目編輯彈窗 -->
 <dialog class="dialog-modal" id="editor-dialog">
   <form id="editor-form">
     <div class="dialog-head">
-      <h2>新增題目／畫板</h2>
+      <h2 id="editor-dialog-title">新增小題題目</h2>
     </div>
     <div class="dialog-body">
-      <div class="type-toggle" id="type-toggle">
-        <button type="button" data-type="match" class="active">連連看</button>
-        <button type="button" data-type="choice">🔘 選擇題</button>
-        <button type="button" data-type="circle">圈出來</button>
-        <button type="button" data-type="board">✍️ 寫字板</button>
-      </div>
-
-      <label for="f-title">題目名稱</label>
-      <input type="text" id="f-title" placeholder="例如：第四課生字書寫" required>
+      <label for="f-title">小題名稱／標題</label>
+      <input type="text" id="f-title" placeholder="例如：第 1 題：「學生」的拼音" required>
 
       <div id="match-fields">
         <div class="row-two">
@@ -613,7 +649,7 @@
     </div>
     <div class="dialog-foot">
       <button type="button" class="btn btn-ghost" id="btn-cancel">取消</button>
-      <button type="submit" class="btn btn-primary">儲存題目</button>
+      <button type="submit" class="btn btn-primary">儲存小題</button>
     </div>
   </form>
 </dialog>
@@ -680,12 +716,12 @@
       root.style.setProperty("--ink-soft", "#5C6B60");
       root.style.setProperty("--grid-line", "rgba(36,51,40,0.12)");
     } else {
-      root.style.setProperty("--paper", "#F3F5EF");
+      root.style.setProperty("--paper", "#FAF8F5");
       root.style.setProperty("--surface", "#FFFFFF");
-      root.style.setProperty("--surface-2", "#EAEDE4");
-      root.style.setProperty("--ink", "#2A333C");
-      root.style.setProperty("--ink-soft", "#66717A");
-      root.style.setProperty("--grid-line", "rgba(42,51,60,0.1)");
+      root.style.setProperty("--surface-2", "#F2EFE9");
+      root.style.setProperty("--ink", "#1C211E");
+      root.style.setProperty("--ink-soft", "#5A635E");
+      root.style.setProperty("--grid-line", "rgba(28,33,30,0.07)");
     }
 
     if(accentColor === "bamboo"){
@@ -873,8 +909,8 @@
     fontSize: 36
   };
 
-  /* ================== 階層式資料夾與專案資料庫 ================== */
-  var STORAGE_FS_KEY = "hanyu-practice-fs-v1";
+  /* ================== 考卷式架構：大題 (Sections) 包覆小題 (Questions) ================== */
+  var STORAGE_FS_KEY = "hanyu-practice-fs-v2";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var DEFAULT_FS = {
@@ -884,12 +920,6 @@
         parentId: null,
         title: "115-1 對泰華語轉銜線上華語課",
         desc: "泰國學生轉銜華語專案班級資料夾"
-      },
-      "f_book1": {
-        id: "f_book1",
-        parentId: null,
-        title: "第一冊 基礎生活華語",
-        desc: "第一冊課文與進度練習"
       }
     },
     projects: {
@@ -897,34 +927,72 @@
         id: "proj_thai_l1",
         folderId: "f_thai",
         title: "第一課：見面問好",
-        desc: "包含問候生詞配對、語意單選題與生字田字格手寫示範",
-        currentSetId: "sample_match",
-        sets: {
-          sample_match: {
-            id:"sample_match", type:"match", title:"生詞配對：你好！（範例）",
-            leftLabel:"生詞", rightLabel:"拼音",
-            pairs:{
-              p1:{id:"p1", left:"你好", right:"nǐ hǎo"},
-              p2:{id:"p2", left:"謝謝", right:"xièxie"},
-              p3:{id:"p3", left:"再見", right:"zàijiàn"},
-              p4:{id:"p4", left:"老師", right:"lǎoshī"},
-              p5:{id:"p5", left:"學生", right:"xuéshēng"}
+        desc: "依試卷大題分類：配對、語意單選與生字書寫",
+        currentQId: "q_1_1",
+        sections: {
+          "sec_1": {
+            id: "sec_1",
+            title: "第一大題：生詞配對",
+            type: "match",
+            collapsed: false,
+            questions: {
+              "q_1_1": {
+                id: "q_1_1",
+                title: "第 1 題：你好與見面禮貌語",
+                leftLabel: "生詞", rightLabel: "拼音",
+                pairs: {
+                  p1: {id:"p1", left:"你好", right:"nǐ hǎo"},
+                  p2: {id:"p2", left:"謝謝", right:"xièxie"},
+                  p3: {id:"p3", left:"再見", right:"zàijiàn"},
+                  p4: {id:"p4", left:"老師", right:"lǎoshī"},
+                  p5: {id:"p5", left:"學生", right:"xuéshēng"}
+                }
+              }
             }
           },
-          sample_choice: {
-            id:"sample_choice", type:"choice", title:"生詞語意選擇（範例）",
-            prompt:"請選出「學生」的拼音與英文意思：",
-            choices:{
-              c1:{id:"c1", text:"老師 (lǎoshī / Teacher)"},
-              c2:{id:"c2", text:"學生 (xuéshēng / Student)"},
-              c3:{id:"c3", text:"朋友 (péngyǒu / Friend)"}
-            },
-            answerId:"c2"
+          "sec_2": {
+            id: "sec_2",
+            title: "第二大題：語意選擇題",
+            type: "choice",
+            collapsed: false,
+            questions: {
+              "q_2_1": {
+                id: "q_2_1",
+                title: "第 1 題：「學生」的意思",
+                prompt: "請選出「學生」的拼音與英文意思：",
+                choices: {
+                  c1: {id:"c1", text:"老師 (lǎoshī / Teacher)"},
+                  c2: {id:"c2", text:"學生 (xuéshēng / Student)"},
+                  c3: {id:"c3", text:"朋友 (péngyǒu / Friend)"}
+                },
+                answerId: "c2"
+              },
+              "q_2_2": {
+                id: "q_2_2",
+                title: "第 2 題：「謝謝」的拼音",
+                prompt: "下面哪一個是「謝謝」的正確拼音？",
+                choices: {
+                  c1: {id:"c1", text:"xièxie"},
+                  c2: {id:"c2", text:"zàijiàn"},
+                  c3: {id:"c3", text:"nǐ hǎo"}
+                },
+                answerId: "c1"
+              }
+            }
           },
-          sample_board: {
-            id:"sample_board", type:"board", title:"生字書寫教學：『好』",
-            desc:"靠近文字框即可自由平移與縮放字體大小。",
-            bgImage:"", gridType:"jiu"
+          "sec_3": {
+            id: "sec_3",
+            title: "第三大題：生字書寫示範",
+            type: "board",
+            collapsed: false,
+            questions: {
+              "q_3_1": {
+                id: "q_3_1",
+                title: "第 1 題：漢字『好』書寫",
+                desc: "請在格線中練習書寫『好』字",
+                bgImage: "", gridType: "jiu"
+              }
+            }
           }
         }
       }
@@ -968,6 +1036,8 @@
   var activeProjectId = null;
   var editingFolderId = null;
   var editingProjectId = null;
+  var activeSectionForAdd = null; // 當前正要新增小題的大題 ID
+  var editingSectionId = null;
 
   var CURSOR_COLORS = ["#1E88E5", "#4C7A5E", "#FB8C00", "#8E24AA", "#00897B", "#D81B60"];
   function getColorForStudent(nameOrId, role){
@@ -982,71 +1052,87 @@
     if(inRoom()) return roomData && roomData.project;
     return activeProjectId ? fsData.projects[activeProjectId] : null;
   }
-  function getSets(){ 
+  function getSections(){
     var proj = getActiveProject();
-    return (proj && proj.sets) || {};
+    return (proj && proj.sections) || {};
   }
-  function getCurrentId(){ 
+  function getAllQuestionsList(){
+    var secs = getSections();
+    var list = [];
+    Object.keys(secs).forEach(function(secId){
+      var sec = secs[secId];
+      Object.keys(sec.questions || {}).forEach(function(qId){
+        var q = sec.questions[qId];
+        list.push({ section: sec, question: q });
+      });
+    });
+    return list;
+  }
+
+  function getCurrentQInfo(){
     var proj = getActiveProject();
-    return (proj && proj.currentSetId) || Object.keys(getSets())[0];
+    var qId = (proj && proj.currentQId);
+    var list = getAllQuestionsList();
+    if(!list.length) return null;
+    var found = list.find(function(it){ return it.question.id === qId; });
+    return found || list[0];
   }
-  function getCurrentSet(){ return getSets()[getCurrentId()] || null; }
+
   function isOpenForStudent(){ return inRoom() ? (roomData && roomData.isOpen !== undefined ? !!roomData.isOpen : true) : true; }
-  
   function canInteract(){ 
     if(!inRoom() || roomRole === "teacher") return true; 
     return isOpenForStudent();
   }
 
-  function getProgress(setId){
+  function getProgress(qId){
     if(inRoom()){
-      return (roomData && roomData.sharedProgress && roomData.sharedProgress[setId]) || {};
+      return (roomData && roomData.sharedProgress && roomData.sharedProgress[qId]) || {};
     }
     var proj = getActiveProject();
     if(proj){
       if(!proj.progress) proj.progress = {};
-      if(!proj.progress[setId]) proj.progress[setId] = {};
-      return proj.progress[setId];
+      if(!proj.progress[qId]) proj.progress[qId] = {};
+      return proj.progress[qId];
     }
     return {};
   }
 
-  function writeSets(newSets, newCurrentId){
+  function writeSections(newSections, newCurrentQId){
     if(inRoom()){
-      var patch = { "project/sets": newSets };
-      if(newCurrentId !== undefined) patch["project/currentSetId"] = newCurrentId;
+      var patch = { "project/sections": newSections };
+      if(newCurrentQId !== undefined) patch["project/currentQId"] = newCurrentQId;
       update(ref(db, "rooms/" + activeRoomId), patch);
     } else {
       var proj = getActiveProject();
       if(proj){
-        proj.sets = newSets;
-        if(newCurrentId !== undefined) proj.currentSetId = newCurrentId;
+        proj.sections = newSections;
+        if(newCurrentQId !== undefined) proj.currentQId = newCurrentQId;
         saveFS(); renderSidebar(); renderStage();
       }
     }
   }
 
-  function setCurrent(id){
-    if(inRoom()){ update(ref(db, "rooms/" + activeRoomId + "/project"), { currentSetId: id }); }
+  function setCurrentQ(qId){
+    if(inRoom()){ update(ref(db, "rooms/" + activeRoomId + "/project"), { currentQId: qId }); }
     else { 
       var proj = getActiveProject();
       if(proj){
-        proj.currentSetId = id; saveFS(); renderSidebar(); renderStage(); 
+        proj.currentQId = qId; saveFS(); renderSidebar(); renderStage(); 
       }
     }
   }
 
-  function writeProgress(setId, patch){
+  function writeProgress(qId, patch){
     if(inRoom()){ 
-      update(ref(db, "rooms/" + activeRoomId + "/sharedProgress/" + setId), patch); 
+      update(ref(db, "rooms/" + activeRoomId + "/sharedProgress/" + qId), patch); 
     } else { 
-      Object.assign(getProgress(setId), patch); 
+      Object.assign(getProgress(qId), patch); 
       saveFS(); 
       renderStage(); 
     }
   }
 
-  /* 大廳／主舞台 切換邏輯 */
+  /* ================== 大廳／主舞台 切換邏輯 ================== */
   var lobbyView = document.getElementById("lobby-view");
   var classroomView = document.getElementById("classroom-view");
 
@@ -1210,7 +1296,10 @@
     });
 
     subProjects.forEach(function(proj){
-      var count = Object.keys(proj.sets || {}).length;
+      var totalQ = 0;
+      Object.keys(proj.sections || {}).forEach(function(sid){
+        totalQ += Object.keys(proj.sections[sid].questions || {}).length;
+      });
 
       var card = document.createElement("div");
       card.className = "item-card";
@@ -1222,7 +1311,7 @@
           <p class="item-desc">${proj.desc || "點擊進入開始備課或線上教學練習"}</p>
         </div>
         <div class="item-card-foot">
-          <span class="item-badge">📦 ${count} 組練習</span>
+          <span class="item-badge">📄 ${Object.keys(proj.sections||{}).length} 大題 · ${totalQ} 小題</span>
           <div class="item-actions-btns">
             <button type="button" class="btn btn-sm btn-ghost btn-edit-p" title="編輯課次名稱與所屬資料夾">✏️</button>
             <button type="button" class="btn btn-sm btn-ghost btn-del-p" title="刪除課次" style="color:var(--seal);">🗑️</button>
@@ -1386,8 +1475,8 @@
         folderId: folderId,
         title: title,
         desc: desc,
-        currentSetId: "sample_match",
-        sets: JSON.parse(JSON.stringify(DEFAULT_FS.projects["proj_thai_l1"].sets))
+        currentQId: "q_1_1",
+        sections: JSON.parse(JSON.stringify(DEFAULT_FS.projects["proj_thai_l1"].sections))
       };
     }
     saveFS();
@@ -1534,64 +1623,176 @@
     });
   }
 
-  /* 側欄 */
-  var setListEl = document.getElementById("set-list");
+  /* ================== 側欄：大題樹狀折疊目錄 ================== */
+  var sectionTreeListEl = document.getElementById("section-tree-list");
   function renderSidebar(){
     if(isStudent) return;
-    setListEl.innerHTML = "";
-    var sets = getSets();
-    Object.keys(sets).forEach(function(id){
-      var s = sets[id];
-      var card = document.createElement("div");
-      card.className = "set-card" + (id === getCurrentId() ? " active" : "");
-      var tag = s.type === "match" ? "連連看" : (s.type === "choice" ? "選擇題" : (s.type === "circle" ? "圈出來" : "寫字板"));
-      card.innerHTML = `<div class="set-card-top"><span class="set-card-title">${s.title}</span><span class="badge">${tag}</span></div>`;
-      var del = document.createElement("button"); del.className = "set-card-del"; del.type = "button"; del.textContent = "刪除";
-      del.onclick = function(ev){
-        ev.stopPropagation();
-        var keys = Object.keys(sets);
-        if(keys.length <= 1) return;
-        var newSets = Object.assign({}, sets);
-        delete newSets[id];
-        var newCur = getCurrentId() === id ? Object.keys(newSets)[0] : undefined;
-        writeSets(newSets, newCur);
+    sectionTreeListEl.innerHTML = "";
+    var secs = getSections();
+    var currentInfo = getCurrentQInfo();
+    var currentQId = currentInfo ? currentInfo.question.id : null;
+
+    Object.keys(secs).forEach(function(secId){
+      var sec = secs[secId];
+      var qKeys = Object.keys(sec.questions || {});
+      var isCollapsed = !!sec.collapsed;
+      var tag = sec.type === "match" ? "連連看" : (sec.type === "choice" ? "選擇題" : (sec.type === "circle" ? "圈出來" : "寫字板"));
+
+      var block = document.createElement("div");
+      block.className = "section-block";
+
+      // 大題標題列
+      var head = document.createElement("div");
+      head.className = "section-head";
+      head.innerHTML = `
+        <div class="section-head-title">
+          <span style="font-size:11px; transition:transform .15s ease;">${isCollapsed ? '▶' : '▼'}</span>
+          <span>${sec.title}</span>
+          <span class="badge">${tag}</span>
+        </div>
+        <div class="section-head-actions">
+          <button type="button" class="btn btn-sm btn-ghost btn-add-subq" title="在此大題新增小題" style="padding:2px 6px; font-weight:700; color:var(--seal);">＋</button>
+          <button type="button" class="btn btn-sm btn-ghost btn-del-sec" title="刪除整大題" style="padding:2px 6px; color:var(--ink-soft);">🗑️</button>
+        </div>
+      `;
+
+      // 點擊大題標題切換折疊狀態
+      head.onclick = function(e){
+        if(e.target.closest("button")) return;
+        sec.collapsed = !sec.collapsed;
+        writeSections(secs);
       };
-      card.appendChild(del);
-      card.onclick = function(){ setCurrent(id); };
-      setListEl.appendChild(card);
+
+      // 大題新增小題按鈕
+      head.querySelector(".btn-add-subq").onclick = function(e){
+        e.stopPropagation();
+        openQuestionDialog(secId, null);
+      };
+
+      // 刪除大題
+      head.querySelector(".btn-del-sec").onclick = function(e){
+        e.stopPropagation();
+        if(Object.keys(secs).length <= 1){
+          alert("試卷中至少要保留一大題喔！");
+          return;
+        }
+        if(confirm(`確定要刪除「${sec.title}」及其所有小題嗎？`)){
+          delete secs[secId];
+          var nextList = getAllQuestionsList();
+          var nextQId = nextList.length ? nextList[0].question.id : null;
+          writeSections(secs, nextQId);
+        }
+      };
+
+      block.appendChild(head);
+
+      // 小題清單區塊
+      if(!isCollapsed){
+        var body = document.createElement("div");
+        body.className = "section-body";
+
+        if(qKeys.length === 0){
+          body.innerHTML = `<span style="font-size:12px; color:var(--ink-soft); padding:6px 8px;">（尚未加入小題）</span>`;
+        } else {
+          qKeys.forEach(function(qId, idx){
+            var q = sec.questions[qId];
+            var qBtn = document.createElement("button");
+            qBtn.type = "button";
+            qBtn.className = "question-item-btn" + (qId === currentQId ? " active" : "");
+            qBtn.innerHTML = `
+              <span>${idx + 1}. ${q.title}</span>
+              <span class="row-del btn-del-q" title="刪除此題" style="font-size:12px; padding:2px 4px;">✕</span>
+            `;
+
+            qBtn.onclick = function(e){
+              if(e.target.closest(".btn-del-q")) return;
+              setCurrentQ(qId);
+            };
+
+            qBtn.querySelector(".btn-del-q").onclick = function(e){
+              e.stopPropagation();
+              if(qKeys.length <= 1 && Object.keys(secs).length <= 1){
+                alert("試卷中至少要保留一小題喔！");
+                return;
+              }
+              if(confirm(`確定刪除「${q.title}」嗎？`)){
+                delete sec.questions[qId];
+                var nextList = getAllQuestionsList();
+                var nextQId = nextList.length ? nextList[0].question.id : null;
+                writeSections(secs, nextQId);
+              }
+            };
+
+            body.appendChild(qBtn);
+          });
+        }
+        block.appendChild(body);
+      }
+
+      sectionTreeListEl.appendChild(block);
     });
   }
 
-  /* 舞台主渲染 */
+  /* ================== 主舞台渲染與考卷翻頁導覽 ================== */
   var stageEl = document.getElementById("stage");
   function renderStage(){
-    var s = getCurrentSet();
+    var currentInfo = getCurrentQInfo();
     stageEl.innerHTML = "";
-    if(!s) return;
+    if(!currentInfo) return;
 
+    var sec = currentInfo.section;
+    var q = currentInfo.question;
+    var allList = getAllQuestionsList();
+    var currentIndex = allList.findIndex(function(it){ return it.question.id === q.id; });
+
+    // 考卷導覽列（快速上一題／下一題）
+    var navBar = document.createElement("div");
+    navBar.className = "stage-header-nav";
+    navBar.innerHTML = `
+      <div style="font-size:13.5px; font-weight:700; color:var(--seal); display:flex; align-items:center; gap:6px;">
+        <span>📝 ${sec.title}</span>
+        <span style="opacity:0.4;">/</span>
+        <span style="color:var(--ink);">${q.title}</span>
+      </div>
+      <div class="nav-page-group">
+        <button type="button" class="btn btn-sm btn-ghost btn-prev-q" ${currentIndex <= 0 ? 'disabled style="opacity:0.4;"' : ''}>◀ 上一題</button>
+        <span style="font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--ink-soft);">${currentIndex + 1} / ${allList.length}</span>
+        <button type="button" class="btn btn-sm btn-ghost btn-next-q" ${currentIndex >= allList.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>下一題 ▶</button>
+      </div>
+    `;
+
+    navBar.querySelector(".btn-prev-q").onclick = function(){
+      if(currentIndex > 0) setCurrentQ(allList[currentIndex - 1].question.id);
+    };
+    navBar.querySelector(".btn-next-q").onclick = function(){
+      if(currentIndex < allList.length - 1) setCurrentQ(allList[currentIndex + 1].question.id);
+    };
+    stageEl.appendChild(navBar);
+
+    // 題目資訊列
     var head = document.createElement("div"); head.className = "stage-head";
-    head.innerHTML = '<div><h2 class="stage-title zh">' + s.title + '</h2><p class="stage-sub">' + (s.desc || "1對1 即時互動練習") + '</p></div>';
+    head.innerHTML = `<div><h2 class="stage-title zh">${q.title}</h2><p class="stage-sub">${q.desc || sec.desc || "即時互動練習"}</p></div>`;
     
     if(!isStudent){
       var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.onclick = function(){
-        writeProgress(s.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
+        writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
       };
       actWrap.appendChild(resetBtn);
 
-      if(s.type === "circle" || s.type === "choice"){
+      if(sec.type === "circle" || sec.type === "choice"){
         var revBtn = document.createElement("button"); revBtn.className = "btn btn-sm btn-primary"; revBtn.textContent = "公布答案";
         revBtn.onclick = function(){
-          writeProgress(s.id, { revealed: true });
+          writeProgress(q.id, { revealed: true });
         };
         actWrap.appendChild(revBtn);
       }
       head.appendChild(actWrap);
     }
-
     stageEl.appendChild(head);
 
+    // 核心互動容器
     var boardArea = document.createElement("div");
     boardArea.className = "board-area";
     boardArea.id = "board-area";
@@ -1602,38 +1803,38 @@
     cursorBox.id = "multi-cursor-box";
     boardArea.appendChild(cursorBox);
 
-    if(s.type === "match") renderMatchBoard(s, boardArea);
-    else if(s.type === "choice") renderChoiceBoard(s, boardArea);
-    else if(s.type === "circle") renderCircleBoard(s, boardArea);
-    else if(s.type === "board") renderDrawBoard(s, boardArea);
+    if(sec.type === "match") renderMatchBoard(q, boardArea);
+    else if(sec.type === "choice") renderChoiceBoard(q, boardArea);
+    else if(sec.type === "circle") renderCircleBoard(q, boardArea);
+    else if(sec.type === "board") renderDrawBoard(q, boardArea);
   }
 
-  /* 選擇題：即時判定與醒目高對比紅框 */
-  function renderChoiceBoard(s, container){
-    var progress = getProgress(s.id);
+  /* 選擇題 */
+  function renderChoiceBoard(q, container){
+    var progress = getProgress(q.id);
     var interactive = canInteract();
     var currentPick = progress.choicePick || null;
     var choiceStatus = progress.choiceStatus || null;
     var isRevealed = !!progress.revealed;
 
     var wrap = document.createElement("div");
-    wrap.innerHTML = `<p class="circle-prompt zh">${s.prompt || s.title}</p>`;
+    wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || q.title}</p>`;
 
     var cBox = document.createElement("div"); 
     cBox.className = "mc-choices-container";
 
-    var keys = Object.keys(s.choices || {}).sort();
+    var keys = Object.keys(q.choices || {}).sort();
     var letters = ["A", "B", "C", "D", "E", "F"];
 
     keys.forEach(function(cid, idx){
-      var c = s.choices[cid];
+      var c = q.choices[cid];
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "mc-option-btn";
       btn.dataset.cid = cid;
 
       var isThisPicked = (currentPick === cid);
-      var isCorrectAnswer = (s.answerId === cid);
+      var isCorrectAnswer = (q.answerId === cid);
 
       if(isRevealed){
         if(isCorrectAnswer) {
@@ -1643,7 +1844,6 @@
         }
         btn.disabled = true;
       } else if(isThisPicked){
-        // 即時判定反饋：對的立即亮綠框，錯的立即亮紅框！
         if(choiceStatus === "correct" || (choiceStatus !== "wrong" && isCorrectAnswer)){
           btn.classList.add("correct");
         } else {
@@ -1662,14 +1862,14 @@
         if(!interactive || isRevealed) return;
         if(isCorrectAnswer){
           playCorrectSound();
-          writeProgress(s.id, { 
+          writeProgress(q.id, { 
             choicePick: cid, 
             choiceStatus: "correct",
             lastChoiceWrong: null 
           });
         } else {
           playWrongSound();
-          writeProgress(s.id, { 
+          writeProgress(q.id, { 
             choicePick: cid, 
             choiceStatus: "wrong",
             lastChoiceWrong: { cid: cid, t: Date.now(), who: myName } 
@@ -1700,13 +1900,13 @@
     }
   }
 
-  /* 寫字板功能：含獨立且穩定的「上傳底圖」與「清除底圖」按鈕 */
-  function renderDrawBoard(s, container){
-    var progress = getProgress(s.id);
+  /* 寫字板功能 */
+  function renderDrawBoard(q, container){
+    var progress = getProgress(q.id);
     var strokes = progress.strokes || [];
     var texts = progress.texts || [];
-    var currentGrid = progress.gridType || s.gridType || "jiu";
-    var currentBg = progress.bgImage || s.bgImage || "";
+    var currentGrid = progress.gridType || q.gridType || "jiu";
+    var currentBg = progress.bgImage || q.bgImage || "";
 
     var wrap = document.createElement("div"); wrap.className = "draw-board-container";
 
@@ -1718,7 +1918,6 @@
       <button type="button" class="tool-btn ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部橡皮擦">🧽 局部擦</button>
       <div class="tool-sep"></div>
 
-      <!-- 獨立底圖操作按鈕，不再被 tool-btn 迴圈覆蓋 -->
       <button type="button" class="btn btn-sm" id="btn-upload-bg" style="font-size:12px; padding:6px 11px; font-weight:600;" title="上傳課本或背景圖片">📷 上傳底圖</button>
       <button type="button" class="btn btn-sm btn-ghost" id="btn-remove-bg" style="display:${currentBg ? 'inline-flex' : 'none'}; color:#E63946; font-size:12px; padding:6px 10px;" title="清除底圖">✕ 移除底圖</button>
       <input type="file" id="board-bg-file" accept="image/*" style="display:none;">
@@ -1764,8 +1963,7 @@
 
     if(btnUploadBg && bgFileInput){
       btnUploadBg.onclick = function(e){
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         bgFileInput.click();
       };
       bgFileInput.onchange = function(e){
@@ -1782,9 +1980,9 @@
             var cx = c.getContext("2d");
             cx.drawImage(img, 0, 0, c.width, c.height);
             var b64 = c.toDataURL("image/jpeg", 0.75);
-            s.bgImage = b64;
-            writeProgress(s.id, { bgImage: b64 });
-            writeSets(getSets());
+            q.bgImage = b64;
+            writeProgress(q.id, { bgImage: b64 });
+            writeSections(getSections());
             renderStage();
           };
           img.src = evt.target.result;
@@ -1795,11 +1993,10 @@
 
     if(btnRemoveBg){
       btnRemoveBg.onclick = function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        s.bgImage = "";
-        writeProgress(s.id, { bgImage: "" });
-        writeSets(getSets());
+        e.preventDefault(); e.stopPropagation();
+        q.bgImage = "";
+        writeProgress(q.id, { bgImage: "" });
+        writeSections(getSections());
         renderStage();
       };
     }
@@ -1897,8 +2094,7 @@
 
         var handle = div.querySelector(".resize-handle");
         handle.onmousedown = function(e){
-          e.stopPropagation();
-          e.preventDefault();
+          e.stopPropagation(); e.preventDefault();
           var startSize = t.fontSize || 36;
           var centerRect = div.getBoundingClientRect();
           var centerX = centerRect.left + centerRect.width / 2;
@@ -1917,7 +2113,7 @@
           function onResizeUp(){
             window.removeEventListener("mousemove", onResizeMove);
             window.removeEventListener("mouseup", onResizeUp);
-            writeProgress(s.id, { texts: texts });
+            writeProgress(q.id, { texts: texts });
           }
 
           window.addEventListener("mousemove", onResizeMove);
@@ -1929,7 +2125,7 @@
 
           if(boardState.tool === "stroke-eraser"){
             texts.splice(idx, 1);
-            writeProgress(s.id, { texts: texts });
+            writeProgress(q.id, { texts: texts });
             return;
           }
 
@@ -1954,7 +2150,7 @@
             div.classList.remove("active");
             window.removeEventListener("mousemove", onMove);
             window.removeEventListener("mouseup", onUp);
-            writeProgress(s.id, { texts: texts });
+            writeProgress(q.id, { texts: texts });
           }
 
           window.addEventListener("mousemove", onMove);
@@ -1982,7 +2178,7 @@
           var dist = Math.hypot(pts[j].x - p.x, pts[j].y - p.y);
           if(dist < 3.5){
             strokes.splice(i, 1);
-            writeProgress(s.id, { strokes: strokes });
+            writeProgress(q.id, { strokes: strokes });
             return true;
           }
         }
@@ -2010,7 +2206,7 @@
             color: boardState.color, 
             fontSize: boardState.fontSize || 36 
           });
-          writeProgress(s.id, { texts: texts });
+          writeProgress(q.id, { texts: texts });
         }
         return;
       }
@@ -2056,7 +2252,7 @@
           size: boardState.size,
           isEraser: boardState.tool === "pixel-eraser"
         });
-        writeProgress(s.id, { strokes: strokes });
+        writeProgress(q.id, { strokes: strokes });
       }
       currentPath = [];
     };
@@ -2078,7 +2274,7 @@
           var selObj = texts.find(function(item){ return item.id === activeSelectedTextId; });
           if(selObj){
             selObj.fontSize = boardState.fontSize;
-            writeProgress(s.id, { texts: texts });
+            writeProgress(q.id, { texts: texts });
           }
         }
       };
@@ -2090,7 +2286,7 @@
         gb.classList.add("active");
         var gType = gb.dataset.grid;
         cWrap.className = "canvas-stage-wrap " + (gType === 'tian' ? 'grid-tian' : (gType === 'jiu' ? 'grid-jiu' : ''));
-        writeProgress(s.id, { gridType: gType });
+        writeProgress(q.id, { gridType: gType });
       };
     });
 
@@ -2113,14 +2309,14 @@
     document.getElementById("btn-clear-draw").onclick = function(){
       if(confirm("確定要清空畫布上的所有內容嗎？")){
         strokes = []; texts = [];
-        writeProgress(s.id, { strokes: strokes, texts: texts });
+        writeProgress(q.id, { strokes: strokes, texts: texts });
       }
     };
   }
 
-  /* 連連看：儲存選取狀態至 Firebase 進度，防止重新渲染沖銷未完成配對 */
-  function renderMatchBoard(s, container){
-    var progress = getProgress(s.id);
+  /* 連連看 */
+  function renderMatchBoard(q, container){
+    var progress = getProgress(q.id);
     var matched = progress.matched || {};
     var selections = progress.selections || {};
     var interactive = canInteract();
@@ -2131,14 +2327,16 @@
     var cols = document.createElement("div"); cols.className = "match-cols";
     var lCol = document.createElement("div"); lCol.className = "match-col";
     var rCol = document.createElement("div"); rCol.className = "match-col";
-    lCol.innerHTML = '<div class="match-col-label">' + (s.leftLabel || "項目一") + '</div>';
-    rCol.innerHTML = '<div class="match-col-label">' + (s.rightLabel || "項目二") + '</div>';
+    lCol.innerHTML = '<div class="match-col-label">' + (q.leftLabel || "項目一") + '</div>';
+    rCol.innerHTML = '<div class="match-col-label">' + (q.rightLabel || "項目二") + '</div>';
 
-    var pIds = Object.keys(s.pairs).sort();
+    var pIds = Object.keys(q.pairs || {}).sort();
     var rOrder = pIds.slice().sort();
 
+    var selL = null, selR = null;
+
     pIds.forEach(function(pid){
-      var p = s.pairs[pid];
+      var p = q.pairs[pid];
       var btn = document.createElement("button"); btn.type="button"; 
       var isMatched = !!matched[pid];
       btn.className = "match-item zh" + (isMatched ? " matched" : "");
@@ -2165,14 +2363,14 @@
         var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
         mySel.left = (mySel.left === pid) ? null : pid;
         var newSelections = Object.assign({}, selections, { [myId]: mySel });
-        writeProgress(s.id, { selections: newSelections });
+        writeProgress(q.id, { selections: newSelections });
         checkMatch(mySel);
       };
       lCol.appendChild(btn);
     });
 
     rOrder.forEach(function(pid){
-      var p = s.pairs[pid];
+      var p = q.pairs[pid];
       var btn = document.createElement("button"); btn.type="button"; 
       var isMatched = !!matched[pid];
       btn.className = "match-item" + (isMatched ? " matched" : "");
@@ -2199,7 +2397,7 @@
         var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
         mySel.right = (mySel.right === pid) ? null : pid;
         var newSelections = Object.assign({}, selections, { [myId]: mySel });
-        writeProgress(s.id, { selections: newSelections });
+        writeProgress(q.id, { selections: newSelections });
         checkMatch(mySel);
       };
       rCol.appendChild(btn);
@@ -2207,21 +2405,20 @@
 
     function checkMatch(currentMySel){
       if(currentMySel && currentMySel.left && currentMySel.right){
-        var newSelections = Object.assign({}, getProgress(s.id).selections || {});
+        var newSelections = Object.assign({}, getProgress(q.id).selections || {});
         delete newSelections[myId];
 
         if(currentMySel.left === currentMySel.right){
           playCorrectSound();
           matched[currentMySel.left] = true;
-          writeProgress(s.id, { matched: matched, lastWrong: null, selections: newSelections });
+          writeProgress(q.id, { matched: matched, lastWrong: null, selections: newSelections });
 
           if(Object.keys(matched).length === pIds.length){
             setTimeout(playVictorySound, 400);
           }
         } else {
-          // 醒目對比紅框推播
           playWrongSound();
-          writeProgress(s.id, { 
+          writeProgress(q.id, { 
             lastWrong: { left: currentMySel.left, right: currentMySel.right, t: Date.now(), who: myName },
             selections: newSelections
           });
@@ -2271,18 +2468,18 @@
   }
 
   /* 圈選題 */
-  function renderCircleBoard(s, container){
-    var progress = getProgress(s.id);
+  function renderCircleBoard(q, container){
+    var progress = getProgress(q.id);
     var selected = progress.selected || {};
     var interactive = canInteract();
-    var correctIds = s.correctIds || [];
+    var correctIds = q.correctIds || [];
 
     var wrap = document.createElement("div");
-    wrap.innerHTML = '<p class="circle-prompt zh">' + s.prompt + '</p>';
+    wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || q.title}</p>`;
     var cBox = document.createElement("div"); cBox.className = "circle-choices";
 
-    Object.keys(s.choices).forEach(function(cid){
-      var c = s.choices[cid];
+    Object.keys(q.choices || {}).forEach(function(cid){
+      var c = q.choices[cid];
       var btn = document.createElement("button"); 
       var isSel = !!selected[cid];
       var isCorrect = correctIds.indexOf(cid) !== -1;
@@ -2307,7 +2504,7 @@
           if(isCorrect) playCorrectSound();
           else playWrongSound();
         }
-        writeProgress(s.id, { selected: selected });
+        writeProgress(q.id, { selected: selected });
       };
       cBox.appendChild(btn);
     });
@@ -2442,27 +2639,83 @@
     document.getElementById("settings-dialog").close();
   };
 
-  /* 題目手動編輯彈窗 */
-  var dialog = document.getElementById("editor-dialog");
-  var typeToggle = document.getElementById("type-toggle");
+  /* ================== 大題新增／編輯彈窗 ================== */
+  var sectionDialog = document.getElementById("section-dialog");
+  var sectionTypeToggle = document.getElementById("section-type-toggle");
+  var currentSectionType = "match";
+
+  sectionTypeToggle.querySelectorAll("button").forEach(function(b){
+    b.onclick = function(){
+      sectionTypeToggle.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); });
+      b.classList.add("active");
+      currentSectionType = b.dataset.type;
+    };
+  });
+
+  document.getElementById("btn-new-section").onclick = function(){
+    editingSectionId = null;
+    document.getElementById("f-sec-title").value = "";
+    document.getElementById("f-sec-desc").value = "";
+    document.getElementById("section-dialog-title").textContent = "新增試卷大題";
+    sectionDialog.showModal();
+  };
+
+  document.getElementById("btn-cancel-section").onclick = function(){ sectionDialog.close(); };
+
+  document.getElementById("section-form").onsubmit = function(e){
+    e.preventDefault();
+    var title = document.getElementById("f-sec-title").value.trim();
+    var desc = document.getElementById("f-sec-desc").value.trim();
+    if(!title) return;
+
+    var secs = Object.assign({}, getSections());
+    if(editingSectionId){
+      secs[editingSectionId].title = title;
+      secs[editingSectionId].desc = desc;
+    } else {
+      var newSecId = uid("sec");
+      var defaultQId = uid("q");
+
+      // 建立大題並預設放進一題範本小題
+      var defaultQ = { id: defaultQId, title: "第 1 題" };
+      if(currentSectionType === "match"){
+        defaultQ.leftLabel = "生詞"; defaultQ.rightLabel = "拼音";
+        defaultQ.pairs = { p1: {id:"p1", left:"你好", right:"nǐ hǎo"} };
+      } else if(currentSectionType === "choice"){
+        defaultQ.prompt = "請選出正確的答案：";
+        defaultQ.choices = { c1: {id:"c1", text:"選項 A"}, c2: {id:"c2", text:"選項 B"} };
+        defaultQ.answerId = "c1";
+      } else if(currentSectionType === "circle"){
+        defaultQ.prompt = "請圈出符合的項目：";
+        defaultQ.choices = { c1: {id:"c1", text:"選項 1"}, c2: {id:"c2", text:"選項 2"} };
+        defaultQ.correctIds = ["c1"];
+      } else {
+        defaultQ.desc = "漢字臨摹與書寫練習";
+        defaultQ.bgImage = ""; defaultQ.gridType = "jiu";
+      }
+
+      secs[newSecId] = {
+        id: newSecId,
+        title: title,
+        desc: desc,
+        type: currentSectionType,
+        collapsed: false,
+        questions: { [defaultQId]: defaultQ }
+      };
+
+      writeSections(secs, defaultQId);
+    }
+
+    sectionDialog.close();
+  };
+
+  /* ================== 小題題目編輯彈窗 ================== */
+  var editorDialog = document.getElementById("editor-dialog");
   var matchFields = document.getElementById("match-fields");
   var choiceFields = document.getElementById("choice-fields");
   var circleFields = document.getElementById("circle-fields");
   var boardFields = document.getElementById("board-fields");
-  var currentType = "match";
   var uploadedBase64 = "";
-
-  typeToggle.querySelectorAll("button").forEach(function(b){
-    b.onclick = function(){
-      typeToggle.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); });
-      b.classList.add("active");
-      currentType = b.dataset.type;
-      matchFields.style.display = currentType === "match" ? "" : "none";
-      choiceFields.style.display = currentType === "choice" ? "" : "none";
-      circleFields.style.display = currentType === "circle" ? "" : "none";
-      boardFields.style.display = currentType === "board" ? "" : "none";
-    };
-  });
 
   var choiceOptRows = document.getElementById("choice-opt-rows");
   function addChoiceOptRow(text, isAnswer){
@@ -2514,7 +2767,8 @@
       img.onload = function(){
         var c = document.createElement("canvas");
         var scale = Math.min(1, 900 / img.width);
-        c.width = img.width * scale; c.height = img.height * scale;
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
         var cx = c.getContext("2d");
         cx.drawImage(img, 0, 0, c.width, c.height);
         uploadedBase64 = c.toDataURL("image/jpeg", 0.75);
@@ -2525,32 +2779,52 @@
     reader.readAsDataURL(f);
   };
 
-  document.getElementById("btn-new").onclick = function(){
+  function openQuestionDialog(sectionId, editQuestionId){
+    activeSectionForAdd = sectionId;
+    var secs = getSections();
+    var sec = secs[sectionId];
+    if(!sec) return;
+
+    var secType = sec.type;
+    matchFields.style.display = secType === "match" ? "" : "none";
+    choiceFields.style.display = secType === "choice" ? "" : "none";
+    circleFields.style.display = secType === "circle" ? "" : "none";
+    boardFields.style.display = secType === "board" ? "" : "none";
+
     uploadedBase64 = "";
     document.getElementById("upload-tip").textContent = "📷 點擊上傳背景圖片（JPG/PNG）";
     pairRows.innerHTML = ""; choiceOptRows.innerHTML = ""; circleRows.innerHTML = "";
+
+    var count = Object.keys(sec.questions || {}).length;
+    document.getElementById("f-title").value = `第 ${count + 1} 題`;
+
     addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie");
     addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false);
     addCircleOptRow("選項 1", true); addCircleOptRow("選項 2", false);
-    dialog.showModal();
-  };
-  document.getElementById("btn-cancel").onclick = function(){ dialog.close(); };
+
+    editorDialog.showModal();
+  }
+
+  document.getElementById("btn-cancel").onclick = function(){ editorDialog.close(); };
 
   document.getElementById("editor-form").onsubmit = function(e){
     e.preventDefault();
     var title = document.getElementById("f-title").value.trim();
-    if(!title) return;
+    if(!title || !activeSectionForAdd) return;
 
-    var newSet;
-    if(currentType === "board"){
-      newSet = {
-        id: uid("set"), type: "board", title: title,
-        desc: document.getElementById("f-board-desc").value.trim(),
-        bgImage: uploadedBase64, gridType: "jiu"
-      };
-    } else if(currentType === "choice"){
-      var choices = {};
-      var ansId = null;
+    var secs = Object.assign({}, getSections());
+    var sec = secs[activeSectionForAdd];
+    if(!sec) return;
+
+    var newQId = uid("q");
+    var newQ = { id: newQId, title: title };
+
+    if(sec.type === "board"){
+      newQ.desc = document.getElementById("f-board-desc").value.trim();
+      newQ.bgImage = uploadedBase64;
+      newQ.gridType = "jiu";
+    } else if(sec.type === "choice"){
+      var choices = {}; var ansId = null;
       choiceOptRows.querySelectorAll(".choice-row").forEach(function(r, idx){
         var txt = r.querySelector(".mc-opt-text").value.trim();
         var isRadio = r.querySelector("input[type='radio']").checked;
@@ -2561,27 +2835,21 @@
         }
       });
       if(!ansId) ansId = Object.keys(choices)[0];
-      newSet = {
-        id: uid("set"), type: "choice", title: title,
-        prompt: document.getElementById("f-choice-prompt").value.trim() || title,
-        choices: choices, answerId: ansId
-      };
-    } else if(currentType === "match"){
+      newQ.prompt = document.getElementById("f-choice-prompt").value.trim() || title;
+      newQ.choices = choices;
+      newQ.answerId = ansId;
+    } else if(sec.type === "match"){
       var pairs = {};
       pairRows.querySelectorAll(".pair-row").forEach(function(r, idx){
         var l = r.querySelector(".pair-left").value.trim();
         var rt = r.querySelector(".pair-right").value.trim();
         if(l && rt) pairs["p" + (idx + 1)] = { id: "p" + (idx + 1), left: l, right: rt };
       });
-      newSet = {
-        id: uid("set"), type: "match", title: title,
-        leftLabel: document.getElementById("f-left-label").value.trim() || "生詞",
-        rightLabel: document.getElementById("f-right-label").value.trim() || "拼音／意思",
-        pairs: pairs
-      };
+      newQ.leftLabel = document.getElementById("f-left-label").value.trim() || "生詞";
+      newQ.rightLabel = document.getElementById("f-right-label").value.trim() || "拼音／意思";
+      newQ.pairs = pairs;
     } else {
-      var cChoices = {};
-      var corIds = [];
+      var cChoices = {}; var corIds = [];
       circleRows.querySelectorAll(".choice-row").forEach(function(r, idx){
         var txt = r.querySelector(".circle-opt-text").value.trim();
         var isChk = r.querySelector(".circle-opt-check").checked;
@@ -2591,20 +2859,18 @@
           if(isChk) corIds.push(cid);
         }
       });
-      newSet = {
-        id: uid("set"), type: "circle", title: title,
-        prompt: document.getElementById("f-prompt").value.trim() || title,
-        choices: cChoices, correctIds: corIds
-      };
+      newQ.prompt = document.getElementById("f-prompt").value.trim() || title;
+      newQ.choices = cChoices;
+      newQ.correctIds = corIds;
     }
 
-    var sets = Object.assign({}, getSets());
-    sets[newSet.id] = newSet;
-    writeSets(sets, newSet.id);
-    dialog.close();
+    if(!sec.questions) sec.questions = {};
+    sec.questions[newQId] = newQ;
+    writeSections(secs, newQId);
+    editorDialog.close();
   };
 
-  /* Excel 批次操作 */
+  /* Excel 批次操作 (對齊大題與小題試卷架構) */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
 
@@ -2622,43 +2888,49 @@
 
         if(!rows || rows.length === 0){ alert("Excel 檔案內沒有資料！"); return; }
 
-        var newSets = Object.assign({}, getSets());
+        var newSections = Object.assign({}, getSections());
         var grouped = {};
 
         rows.forEach(function(row){
-          var title = row["題目名稱"] || row["Title"] || "未命名題目";
+          var secTitle = row["大題名稱"] || row["Section"] || "第一大題：生詞測驗";
           var type = (row["題型"] || row["Type"] || "match").toLowerCase();
-          if(!grouped[title]){
-            grouped[title] = { title: title, type: type, items: [], desc: row["說明"] || row["Desc"] || "" };
+          if(!grouped[secTitle]){
+            grouped[secTitle] = { title: secTitle, type: type, questions: {} };
           }
-          grouped[title].items.push(row);
+          var qTitle = row["小題名稱"] || row["Question"] || ("第 " + (Object.keys(grouped[secTitle].questions).length + 1) + " 題");
+          if(!grouped[secTitle].questions[qTitle]){
+            grouped[secTitle].questions[qTitle] = { title: qTitle, rows: [] };
+          }
+          grouped[secTitle].questions[qTitle].rows.push(row);
         });
 
-        Object.keys(grouped).forEach(function(tKey){
-          var g = grouped[tKey];
-          var newId = uid("set");
+        var firstNewQId = null;
+        Object.keys(grouped).forEach(function(secTitle){
+          var gSec = grouped[secTitle];
+          var newSecId = uid("sec");
+          var questionsObj = {};
 
-          if(g.type === "match"){
-            var pairs = {};
-            g.items.forEach(function(it, idx){
-              var pid = "p" + (idx + 1);
-              var l = it["左欄生詞"] || it["Left"] || "";
-              var r = it["右欄拼音或意思"] || it["Right"] || "";
-              if(l && r) pairs[pid] = { id: pid, left: String(l), right: String(r) };
-            });
-            newSets[newId] = {
-              id: newId, type: "match", title: g.title,
-              leftLabel: "生詞", rightLabel: "拼音／意思",
-              pairs: pairs
-            };
-          } else if(g.type === "choice"){
-            g.items.forEach(function(it, idx){
-              var subId = uid("set");
-              var prompt = it["題目說明"] || it["Prompt"] || g.title;
+          Object.keys(gSec.questions).forEach(function(qTitle){
+            var gQ = gSec.questions[qTitle];
+            var newQId = uid("q");
+            if(!firstNewQId) firstNewQId = newQId;
+
+            if(gSec.type === "match"){
+              var pairs = {};
+              gQ.rows.forEach(function(it, idx){
+                var pid = "p" + (idx + 1);
+                var l = it["左欄生詞"] || it["Left"] || "";
+                var r = it["右欄拼音或意思"] || it["Right"] || "";
+                if(l && r) pairs[pid] = { id: pid, left: String(l), right: String(r) };
+              });
+              questionsObj[newQId] = {
+                id: newQId, title: qTitle, leftLabel: "生詞", rightLabel: "拼音／意思", pairs: pairs
+              };
+            } else if(gSec.type === "choice"){
+              var it = gQ.rows[0];
               var rawChoices = String(it["選項(逗號分開)"] || it["Choices"] || "").split(/[,，、]/);
               var answer = String(it["正確答案"] || it["Answer"] || "").trim();
               var choices = {}, answerId = null;
-
               rawChoices.forEach(function(cText, cIdx){
                 var cid = "c" + (cIdx + 1);
                 var trimTxt = cText.trim();
@@ -2667,45 +2939,20 @@
                   if(trimTxt === answer) answerId = cid;
                 }
               });
-
               if(!answerId && Object.keys(choices).length) answerId = Object.keys(choices)[0];
-
-              newSets[subId] = {
-                id: subId, type: "choice",
-                title: g.title + (g.items.length > 1 ? " (" + (idx+1) + ")" : ""),
-                prompt: prompt, choices: choices, answerId: answerId
+              questionsObj[newQId] = {
+                id: newQId, title: qTitle, prompt: it["題目說明"] || qTitle, choices: choices, answerId: answerId
               };
-            });
-          } else if(g.type === "circle"){
-            g.items.forEach(function(it, idx){
-              var subId = uid("set");
-              var prompt = it["題目說明"] || it["Prompt"] || g.title;
-              var rawChoices = String(it["選項(逗號分開)"] || it["Choices"] || "").split(/[,，、]/);
-              var answer = String(it["正確答案"] || it["Answer"] || "").trim();
-              var choices = {};
-              var correctIds = [];
+            }
+          });
 
-              rawChoices.forEach(function(cText, cIdx){
-                var cid = "c" + (cIdx + 1);
-                var trimTxt = cText.trim();
-                if(trimTxt){
-                  choices[cid] = { id: cid, text: trimTxt };
-                  if(trimTxt === answer) correctIds.push(cid);
-                }
-              });
-
-              newSets[subId] = {
-                id: subId, type: "circle",
-                title: g.title + (g.items.length > 1 ? " (" + (idx+1) + ")" : ""),
-                prompt: prompt, multiSelect: false,
-                choices: choices, correctIds: correctIds
-              };
-            });
-          }
+          newSections[newSecId] = {
+            id: newSecId, title: secTitle, type: gSec.type, collapsed: false, questions: questionsObj
+          };
         });
 
-        writeSets(newSets);
-        alert("🎉 成功由 Excel 匯入題庫！");
+        writeSections(newSections, firstNewQId);
+        alert("🎉 成功由 Excel 匯入試卷大題題庫！");
       } catch(err){ alert("解析失敗，請確認檔案格式。"); }
     };
     reader.readAsArrayBuffer(file);
@@ -2713,30 +2960,33 @@
 
   document.getElementById("btn-dl-template").onclick = function(){
     var templateData = [
-      { "題型": "match", "題目名稱": "第一課生詞配對", "左欄生詞": "你好", "右欄拼音或意思": "nǐ hǎo", "題目說明": "", "選項(逗號分開)": "", "正確答案": "" },
-      { "題型": "match", "題目名稱": "第一課生詞配對", "左欄生詞": "謝謝", "右欄拼音或意思": "xièxie", "題目說明": "", "選項(逗號分開)": "", "正確答案": "" },
-      { "題型": "choice", "題目名稱": "第一課單選題", "左欄生詞": "", "右欄拼音或意思": "", "題目說明": "「謝謝」是什麼意思？", "選項(逗號分開)": "Hello, Thank you, Goodbye", "正確答案": "Thank you" }
+      { "大題名稱": "第一大題：生詞配對", "題型": "match", "小題名稱": "第1題", "左欄生詞": "你好", "右欄拼音或意思": "nǐ hǎo", "題目說明": "", "選項(逗號分開)": "", "正確答案": "" },
+      { "大題名稱": "第一大題：生詞配對", "題型": "match", "小題名稱": "第1題", "左欄生詞": "謝謝", "右欄拼音或意思": "xièxie", "題目說明": "", "選項(逗號分開)": "", "正確答案": "" },
+      { "大題名稱": "第二大題：語意選擇題", "題型": "choice", "小題名稱": "第1題", "左欄生詞": "", "右欄拼音或意思": "", "題目說明": "「謝謝」是什麼意思？", "選項(逗號分開)": "Hello, Thank you, Goodbye", "正確答案": "Thank you" }
     ];
     var ws = XLSX.utils.json_to_sheet(templateData);
     var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "題庫範本");
-    XLSX.writeFile(wb, "生詞練習台_完整題庫範本.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "考卷範本");
+    XLSX.writeFile(wb, "生詞練習台_試卷大題題庫範本.xlsx");
   };
 
   document.getElementById("btn-export-excel").onclick = function(){
-    var currentSets = getSets();
+    var secs = getSections();
     var exportRows = [];
-    Object.keys(currentSets).forEach(function(sid){
-      var s = currentSets[sid];
-      if(s.type === "match" && s.pairs){
-        Object.keys(s.pairs).forEach(function(pid){
-          exportRows.push({ "題型": "match", "題目名稱": s.title, "左欄生詞": s.pairs[pid].left, "右欄拼音或意思": s.pairs[pid].right, "題目說明": "", "選項(逗號分開)": "", "正確答案": "" });
-        });
-      } else if(s.type === "choice" && s.choices){
-        var cTexts = Object.keys(s.choices).map(function(cid){ return s.choices[cid].text; }).join(", ");
-        var ansText = s.choices[s.answerId] ? s.choices[s.answerId].text : "";
-        exportRows.push({ "題型": "choice", "題目名稱": s.title, "左欄生詞": "", "右欄拼音或意思": "", "題目說明": s.prompt || "", "選項(逗號分開)": cTexts, "正確答案": ansText });
-      }
+    Object.keys(secs).forEach(function(sid){
+      var sec = secs[sid];
+      Object.keys(sec.questions || {}).forEach(function(qid){
+        var q = sec.questions[qid];
+        if(sec.type === "match" && q.pairs){
+          Object.keys(q.pairs).forEach(function(pid){
+            exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": q.pairs[pid].left, "右欄拼音或意思": q.pairs[pid].right, "題目說明": "", "選項(逗號分開)": "", "正確答案": "" });
+          });
+        } else if(sec.type === "choice" && q.choices){
+          var cTexts = Object.keys(q.choices).map(function(cid){ return q.choices[cid].text; }).join(", ");
+          var ansText = q.choices[q.answerId] ? q.choices[q.answerId].text : "";
+          exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": "", "右欄拼音或意思": "", "題目說明": q.prompt || "", "選項(逗號分開)": cTexts, "正確答案": ansText });
+        }
+      });
     });
     if(exportRows.length === 0){ alert("目前沒有可匯出的題目。"); return; }
     var ws = XLSX.utils.json_to_sheet(exportRows);
