@@ -180,9 +180,9 @@
   }
   
   .drag-handle-icon{
-    color:var(--ink-soft);opacity:0.45;font-size:13px;cursor:grab;margin-right:2px;user-select:none; pointer-events:none;
+    color:var(--ink-soft);opacity:0.35;font-size:12px;cursor:grab;margin-right:2px;user-select:none; pointer-events:none;
   }
-  .section-head:hover .drag-handle-icon, .question-item-btn:hover .drag-handle-icon{ opacity:0.9; }
+  .section-head:hover .drag-handle-icon, .question-item-btn:hover .drag-handle-icon{ opacity:0.8; }
 
   .question-item-btn{
     padding:8px 12px;border-radius:8px;border:1px solid transparent;background:transparent;
@@ -227,18 +227,22 @@
     transition:transform .15s ease-out;
   }
 
-  /* 排序題專屬樣式 (Sentence Reordering) */
-  .reorder-container{display:flex;flex-direction:column;gap:20px;max-width:840px;margin:0 auto;}
+  /* 句子重組專屬樣式：支援流暢拖曳與放上更正 */
+  .reorder-container{display:flex;flex-direction:column;gap:24px;max-width:840px;margin:0 auto;}
   .reorder-slot-zone{
-    display:flex;flex-wrap:wrap;gap:10px;min-height:68px;padding:14px;
+    display:flex;flex-wrap:wrap;gap:12px;min-height:76px;padding:16px;
     background:var(--surface-2);border:2px dashed var(--grid-line);border-radius:14px;align-items:center;
+    transition:background .15s ease;
   }
+  .reorder-slot-zone.drag-over-zone{ background:var(--seal-soft); border-color:var(--seal); }
+  
   .reorder-chip{
-    font-family:"LXGW WenKai TC",serif;font-size:18px;font-weight:700;padding:10px 18px;
-    background:var(--surface);border:2px solid var(--grid-line);color:var(--ink);border-radius:10px;cursor:pointer;
+    font-family:"LXGW WenKai TC",serif;font-size:18px;font-weight:700;padding:10px 20px;
+    background:var(--surface);border:2px solid var(--grid-line);color:var(--ink);border-radius:10px;cursor:grab;
     box-shadow:0 2px 6px rgba(0,0,0,0.03);transition:all .12s ease;user-select:none;
   }
-  .reorder-chip:hover{border-color:var(--seal); transform:translateY(-2px); color:var(--seal);}
+  .reorder-chip:active{cursor:grabbing;}
+  .reorder-chip:hover{border-color:var(--seal); transform:translateY(-1px); color:var(--seal);}
   .reorder-chip.placed{background:var(--seal-soft); border-color:var(--seal); color:var(--seal);}
   .reorder-chip.correct-done{background:var(--bamboo-soft); border-color:var(--bamboo); color:var(--bamboo); cursor:default;}
   .reorder-chip.wrong-shake{border-color:#E63946 !important; background:rgba(230,57,70,0.12) !important; color:#E63946 !important; animation:shakeWrong .45s ease;}
@@ -1019,7 +1023,7 @@
   var editingProjectId = null;
   var activeSectionForAdd = null;
   var editingSectionId = null;
-  var editingQuestionId = null; // 記錄目前正在編輯的小題 ID
+  var editingQuestionId = null;
 
   var draggedSecId = null;
   var draggedQ = null;
@@ -1144,7 +1148,7 @@
     }
   }
 
-  /* 大廳切換 */
+  /*大廳切換*/
   var lobbyView = document.getElementById("lobby-view");
   var classroomView = document.getElementById("classroom-view");
 
@@ -1629,11 +1633,11 @@
       var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.onclick = function(){
-        writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, reorderUserWords:[], revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
+        writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, userWords:[], poolWords:[], _shuffledWords:false, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
       };
       actWrap.appendChild(resetBtn);
 
-      if(sec.type === "choice" || sec.type === "reorder"){
+      if(sec.type === "choice"){
         var revBtn = document.createElement("button"); revBtn.className = "btn btn-sm btn-primary"; revBtn.textContent = "公布答案";
         revBtn.onclick = function(){ writeProgress(q.id, { revealed: true }); };
         actWrap.appendChild(revBtn);
@@ -1711,7 +1715,7 @@
     container.appendChild(wrap);
   }
 
-  /* 排序題（句子重組 - 排滿即自動即時判定） */
+  /* 排序題（句子重組 - 全拖曳、放上可更正、排滿兩秒自動判定） */
   function renderReorderBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
@@ -1730,18 +1734,61 @@
 
     var wrap = document.createElement("div");
     wrap.className = "reorder-container";
-    wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || "請將下列詞語重組為正確句子："}</p>`;
+    wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || "請將下列詞語拖曳重組為正確句子："}</p>`;
 
+    // 上方放置槽 (Slot Zone)
     var slotZone = document.createElement("div");
     slotZone.className = "reorder-slot-zone";
+    
+    // 拖曳放置事件：支援從下方字庫或上方其他位置拖過來
+    slotZone.ondragover = function(e){
+      if(!interactive || isRevealed) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      slotZone.classList.add("drag-over-zone");
+    };
+    slotZone.ondragleave = function(){
+      slotZone.classList.remove("drag-over-zone");
+    };
+    slotZone.ondrop = function(e){
+      e.preventDefault();
+      slotZone.classList.remove("drag-over-zone");
+      var data = e.dataTransfer.getData("text/plain");
+      if(!data) return;
+
+      var parts = data.split(":");
+      var type = parts[0];
+      var val = parts[1];
+      var idx = parseInt(parts[2], 10);
+
+      if(type === "pool"){
+        if(!isNaN(idx) && poolWords[idx] !== undefined){
+          var word = poolWords.splice(idx, 1)[0];
+          userWords.push(word);
+          evaluateReorderState(q, userWords, poolWords, correctWords);
+        }
+      } else if(type === "user"){
+        // 在上方槽位內重新排序或維持
+        if(!isNaN(idx) && userWords[idx] !== undefined){
+          // 已在上方，不作移動或可微調
+        }
+      }
+    };
+
     if(userWords.length === 0){
-      slotZone.innerHTML = `<span style="font-size:14px; color:var(--ink-soft);">點擊下方詞語依序排列到這裡...</span>`;
+      slotZone.innerHTML = `<span style="font-size:14px; color:var(--ink-soft); pointer-events:none;">請將下方詞語拖曳排列到這裡...</span>`;
     } else {
       userWords.forEach(function(w, idx){
         var chip = document.createElement("div");
         chip.className = "reorder-chip" + (isRevealed ? " correct-done" : " placed");
         chip.textContent = w;
         if(!isRevealed && interactive){
+          chip.setAttribute("draggable", "true");
+          chip.ondragstart = function(e){
+            e.dataTransfer.setData("text/plain", "user:" + w + ":" + idx);
+            e.stopPropagation();
+          };
+          // 點擊也可直接退回字庫
           chip.onclick = function(){
             userWords.splice(idx, 1);
             poolWords.push(w);
@@ -1753,9 +1800,32 @@
     }
     wrap.appendChild(slotZone);
 
+    // 下方備選字庫區 (Pool Zone)
     var poolZone = document.createElement("div");
-    poolZone.style.cssText = "display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; min-height:50px;";
-    
+    poolZone.style.cssText = "display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; min-height:64px; align-items:center;";
+    poolZone.ondragover = function(e){
+      if(!interactive || isRevealed) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    };
+    poolZone.ondrop = function(e){
+      e.preventDefault();
+      var data = e.dataTransfer.getData("text/plain");
+      if(!data) return;
+      var parts = data.split(":");
+      var type = parts[0];
+      var val = parts[1];
+      var idx = parseInt(parts[2], 10);
+
+      if(type === "user"){
+        if(!isNaN(idx) && userWords[idx] !== undefined){
+          var word = userWords.splice(idx, 1)[0];
+          poolWords.push(word);
+          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+        }
+      }
+    };
+
     poolWords.forEach(function(w, idx){
       var chip = document.createElement("div");
       chip.className = "reorder-chip";
@@ -1763,29 +1833,15 @@
       if(isRevealed){
         chip.classList.add("correct-done");
       } else if(interactive){
+        chip.setAttribute("draggable", "true");
+        chip.ondragstart = function(e){
+          e.dataTransfer.setData("text/plain", "pool:" + w + ":" + idx);
+          e.stopPropagation();
+        };
         chip.onclick = function(){
           poolWords.splice(idx, 1);
           userWords.push(w);
-          
-          // 檢查是否排滿所有字，若排滿則自動進行對錯即時判定！
-          if(userWords.length === correctWords.length){
-            var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
-            if(isMatch){
-              playCorrectSound();
-              writeProgress(q.id, { userWords: userWords, poolWords: poolWords, revealed: true });
-              return;
-            } else {
-              playWrongSound();
-              slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
-              setTimeout(function(){
-                // 答錯自動退回重排
-                writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
-              }, 500);
-              return;
-            }
-          }
-
-          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+          evaluateReorderState(q, userWords, poolWords, correctWords);
         };
       }
       poolZone.appendChild(chip);
@@ -1800,6 +1856,36 @@
     }
 
     container.appendChild(wrap);
+  }
+
+  /* 句子重組自動判定邏輯（排滿兩秒無變動自動公布） */
+  var reorderTimer = null;
+  function evaluateReorderState(q, userWords, poolWords, correctWords){
+    if(reorderTimer) clearTimeout(reorderTimer);
+
+    if(userWords.length === correctWords.length){
+      // 立即寫入當前排法
+      writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+
+      // 啟動 2 秒靜止後自動判定
+      reorderTimer = setTimeout(function(){
+        var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
+        if(isMatch){
+          playCorrectSound();
+          writeProgress(q.id, { revealed: true });
+        } else {
+          playWrongSound();
+          var slotZone = document.querySelector(".reorder-slot-zone");
+          if(slotZone) slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
+          setTimeout(function(){
+            // 答錯自動重置回字庫
+            writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
+          }, 500);
+        }
+      }, 2000);
+    } else {
+      writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+    }
   }
 
   /* 寫字板功能 */
@@ -2315,7 +2401,7 @@
     sectionDialog.close();
   };
 
-  /* ================== 小題題目編輯彈窗（支援新增與編輯現有題目） ================== */
+  /* 小題題目編輯彈窗（支援新增與編輯現有題目） */
   var editorDialog = document.getElementById("editor-dialog");
   var matchFields = document.getElementById("match-fields");
   var choiceFields = document.getElementById("choice-fields");
@@ -2383,7 +2469,6 @@
     pairRows.innerHTML = ""; choiceOptRows.innerHTML = "";
 
     if(editingQuestionId){
-      // 編輯現有題目模式
       document.getElementById("editor-dialog-title").textContent = "編輯現有題目";
       var q = sec.questions[editingQuestionId];
       document.getElementById("f-title").value = q.title || "";
@@ -2393,9 +2478,7 @@
         document.getElementById("f-right-label").value = q.rightLabel || "拼音／意思";
         var pKeys = Object.keys(q.pairs || {});
         if(pKeys.length === 0) addPairRow("", "");
-        pKeys.forEach(function(pk){
-          addPairRow(q.pairs[pk].left, q.pairs[pk].right);
-        });
+        pKeys.forEach(function(pk){ addPairRow(q.pairs[pk].left, q.pairs[pk].right); });
       } else if(secType === "choice"){
         document.getElementById("f-choice-prompt").value = q.prompt || "";
         var ansIds = q.answerIds || (q.answerId ? [q.answerId] : []);
@@ -2410,26 +2493,16 @@
         document.getElementById("f-reorder-answer").value = q.words ? q.words.join(", ") : "";
       } else if(secType === "board"){
         document.getElementById("f-board-desc").value = q.desc || "";
-        if(q.bgImage){
-          uploadedBase64 = q.bgImage;
-          document.getElementById("upload-tip").textContent = "✅ 已載入現有底圖";
-        }
+        if(q.bgImage){ uploadedBase64 = q.bgImage; document.getElementById("upload-tip").textContent = "✅ 已載入現有底圖"; }
       }
     } else {
-      // 新增題目模式
       document.getElementById("editor-dialog-title").textContent = "新增小題題目";
       var count = Object.keys(sec.questions || {}).length;
       document.getElementById("f-title").value = `第 ${count + 1} 題`;
-      if(secType === "match"){
-        addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie");
-      } else if(secType === "choice"){
-        addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false);
-      } else if(secType === "reorder"){
-        document.getElementById("f-reorder-prompt").value = "請將下列詞語重組為正確句子";
-        document.getElementById("f-reorder-answer").value = "我, 愛, 學, 華語";
-      }
+      if(secType === "match"){ addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie"); }
+      else if(secType === "choice"){ addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false); }
+      else if(secType === "reorder"){ document.getElementById("f-reorder-prompt").value = "請將下列詞語重組為正確句子"; document.getElementById("f-reorder-answer").value = "我, 愛, 學, 華語"; }
     }
-
     editorDialog.showModal();
   }
 
@@ -2441,11 +2514,9 @@
     if(!title || !activeSectionForAdd) return;
 
     var secs = Object.assign({}, getSections()); var sec = secs[activeSectionForAdd]; if(!sec) return;
-
     var qId = editingQuestionId || uid("q");
     var qKeys = Object.keys(sec.questions || {});
     var existingOrder = (editingQuestionId && sec.questions[editingQuestionId]) ? sec.questions[editingQuestionId].order : qKeys.length;
-
     var newQ = { id: qId, title: title, order: existingOrder };
 
     if(sec.type === "board"){
@@ -2482,12 +2553,10 @@
     }
 
     if(!sec.questions) sec.questions = {};
-    sec.questions[qId] = newQ;
-    writeSections(secs, qId);
-    editorDialog.close();
+    sec.questions[qId] = newQ; writeSections(secs, qId); editorDialog.close();
   };
 
-  /* Excel 匯入／匯出 */
+  /* Excel 匯入 */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
   excelInput.onchange = function(e){
