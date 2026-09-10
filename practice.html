@@ -153,16 +153,33 @@
   .item-card.is-folder:hover{border-color:var(--bamboo);}
 
   /* 教學主舞台佈局 */
-  .layout{flex:1;display:grid;grid-template-columns:280px 1fr;min-height:0;}
+  .layout{flex:1;display:grid;grid-template-columns:280px 1fr;min-height:0; transition:grid-template-columns .2s cubic-bezier(0.16, 1, 0.3, 1);}
   .app.student-mode .layout, .app.present .layout{grid-template-columns:1fr;}
   .app.student-mode .sidebar, .app.present .sidebar{display:none;}
+  .layout.sidebar-collapsed{grid-template-columns:44px 1fr;}
 
   .sidebar{
     background:var(--surface); border-right:1px solid var(--grid-line); padding:16px 12px;
-    display:flex;flex-direction:column;gap:10px;overflow-y:auto;
+    display:flex;flex-direction:column;gap:10px;overflow-y:auto; min-width:0;
+    transition:padding .2s ease;
   }
+  .layout.sidebar-collapsed .sidebar{ padding:16px 6px; align-items:center; overflow:visible; }
   .btn-new{width:100%;justify-content:center;padding:11px 16px; font-weight:700;}
   .sidebar-excel-group{display:flex;flex-direction:column;gap:6px;margin-bottom:4px;}
+  .sidebar-inner{display:flex;flex-direction:column;gap:10px;min-width:0;}
+  .layout.sidebar-collapsed .sidebar-inner{display:none;}
+
+  .sidebar-collapse-btn{
+    flex:none; display:flex; align-items:center; justify-content:center; gap:6px;
+    width:100%; padding:8px 6px; border-radius:8px; border:1px solid var(--grid-line);
+    background:var(--surface-2); color:var(--ink-soft); font-size:12.5px; font-weight:600;
+    cursor:pointer; transition:all .15s ease; white-space:nowrap; overflow:hidden;
+  }
+  .sidebar-collapse-btn:hover{ color:var(--seal); border-color:var(--seal-ring); background:var(--seal-soft); }
+  .sidebar-collapse-icon{ transition:transform .2s ease; flex:none; }
+  .layout.sidebar-collapsed .sidebar-collapse-btn{ width:32px; padding:8px 0; }
+  .layout.sidebar-collapsed .sidebar-collapse-label{ display:none; }
+  .layout.sidebar-collapsed .sidebar-collapse-icon{ transform:rotate(180deg); }
 
   /* 試卷考題清單 */
   .section-list{display:flex;flex-direction:column;gap:10px;}
@@ -520,18 +537,21 @@
   <!-- 教學主舞台 -->
   <div class="layout" id="classroom-view" style="display:none;">
     <aside class="sidebar" id="sidebar">
-      <button class="btn btn-primary btn-new" id="btn-new-section" type="button">＋ 新增大題</button>
+      <button type="button" class="sidebar-collapse-btn" id="btn-toggle-sidebar" title="收合／展開左側欄"><span class="sidebar-collapse-icon">◀</span><span class="sidebar-collapse-label">收合欄位</span></button>
+      <div class="sidebar-inner" id="sidebar-inner">
+        <button class="btn btn-primary btn-new" id="btn-new-section" type="button">＋ 新增大題</button>
 
-      <div class="sidebar-excel-group">
-        <button type="button" class="btn btn-sm" id="btn-import-excel" style="width:100%; justify-content:center;">📊 匯入 Excel 題庫</button>
-        <div style="display:flex; gap:6px;">
-          <button type="button" class="btn btn-sm btn-ghost" id="btn-dl-template" style="flex:1; justify-content:center; border:1px solid var(--grid-line);" title="下載填題格式檔">📥 空白範本</button>
-          <button type="button" class="btn btn-sm btn-ghost" id="btn-export-excel" style="flex:1; justify-content:center; border:1px solid var(--grid-line);" title="匯出目前題庫成Excel">📤 匯出題目</button>
+        <div class="sidebar-excel-group">
+          <button type="button" class="btn btn-sm" id="btn-import-excel" style="width:100%; justify-content:center;">📊 匯入 Excel 題庫</button>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn btn-sm btn-ghost" id="btn-dl-template" style="flex:1; justify-content:center; border:1px solid var(--grid-line);" title="下載填題格式檔">📥 空白範本</button>
+            <button type="button" class="btn btn-sm btn-ghost" id="btn-export-excel" style="flex:1; justify-content:center; border:1px solid var(--grid-line);" title="匯出目前題庫成Excel">📤 匯出題目</button>
+          </div>
+          <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display:none;">
         </div>
-        <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display:none;">
-      </div>
 
-      <div class="section-list" id="section-tree-list"></div>
+        <div class="section-list" id="section-tree-list"></div>
+      </div>
     </aside>
 
     <main class="stage-wrap">
@@ -1038,6 +1058,25 @@
   var STORAGE_FS_KEY = "hanyu-mandamy-v11";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
+  /* ================== 決定性洗牌（確保連連看／句子重組題老師與學生看到的順序完全一致） ================== */
+  // 用 seed 字串（通常是題目ID）產生固定的偽隨機序列，同一題不管誰、不管重新渲染幾次，順序都一樣
+  function seededShuffle(arr, seedStr){
+    var seed = 0;
+    for(var i = 0; i < seedStr.length; i++){ seed = (Math.imul(seed, 31) + seedStr.charCodeAt(i)) | 0; }
+    function nextRand(){
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+    var result = arr.slice();
+    for(var i = result.length - 1; i > 0; i--){
+      var j = Math.floor(nextRand() * (i + 1));
+      var tmp = result[i]; result[i] = result[j]; result[j] = tmp;
+    }
+    return result;
+  }
+
   var DEFAULT_FS = {
     folders: {
       "f_review": {
@@ -1489,6 +1528,21 @@
   if(btnZoomIn) btnZoomIn.onclick = function(){ applyStageZoom(currentZoomRatio + 0.1); };
   if(btnZoomOut) btnZoomOut.onclick = function(){ applyStageZoom(currentZoomRatio - 0.1); };
   if(zoomPercentText) zoomPercentText.onclick = function(){ applyStageZoom(1.0); };
+
+  /* ================== 左側題目欄位收合／展開 ================== */
+  // 進入題目區（教學主舞台）時，左側大題／題目清單佔用空間較大，
+  // 讓老師可以自行收合成一條窄邊，需要時再點擊展開，並記住上次的收合狀態
+  var layoutEl = document.getElementById("classroom-view");
+  var btnToggleSidebar = document.getElementById("btn-toggle-sidebar");
+  var sidebarCollapsed = localStorage.getItem("hanyu_sidebar_collapsed") === "1";
+  function applySidebarCollapsed(collapsed){
+    sidebarCollapsed = collapsed;
+    if(layoutEl) layoutEl.classList.toggle("sidebar-collapsed", collapsed);
+    if(btnToggleSidebar) btnToggleSidebar.title = collapsed ? "展開左側欄" : "收合左側欄";
+    localStorage.setItem("hanyu_sidebar_collapsed", collapsed ? "1" : "0");
+  }
+  if(btnToggleSidebar) btnToggleSidebar.onclick = function(){ applySidebarCollapsed(!sidebarCollapsed); };
+  applySidebarCollapsed(sidebarCollapsed);
 
   /* ================== 設定彈窗按鈕 ================== */
   var settingsDialog = document.getElementById("settings-dialog");
@@ -2431,7 +2485,9 @@
     if(!isStudent){
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.onclick = function(){
-        writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, userPairs:{}, userWords:[], poolWords:[], _shuffledWords:false, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
+        var resetPatch = { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, userPairs:{}, userWords:[], revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} };
+        resetPatch.poolWords = (sec.type === "reorder") ? seededShuffle(q.words || [], q.id + "|reorder-pool") : [];
+        writeProgress(q.id, resetPatch);
       };
       actWrap.appendChild(resetBtn);
     }
@@ -2457,12 +2513,8 @@
     var pairKeys = Object.keys(pairs);
     var isTest = currentClassMode === 'test';
 
-    if(!progress._shuffledRight || progress._matchQId !== q.id){
-      progress._shuffledRight = pairKeys.slice().sort(function(){ return Math.random() - 0.5; });
-      progress._matchQId = q.id;
-    }
-    var rightOrder = (progress._shuffledRight || []).filter(function(pid){ return pairs[pid]; });
-    pairKeys.forEach(function(pid){ if(rightOrder.indexOf(pid) === -1) rightOrder.push(pid); });
+    // 用題目ID做固定種子洗牌：不管誰渲染、渲染幾次，右欄順序都完全一樣（老師／學生、每次重繪都一致）
+    var rightOrder = seededShuffle(pairKeys, q.id + "|match-right");
 
     var matched = progress.matched || {};
     var userPairs = progress.userPairs || {};
@@ -2639,15 +2691,17 @@
     var isRevealed = currentClassMode !== 'test' && !!progress.revealed;
     var correctWords = q.words || [];
 
-    if(!progress._shuffledWords || progress._qIdSaved !== q.id){
-      progress.userWords = [];
-      progress.poolWords = correctWords.slice().sort(function(){ return Math.random() - 0.5; });
-      progress._shuffledWords = true;
-      progress._qIdSaved = q.id;
+    // 用題目ID做固定種子洗牌：不管誰渲染、渲染幾次，題目池的初始順序都完全一樣（老師／學生、每次重繪都一致）
+    // 只有在真正還沒有任何已存進度（userWords/poolWords 都不存在）時才產生初始洗牌後的池，
+    // 一旦有了 progress 裡的實際資料就直接使用，避免用暫存旗標判斷在房間模式下失效
+    var userWords, poolWords;
+    if(progress.userWords === undefined && progress.poolWords === undefined){
+      userWords = [];
+      poolWords = seededShuffle(correctWords, q.id + "|reorder-pool");
+    } else {
+      userWords = progress.userWords || [];
+      poolWords = progress.poolWords || [];
     }
-
-    var userWords = progress.userWords || [];
-    var poolWords = progress.poolWords || [];
 
     var wrap = document.createElement("div");
     wrap.className = "reorder-container";
@@ -2784,7 +2838,7 @@
             var slotZone = document.querySelector(".reorder-slot-zone");
             if(slotZone) slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
             setTimeout(function(){
-              writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
+              writeProgress(q.id, { userWords: [], poolWords: seededShuffle(correctWords, q.id + "|reorder-pool") });
             }, 500);
           }
         }
