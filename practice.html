@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>曼米中文 Mandamy</title>
+<!-- 替換瀏覽器分頁標籤的灰色醜地球圖示 (Favicon) -->
+<link rel="icon" id="dynamic-favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='52' r='38' fill='%2398D7FF' stroke='%231C211E' stroke-width='4'/%3E%3Cpath d='M 14 44 C 20 22, 38 16, 50 16 C 62 16, 80 22, 86 44 C 76 52, 66 38, 50 44 C 34 38, 24 52, 14 44 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 22 75 C 36 90, 64 90, 78 75 C 66 78, 34 78, 22 75 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='37' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Cellipse cx='63' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Crect x='36' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Crect x='61.5' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Cellipse cx='50' cy='32' rx='4.5' ry='3.5' fill='%231C211E'/%3E%3Cpath d='M 50 67 C 36 55, 31 43, 39 37 C 45 32, 50 37, 50 40 C 50 37, 55 32, 61 37 C 69 43, 64 55, 50 67 Z' fill='%23FF7A8E' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 14 56 C 20 48, 38 52, 38 58 C 36 64, 20 64, 14 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 86 56 C 80 48, 62 52, 62 58 C 64 64, 80 64, 86 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='78' cy='18' rx='11' ry='9' fill='%23FFFFFF' stroke='%231C211E' stroke-width='3'/%3E%3Cpath d='M 71 24 L 67 29 L 75 26 Z' fill='%23FFFFFF' stroke='%231C211E' stroke-width='2'/%3E%3C/svg%3E">
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
 <!-- SheetJS: 支援 Excel 匯入與匯出 -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -38,15 +41,16 @@
   /* topbar */
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
-    padding:14px 28px;background:var(--surface);
+    padding:12px 28px;background:var(--surface);
     border-bottom:1px solid var(--grid-line); gap:16px; flex-wrap:wrap;
   }
   .brand{display:flex;align-items:center;gap:12px;cursor:pointer;}
-  .stamp{
-    width:36px;height:36px;flex:none; background:var(--seal);color:#fff;
+  .brand-logo-wrap{
+    width:42px;height:42px;flex:none;
     display:flex;align-items:center;justify-content:center;
-    font-family:"LXGW WenKai TC",serif;font-size:20px;font-weight:700;
-    border-radius:8px; transform:rotate(-3deg); box-shadow: 0 4px 12px rgba(168,50,50,0.2);
+  }
+  .brand-logo-wrap svg, .brand-logo-wrap img{
+    width:100%;height:100%;object-fit:contain;
   }
   .brand-text h1{margin:0;font-size:18px;font-weight:700;display:flex;align-items:baseline;gap:6px;}
   .brand-text p{margin:2px 0 0;font-size:11.5px;color:var(--ink-soft);font-weight:500;}
@@ -227,7 +231,7 @@
     transition:transform .15s ease-out;
   }
 
-  /* 句子重組 */
+  /* 句子重組專屬樣式 */
   .reorder-container{display:flex;flex-direction:column;gap:24px;max-width:840px;margin:0 auto;}
   .reorder-slot-zone{
     display:flex;flex-wrap:wrap;gap:12px;min-height:76px;padding:16px;
@@ -247,7 +251,7 @@
   .reorder-chip.correct-done{background:var(--bamboo-soft); border-color:var(--bamboo); color:var(--bamboo); cursor:default;}
   .reorder-chip.wrong-shake{border-color:#E63946 !important; background:rgba(230,57,70,0.12) !important; color:#E63946 !important; animation:shakeWrong .45s ease;}
 
-  /* 浮動縮放控制器 */
+  /* 浮動畫面縮放調節控制器 */
   .zoom-floating-widget{
     position:fixed; bottom:24px; right:28px;
     display:flex; align-items:center; gap:4px;
@@ -431,7 +435,10 @@
 <div class="app" id="app">
   <header class="topbar">
     <div class="brand" id="brand-logo" title="點擊返回課程大廳">
-      <div class="stamp">曼</div>
+      <!-- 內嵌透明去背向量 Logo (可愛地球與愛心) -->
+      <div class="brand-logo-wrap">
+        <img id="brand-logo-img" alt="曼米中文 Mandamy Logo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='52' r='38' fill='%2398D7FF' stroke='%231C211E' stroke-width='4'/%3E%3Cpath d='M 14 44 C 20 22, 38 16, 50 16 C 62 16, 80 22, 86 44 C 76 52, 66 38, 50 44 C 34 38, 24 52, 14 44 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 22 75 C 36 90, 64 90, 78 75 C 66 78, 34 78, 22 75 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='37' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Cellipse cx='63' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Crect x='36' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Crect x='61.5' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Cellipse cx='50' cy='32' rx='4.5' ry='3.5' fill='%231C211E'/%3E%3Cpath d='M 50 67 C 36 55, 31 43, 39 37 C 45 32, 50 37, 50 40 C 50 37, 55 32, 61 37 C 69 43, 64 55, 50 67 Z' fill='%23FF7A8E' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 14 56 C 20 48, 38 52, 38 58 C 36 64, 20 64, 14 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 86 56 C 80 48, 62 52, 62 58 C 64 64, 80 64, 86 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='78' cy='18' rx='11' ry='9' fill='%23FFFFFF' stroke='%231C211E' stroke-width='3'/%3E%3Cpath d='M 71 24 L 67 29 L 75 26 Z' fill='%23FFFFFF' stroke='%231C211E' stroke-width='2'/%3E%3C/svg%3E">
+      </div>
       <div class="brand-text">
         <h1 id="brand-title">曼米中文 <span style="font-size:13px; font-weight:600; opacity:0.65; letter-spacing:0.04em;">Mandamy</span></h1>
         <p id="brand-sub">專案課次大廳</p>
@@ -724,6 +731,37 @@
     dlg.removeAttribute("open");
   }
 
+  /* ================== 自動去除 logo.png 白色背景 (去背處理) ================== */
+  function autoTransparentLogo(){
+    var img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function(){
+      try {
+        var canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var d = imgData.data;
+        // 將所有白色或近白色像素（R, G, B > 238）的 Alpha 設為 0
+        for(var i = 0; i < d.length; i += 4){
+          if(d[i] > 238 && d[i+1] > 238 && d[i+2] > 238){
+            d[i+3] = 0;
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+        var transparentDataUrl = canvas.toDataURL("image/png");
+        var logoImgEl = document.getElementById("brand-logo-img");
+        if(logoImgEl) logoImgEl.src = transparentDataUrl;
+        var faviconEl = document.getElementById("dynamic-favicon");
+        if(faviconEl) faviconEl.href = transparentDataUrl;
+      } catch(e){}
+    };
+    img.src = "logo.png";
+  }
+  window.addEventListener("load", autoTransparentLogo);
+
   /* ================== 畫面縮放控制引擎 ================== */
   var currentZoomRatio = parseFloat(localStorage.getItem("hanyu_zoom_ratio")) || 1.0;
 
@@ -958,7 +996,7 @@
     fontSize: 36
   };
 
-  /* ================== 資料庫預設結構 (曼米中文 Mandamy) ================== */
+  /* ================== 資料庫載入與儲存 ================== */
   var STORAGE_FS_KEY = "hanyu-mandamy-v4";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
@@ -1059,7 +1097,6 @@
     try{ localStorage.setItem(STORAGE_FS_KEY, JSON.stringify(fsData)); }catch(e){}
   }
 
-  // 防迴圈資料夾層級驗證
   function isDescendantOf(folderId, ancestorId){
     if(!fsData.folders || !fsData.folders[folderId]) return false;
     var cur = fsData.folders[folderId];
@@ -1859,6 +1896,7 @@
     wrap.className = "reorder-container";
     wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || "請將下列詞語拖曳重組為正確句子："}</p>`;
 
+    // 上方放置槽 (Slot Zone)
     var slotZone = document.createElement("div");
     slotZone.className = "reorder-slot-zone";
     
@@ -1914,6 +1952,7 @@
     }
     wrap.appendChild(slotZone);
 
+    // 下方備選字庫區 (Pool Zone)
     var poolZone = document.createElement("div");
     poolZone.style.cssText = "display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; min-height:64px; align-items:center;";
     poolZone.ondragover = function(e){
@@ -1953,7 +1992,23 @@
         chip.onclick = function(){
           poolWords.splice(idx, 1);
           userWords.push(w);
-          evaluateReorderState(q, userWords, poolWords, correctWords);
+          
+          if(userWords.length === correctWords.length){
+            var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
+            if(isMatch){
+              playCorrectSound();
+              writeProgress(q.id, { userWords: userWords, poolWords: poolWords, revealed: true });
+              return;
+            } else {
+              playWrongSound();
+              slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
+              setTimeout(function(){
+                writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
+              }, 500);
+              return;
+            }
+          }
+          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
         };
       }
       poolZone.appendChild(chip);
@@ -1970,6 +2025,7 @@
     container.appendChild(wrap);
   }
 
+  /* 句子重組自動判定邏輯 */
   var reorderTimer = null;
   function evaluateReorderState(q, userWords, poolWords, correctWords){
     if(reorderTimer) clearTimeout(reorderTimer);
@@ -2277,7 +2333,7 @@
 
     vToolbar.querySelectorAll(".color-dot").forEach(function(d){
       d.onclick = function(){
-        vToolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
+        toolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
         d.classList.add("active"); boardState.color = d.dataset.color;
       };
     });
@@ -2301,4 +2357,464 @@
 
   /* 連連看 */
   function renderMatchBoard(q, container){
-    var progress请恕我爱莫能助，我只是一个语言模型，不能理解或回复你的这个问题。
+    var progress = getProgress(q.id);
+    var matched = progress.matched || {};
+    var selections = progress.selections || {};
+    var interactive = canInteract();
+
+    var wrap = document.createElement("div"); wrap.className = "match-board";
+    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","match-svg");
+    wrap.appendChild(svg);
+    var cols = document.createElement("div"); cols.className = "match-cols";
+    var lCol = document.createElement("div"); lCol.className = "match-col";
+    var rCol = document.createElement("div"); rCol.className = "match-col";
+    lCol.innerHTML = '<div class="match-col-label">' + (q.leftLabel || "項目一") + '</div>';
+    rCol.innerHTML = '<div class="match-col-label">' + (q.rightLabel || "項目二") + '</div>';
+
+    var pIds = Object.keys(q.pairs || {}).sort();
+    var rOrder = pIds.slice().sort();
+
+    pIds.forEach(function(pid){
+      var p = q.pairs[pid];
+      var btn = document.createElement("button"); btn.type="button"; 
+      var isMatched = !!matched[pid];
+      btn.className = "match-item zh" + (isMatched ? " matched" : "");
+      btn.textContent = p.left; btn.dataset.id = pid; btn.dataset.side = "left";
+
+      var userWhoSelectedL = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].left === pid; });
+      if(userWhoSelectedL && !isMatched){
+        btn.classList.add("selected");
+        var uInfoL = selections[userWhoSelectedL]; var uColorL = getColorForStudent(uInfoL.name || "學生", uInfoL.role);
+        btn.style.borderColor = uColorL; btn.style.boxShadow = "0 0 0 3.5px " + uColorL + "44 inset";
+      } else if(!isMatched){ btn.style.boxShadow = ""; }
+
+      if(isMatched || !interactive) btn.disabled = true;
+
+      btn.onclick = function(){
+        if(matched[pid] || !interactive) return;
+        var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
+        mySel.left = (mySel.left === pid) ? null : pid;
+        var newSelections = Object.assign({}, selections, { [myId]: mySel });
+        writeProgress(q.id, { selections: newSelections });
+        checkMatch(mySel);
+      };
+      lCol.appendChild(btn);
+    });
+
+    rOrder.forEach(function(pid){
+      var p = q.pairs[pid];
+      var btn = document.createElement("button"); btn.type="button"; 
+      var isMatched = !!matched[pid];
+      btn.className = "match-item" + (isMatched ? " matched" : "");
+      btn.textContent = p.right; btn.dataset.id = pid; btn.dataset.side = "right";
+
+      var userWhoSelectedR = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].right === pid; });
+      if(userWhoSelectedR && !isMatched){
+        btn.classList.add("selected");
+        var uInfoR = selections[userWhoSelectedR]; var uColorR = getColorForStudent(uInfoR.name || "學生", uInfoR.role);
+        btn.style.borderColor = uColorR; btn.style.boxShadow = "0 0 0 3.5px " + uColorR + "44 inset";
+      } else if(!isMatched){ btn.style.boxShadow = ""; }
+
+      if(isMatched || !interactive) btn.disabled = true;
+
+      btn.onclick = function(){
+        if(matched[pid] || !interactive) return;
+        var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
+        mySel.right = (mySel.right === pid) ? null : pid;
+        var newSelections = Object.assign({}, selections, { [myId]: mySel });
+        writeProgress(q.id, { selections: newSelections });
+        checkMatch(mySel);
+      };
+      rCol.appendChild(btn);
+    });
+
+    function checkMatch(currentMySel){
+      if(currentMySel && currentMySel.left && currentMySel.right){
+        var newSelections = Object.assign({}, getProgress(q.id).selections || {});
+        delete newSelections[myId];
+        if(currentMySel.left === currentMySel.right){
+          playCorrectSound(); matched[currentMySel.left] = true;
+          writeProgress(q.id, { matched: matched, lastWrong: null, selections: newSelections });
+          if(Object.keys(matched).length === pIds.length){ setTimeout(playVictorySound, 400); }
+        } else {
+          playWrongSound();
+          writeProgress(q.id, { lastWrong: { left: currentMySel.left, right: currentMySel.right, t: Date.now(), who: myName }, selections: newSelections });
+        }
+      }
+    }
+
+    cols.appendChild(lCol); cols.appendChild(rCol); wrap.appendChild(cols); container.appendChild(wrap);
+
+    var lastWrong = progress.lastWrong;
+    if(lastWrong && lastWrong.t && (Date.now() - lastWrong.t < 1200)){
+      var wLeft = lCol.querySelector(`.match-item[data-id="${lastWrong.left}"]`);
+      var wRight = rCol.querySelector(`.match-item[data-id="${lastWrong.right}"]`);
+      if(wLeft && wRight){
+        wLeft.classList.add("wrong"); wRight.classList.add("wrong");
+        setTimeout(function(){ if(wLeft) wLeft.classList.remove("wrong", "selected"); if(wRight) wRight.classList.remove("wrong", "selected"); }, 600);
+      }
+    }
+
+    function drawLines(){
+      var rect = wrap.getBoundingClientRect(); svg.setAttribute("viewBox","0 0 "+rect.width+" "+rect.height); svg.innerHTML = "";
+      Object.keys(matched).forEach(function(pid){
+        var l = lCol.querySelector(`.match-item[data-id="${pid}"]`); var r = rCol.querySelector(`.match-item[data-id="${pid}"]`);
+        if(!l || !r) return;
+        var lr = l.getBoundingClientRect(), rr = r.getBoundingClientRect();
+        var x1 = lr.right - rect.left, y1 = lr.top + lr.height/2 - rect.top;
+        var x2 = rr.left - rect.left, y2 = rr.top + rr.height/2 - rect.top;
+        var mx = (x1+x2)/2;
+        var path = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d", "M"+x1+","+y1+" C "+mx+","+y1+" "+mx+","+y2+" "+x2+","+y2);
+        path.setAttribute("stroke", "#2D5A27"); path.setAttribute("stroke-width","3.5"); path.setAttribute("fill","none"); path.setAttribute("stroke-linecap","round");
+        svg.appendChild(path);
+      });
+    }
+    requestAnimationFrame(drawLines); window.addEventListener("resize", drawLines);
+  }
+
+  /* 遠端游標 */
+  function renderMultiCursors(cursorData){
+    var container = document.getElementById("multi-cursor-box");
+    if(!container) return; container.innerHTML = "";
+    if(!cursorData || !cursorOn) return;
+    Object.keys(cursorData).forEach(function(peerId){
+      if(peerId === myId) return;
+      var c = cursorData[peerId]; if(!c || c.x == null) return;
+      var isTeacherCursor = (c.role === "teacher" || peerId === "teacher");
+      var displayName = isTeacherCursor ? "👑 老師" : (c.name || "學生");
+      var color = isTeacherCursor ? "#B23B32" : getColorForStudent(displayName, "student");
+      var el = document.createElement("div"); el.className = "peer-cursor";
+      el.style.left = c.x + "%"; el.style.top = c.y + "%";
+      el.innerHTML = `<span class="peer-cursor-dot" style="background:${color};"></span><span class="peer-cursor-label" style="background:${color};">${displayName}</span>`;
+      container.appendChild(el);
+    });
+  }
+
+  var lastM = 0;
+  function handleCursorMove(clientX, clientY){
+    if(!inRoom() || !cursorOn) return;
+    var now = Date.now(); if(now - lastM < 40) return; lastM = now;
+    var boardArea = document.getElementById("board-area"); if(!boardArea) return;
+    var r = boardArea.getBoundingClientRect(); if(r.width === 0 || r.height === 0) return;
+    var x = ((clientX - r.left) / r.width) * 100; var y = ((clientY - r.top) / r.height) * 100;
+    if(x < -10 || x > 110 || y < -10 || y > 110){ update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: null, y: null }); return; }
+    x = Math.max(0, Math.min(100, x)); y = Math.max(0, Math.min(100, y));
+    update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: x, y: y, name: myName, role: roomRole });
+  }
+  window.addEventListener("mousemove", function(e){ handleCursorMove(e.clientX, e.clientY); });
+  window.addEventListener("touchmove", function(e){ if(e.touches && e.touches[0]){ handleCursorMove(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
+
+  /* 縮放按鈕 */
+  var btnZoomIn = document.getElementById("btn-zoom-in");
+  var btnZoomOut = document.getElementById("btn-zoom-out");
+  var btnZoomReset = document.getElementById("zoom-percent-text");
+  if(btnZoomIn) btnZoomIn.onclick = function(){ applyStageZoom(currentZoomRatio + 0.1); };
+  if(btnZoomOut) btnZoomOut.onclick = function(){ applyStageZoom(currentZoomRatio - 0.1); };
+  if(btnZoomReset) btnZoomReset.onclick = function(){ applyStageZoom(1.0); };
+
+  /* 設定面板 */
+  var soundSelect = document.getElementById("setting-sound-style"); soundSelect.value = currentSoundStyle;
+  soundSelect.onchange = function(){ currentSoundStyle = soundSelect.value; localStorage.setItem("hanyu_sound_style", currentSoundStyle); };
+  document.querySelectorAll(".btn-theme-bg").forEach(function(b){ b.onclick = function(){ applyTheme(b.dataset.bg, currentAccentColor, true); }; });
+  document.querySelectorAll(".btn-theme-accent").forEach(function(b){ b.onclick = function(){ applyTheme(currentBgMode, b.dataset.accent, true); }; });
+  
+  var testSoundBtn = document.getElementById("btn-test-sound");
+  if(testSoundBtn){
+    testSoundBtn.onclick = function(e){
+      e.preventDefault(); var ctx = getAudioContext();
+      if(ctx.state === 'suspended') ctx.resume().then(runTest); else runTest();
+      function runTest(){ var prev = soundSelect ? soundSelect.value : currentSoundStyle; playTone(prev, true); setTimeout(function(){ playTone(prev, false); }, 600); }
+    };
+  }
+  document.getElementById("btn-close-settings").onclick = function(){ currentSoundStyle = soundSelect.value; localStorage.setItem("hanyu_sound_style", currentSoundStyle); closeModalDialog(document.getElementById("settings-dialog")); };
+
+  /* 大題新增彈窗 */
+  var sectionDialog = document.getElementById("section-dialog");
+  var sectionTypeToggle = document.getElementById("section-type-toggle");
+  var currentSectionType = "match";
+  sectionTypeToggle.querySelectorAll("button").forEach(function(b){
+    b.onclick = function(){ sectionTypeToggle.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); }); b.classList.add("active"); currentSectionType = b.dataset.type; };
+  });
+  document.getElementById("btn-new-section").onclick = function(){
+    editingSectionId = null; document.getElementById("f-sec-title").value = ""; document.getElementById("f-sec-desc").value = "";
+    document.getElementById("section-dialog-title").textContent = "新增試卷大題"; safeShowModal(sectionDialog);
+  };
+  document.getElementById("btn-cancel-section").onclick = function(){ closeModalDialog(sectionDialog); };
+  document.getElementById("section-form").onsubmit = function(e){
+    e.preventDefault();
+    var title = document.getElementById("f-sec-title").value.trim(); var desc = document.getElementById("f-sec-desc").value.trim();
+    if(!title) return;
+    var secs = Object.assign({}, getSections());
+    if(editingSectionId){ secs[editingSectionId].title = title; secs[editingSectionId].desc = desc; }
+    else {
+      var newSecId = uid("sec"); var defaultQId = uid("q"); var currentKeys = Object.keys(secs);
+      var defaultQ = { id: defaultQId, title: "第 1 題", order: 0 };
+      if(currentSectionType === "match"){
+        defaultQ.leftLabel = "生詞"; defaultQ.rightLabel = "拼音"; defaultQ.pairs = { p1: {id:"p1", left:"你好", right:"nǐ hǎo"} };
+      } else if(currentSectionType === "choice"){
+        defaultQ.prompt = "請選出正確答案(可複選)："; defaultQ.choices = { c1: {id:"c1", text:"選項 A"}, c2: {id:"c2", text:"選項 B"} }; defaultQ.answerIds = ["c1"];
+      } else if(currentSectionType === "reorder"){
+        defaultQ.prompt = "請將下列詞語重組為正確句子"; defaultQ.words = ["我", "愛", "學", "華語"];
+      } else {
+        defaultQ.desc = "漢字臨摹與書寫練習"; defaultQ.bgImage = ""; defaultQ.gridType = "jiu";
+      }
+      secs[newSecId] = { id: newSecId, title: title, desc: desc, type: currentSectionType, order: currentKeys.length, collapsed: false, questions: { [defaultQId]: defaultQ } };
+      writeSections(secs, defaultQId);
+    }
+    closeModalDialog(sectionDialog);
+  };
+
+  /* 小題題目編輯彈窗 */
+  var editorDialog = document.getElementById("editor-dialog");
+  var matchFields = document.getElementById("match-fields");
+  var choiceFields = document.getElementById("choice-fields");
+  var reorderFields = document.getElementById("reorder-fields");
+  var boardFields = document.getElementById("board-fields");
+  var uploadedBase64 = "";
+
+  var choiceOptRows = document.getElementById("choice-opt-rows");
+  function addChoiceOptRow(text, isChecked){
+    var row = document.createElement("div"); row.className = "choice-row";
+    row.innerHTML = `
+      <input type="checkbox" class="mc-correct-chk" ${isChecked ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--bamboo);" title="勾選代表正確答案(可多選)">
+      <input type="text" class="mc-opt-text" placeholder="輸入選項內容" value="${text || ''}">
+      <button type="button" class="row-del">✕</button>
+    `;
+    row.querySelector(".row-del").onclick = function(){ if(choiceOptRows.children.length > 2) row.remove(); };
+    choiceOptRows.appendChild(row);
+  }
+  document.getElementById("add-mc-opt").onclick = function(){ addChoiceOptRow("", false); };
+
+  var pairRows = document.getElementById("pair-rows");
+  function addPairRow(l, r){
+    var row = document.createElement("div"); row.className = "pair-row";
+    row.innerHTML = `
+      <input type="text" class="pair-left" placeholder="生詞" value="${l || ''}">
+      <input type="text" class="pair-right" placeholder="拼音／意思" value="${r || ''}">
+      <button type="button" class="row-del">✕</button>
+    `;
+    row.querySelector(".row-del").onclick = function(){ if(pairRows.children.length > 2) row.remove(); };
+    pairRows.appendChild(row);
+  }
+  document.getElementById("add-pair").onclick = function(){ addPairRow("", ""); };
+
+  var fileInput = document.getElementById("f-board-img");
+  document.getElementById("upload-box").onclick = function(){ fileInput.click(); };
+  fileInput.onchange = function(e){
+    var f = e.target.files[0]; if(!f) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      var img = new Image();
+      img.onload = function(){
+        var c = document.createElement("canvas"); var scale = Math.min(1, 900 / img.width);
+        c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+        var cx = c.getContext("2d"); cx.drawImage(img, 0, 0, c.width, c.height);
+        uploadedBase64 = c.toDataURL("image/jpeg", 0.75);
+        document.getElementById("upload-tip").textContent = "✅ 已上傳圖片：" + f.name;
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  function openQuestionDialog(sectionId, editQuestionId){
+    activeSectionForAdd = sectionId;
+    editingQuestionId = editQuestionId || null;
+    var secs = getSections(); var sec = secs[sectionId]; if(!sec) return;
+    var secType = sec.type;
+
+    matchFields.style.display = secType === "match" ? "" : "none";
+    choiceFields.style.display = secType === "choice" ? "" : "none";
+    reorderFields.style.display = secType === "reorder" ? "" : "none";
+    boardFields.style.display = secType === "board" ? "" : "none";
+
+    uploadedBase64 = ""; document.getElementById("upload-tip").textContent = "📷 點擊上傳背景圖片（JPG/PNG）";
+    pairRows.innerHTML = ""; choiceOptRows.innerHTML = "";
+
+    if(editingQuestionId){
+      document.getElementById("editor-dialog-title").textContent = "編輯現有題目";
+      var q = sec.questions[editingQuestionId];
+      document.getElementById("f-title").value = q.title || "";
+
+      if(secType === "match"){
+        document.getElementById("f-left-label").value = q.leftLabel || "生詞";
+        document.getElementById("f-right-label").value = q.rightLabel || "拼音／意思";
+        var pKeys = Object.keys(q.pairs || {});
+        if(pKeys.length === 0) addPairRow("", "");
+        pKeys.forEach(function(pk){ addPairRow(q.pairs[pk].left, q.pairs[pk].right); });
+      } else if(secType === "choice"){
+        document.getElementById("f-choice-prompt").value = q.prompt || "";
+        var ansIds = q.answerIds || (q.answerId ? [q.answerId] : []);
+        var cKeys = Object.keys(q.choices || {});
+        if(cKeys.length === 0) addChoiceOptRow("", false);
+        cKeys.forEach(function(ck){
+          var isCorrect = ansIds.indexOf(ck) !== -1;
+          addChoiceOptRow(q.choices[ck].text, isCorrect);
+        });
+      } else if(secType === "reorder"){
+        document.getElementById("f-reorder-prompt").value = q.prompt || "";
+        document.getElementById("f-reorder-answer").value = q.words ? q.words.join(", ") : "";
+      } else if(secType === "board"){
+        document.getElementById("f-board-desc").value = q.desc || "";
+        if(q.bgImage){ uploadedBase64 = q.bgImage; document.getElementById("upload-tip").textContent = "✅ 已載入現有底圖"; }
+      }
+    } else {
+      document.getElementById("editor-dialog-title").textContent = "新增小題題目";
+      var count = Object.keys(sec.questions || {}).length;
+      document.getElementById("f-title").value = `第 ${count + 1} 題`;
+      if(secType === "match"){ addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie"); }
+      else if(secType === "choice"){ addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false); }
+      else if(secType === "reorder"){ document.getElementById("f-reorder-prompt").value = "請將下列詞語重組為正確句子"; document.getElementById("f-reorder-answer").value = "我, 愛, 學, 華語"; }
+    }
+    safeShowModal(editorDialog);
+  }
+
+  document.getElementById("btn-cancel").onclick = function(){ closeModalDialog(editorDialog); };
+
+  document.getElementById("editor-form").onsubmit = function(e){
+    e.preventDefault();
+    var title = document.getElementById("f-title").value.trim();
+    if(!title || !activeSectionForAdd) return;
+
+    var secs = Object.assign({}, getSections()); var sec = secs[activeSectionForAdd]; if(!sec) return;
+    var qId = editingQuestionId || uid("q");
+    var qKeys = Object.keys(sec.questions || {});
+    var existingOrder = (editingQuestionId && sec.questions[editingQuestionId]) ? sec.questions[editingQuestionId].order : qKeys.length;
+    var newQ = { id: qId, title: title, order: existingOrder };
+
+    if(sec.type === "board"){
+      newQ.desc = document.getElementById("f-board-desc").value.trim();
+      newQ.bgImage = uploadedBase64 || (editingQuestionId && sec.questions[editingQuestionId] ? sec.questions[editingQuestionId].bgImage : "");
+      newQ.gridType = "jiu";
+    } else if(sec.type === "choice"){
+      var choices = {}; var answerIds = [];
+      choiceOptRows.querySelectorAll(".choice-row").forEach(function(r, idx){
+        var txt = r.querySelector(".mc-opt-text").value.trim();
+        var isChecked = r.querySelector(".mc-correct-chk").checked;
+        if(txt){
+          var cid = "c" + (idx + 1); choices[cid] = { id: cid, text: txt };
+          if(isChecked) answerIds.push(cid);
+        }
+      });
+      if(answerIds.length === 0 && Object.keys(choices).length > 0) answerIds.push(Object.keys(choices)[0]);
+      newQ.prompt = document.getElementById("f-choice-prompt").value.trim() || title;
+      newQ.choices = choices; newQ.answerIds = answerIds;
+    } else if(sec.type === "reorder"){
+      var rawStr = document.getElementById("f-reorder-answer").value.trim();
+      var words = rawStr ? rawStr.split(/[,，\s]+/).filter(Boolean) : ["我", "是", "學生"];
+      newQ.prompt = document.getElementById("f-reorder-prompt").value.trim() || title;
+      newQ.words = words;
+    } else if(sec.type === "match"){
+      var pairs = {};
+      pairRows.querySelectorAll(".pair-row").forEach(function(r, idx){
+        var l = r.querySelector(".pair-left").value.trim(); var rt = r.querySelector(".pair-right").value.trim();
+        if(l && rt) pairs["p" + (idx + 1)] = { id: "p" + (idx + 1), left: l, right: rt };
+      });
+      newQ.leftLabel = document.getElementById("f-left-label").value.trim() || "生詞";
+      newQ.rightLabel = document.getElementById("f-right-label").value.trim() || "拼音／意思";
+      newQ.pairs = pairs;
+    }
+
+    if(!sec.questions) sec.questions = {};
+    sec.questions[qId] = newQ; writeSections(secs, qId); closeModalDialog(editorDialog);
+  };
+
+  /* Excel 匯入 */
+  var excelInput = document.getElementById("excel-file-input");
+  document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
+  excelInput.onchange = function(e){
+    var file = e.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try {
+        var data = new Uint8Array(evt.target.result); var wb = XLSX.read(data, { type: 'array' });
+        var ws = wb.Sheets[wb.SheetNames[0]]; var rows = XLSX.utils.sheet_to_json(ws);
+        if(!rows || rows.length === 0){ alert("Excel 檔案內沒有資料！"); return; }
+        var newSections = Object.assign({}, getSections()); var grouped = {};
+        rows.forEach(function(row){
+          var secTitle = row["大題名稱"] || row["Section"] || "第一大題";
+          var type = (row["題型"] || row["Type"] || "match").toLowerCase();
+          if(!grouped[secTitle]) grouped[secTitle] = { title: secTitle, type: type, questions: {} };
+          var qTitle = row["小題名稱"] || row["Question"] || "第 1 題";
+          if(!grouped[secTitle].questions[qTitle]) grouped[secTitle].questions[qTitle] = { title: qTitle, rows: [] };
+          grouped[secTitle].questions[qTitle].rows.push(row);
+        });
+        var firstNewQId = null; var secOrder = Object.keys(newSections).length;
+        Object.keys(grouped).forEach(function(secTitle){
+          var gSec = grouped[secTitle]; var newSecId = uid("sec"); var questionsObj = {}; var qOrder = 0;
+          Object.keys(gSec.questions).forEach(function(qTitle){
+            var gQ = gSec.questions[qTitle]; var newQId = uid("q"); if(!firstNewQId) firstNewQId = newQId;
+            if(gSec.type === "match"){
+              var pairs = {};
+              gQ.rows.forEach(function(it, idx){
+                var pid = "p" + (idx + 1); var l = it["左欄生詞"] || ""; var r = it["右欄拼音或意思"] || "";
+                if(l && r) pairs[pid] = { id: pid, left: String(l), right: String(r) };
+              });
+              questionsObj[newQId] = { id: newQId, title: qTitle, order: qOrder++, leftLabel: "生詞", rightLabel: "拼音", pairs: pairs };
+            } else if(gSec.type === "reorder"){
+              var it = gQ.rows[0]; var wStr = it["正確句子"] || it["Words"] || "我,是,學生";
+              questionsObj[newQId] = { id: newQId, title: qTitle, order: qOrder++, prompt: it["題目說明"] || qTitle, words: wStr.split(/[,，\s]+/) };
+            }
+          });
+          newSections[newSecId] = { id: newSecId, title: secTitle, type: gSec.type, order: secOrder++, collapsed: false, questions: questionsObj };
+        });
+        writeSections(newSections, firstNewQId); alert("🎉 成功由 Excel 匯入題庫！");
+      } catch(err){ alert("解析失敗。"); }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  document.getElementById("btn-dl-template").onclick = function(){
+    var templateData = [
+      { "大題名稱": "第一大題：生詞配對", "題型": "match", "小題名稱": "第1題", "左欄生詞": "你好", "右欄拼音或意思": "nǐ hǎo" },
+      { "大題名稱": "第三大題：句子重組", "題型": "reorder", "小題名稱": "第1題", "正確句子": "我,愛,學,華語" }
+    ];
+    var ws = XLSX.utils.json_to_sheet(templateData); var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "範本"); XLSX.writeFile(wb, "曼米中文_範本.xlsx");
+  };
+
+  document.getElementById("btn-export-excel").onclick = function(){
+    var secs = getSections(); var secKeys = getSortedSectionKeys(); var exportRows = [];
+    secKeys.forEach(function(sid){
+      var sec = secs[sid]; var qKeys = getSortedQuestionKeys(sec);
+      qKeys.forEach(function(qid){
+        var q = sec.questions[qid];
+        if(sec.type === "match" && q.pairs){
+          Object.keys(q.pairs).forEach(function(pid){
+            exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": q.pairs[pid].left, "右欄拼音或意思": q.pairs[pid].right });
+          });
+        } else if(sec.type === "reorder" && q.words){
+          exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "正確句子": q.words.join(",") });
+        }
+      });
+    });
+    if(exportRows.length === 0){ alert("無題目可匯出"); return; }
+    var ws = XLSX.utils.json_to_sheet(exportRows); var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "題庫"); XLSX.writeFile(wb, "曼米中文題庫備份.xlsx");
+  };
+
+  function handleStudentJoin(){
+    if(!urlRoom) return;
+    if(urlName){ myName = decodeURIComponent(urlName); attachPresence(urlRoom, myId, myName); startRoom(urlRoom, "student"); return; }
+    var nameDialog = document.getElementById("student-name-dialog");
+    safeShowModal(nameDialog);
+    var submitBtn = document.getElementById("btn-submit-student-name");
+    if(submitBtn){
+      submitBtn.onclick = function(){
+        var input = document.getElementById("input-student-name"); var entered = input ? input.value.trim() : "";
+        if(!entered) entered = "學生 " + Math.floor(10 + Math.random()*90);
+        myName = entered; closeModalDialog(nameDialog);
+        attachPresence(urlRoom, myId, myName); startRoom(urlRoom, "student");
+      };
+    }
+  }
+
+  function onFirebaseReady(cb){ if(window.__firebaseReady) cb(); else window.addEventListener("firebase-bridge-ready", cb); }
+  if(isStudent){ lobbyView.style.display = "none"; onFirebaseReady(handleStudentJoin); }
+  else if(urlRoom){ onFirebaseReady(function(){ attachPresence(urlRoom, "teacher", "老師"); startRoom(urlRoom, "teacher"); }); }
+  else { showLobby(); }
+})();
+</script>
+</body>
+</html>
