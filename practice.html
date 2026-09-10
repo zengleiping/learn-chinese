@@ -2067,6 +2067,37 @@
     return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
+  /* 頁面內文字輸入框（避免依賴瀏覽器原生 prompt()，某些預覽環境會封鎖原生彈窗） */
+  function showInlineTextInput(container, pos, onCommit){
+    var existing = container.querySelector(".inline-text-input");
+    if(existing) existing.remove();
+    var input = document.createElement("input");
+    input.type = "text";
+    input.className = "inline-text-input";
+    input.placeholder = "輸入文字，Enter 確認";
+    input.style.cssText = "position:absolute; left:" + pos.x + "%; top:" + pos.y + "%; transform:translate(-50%,-50%); z-index:30; width:160px; max-width:70%; padding:7px 12px; border:2px solid var(--seal); border-radius:10px; background:var(--surface); color:var(--ink); font-size:16px; font-family:'LXGW WenKai TC',serif; box-shadow:0 6px 16px rgba(0,0,0,0.15); outline:none;";
+    container.appendChild(input);
+    setTimeout(function(){ input.focus(); }, 0);
+    var done = false;
+    function commit(){
+      if(done) return; done = true;
+      var val = input.value;
+      if(input.parentNode) input.remove();
+      onCommit(val);
+    }
+    function cancel(){
+      if(done) return; done = true;
+      if(input.parentNode) input.remove();
+    }
+    input.addEventListener("keydown", function(ev){
+      ev.stopPropagation();
+      if(ev.key === "Enter"){ ev.preventDefault(); commit(); }
+      else if(ev.key === "Escape"){ ev.preventDefault(); cancel(); }
+    });
+    input.addEventListener("mousedown", function(ev){ ev.stopPropagation(); });
+    input.addEventListener("blur", function(){ commit(); });
+  }
+
   var editorDialog = document.getElementById("editor-dialog");
   var pairRowsEl = document.getElementById("pair-rows");
   var choiceOptRowsEl = document.getElementById("choice-opt-rows");
@@ -2553,7 +2584,7 @@
     var progress = getProgress(q.id);
     var interactive = canInteract();
     var multiPicks = progress.multiPicks || {};
-    var isRevealed = (currentClassMode === 'test') ? !!progress.revealed : true;
+    var isTest = currentClassMode === 'test';
     var correctIds = q.answerIds || (q.answerId ? [q.answerId] : []);
 
     var wrap = document.createElement("div");
@@ -2570,16 +2601,12 @@
       var isPicked = !!multiPicks[cid];
       var isCorrect = correctIds.indexOf(cid) !== -1;
 
-      if(isRevealed && currentClassMode !== 'test'){
-        if(isCorrect) btn.classList.add("correct");
-        else if(isPicked && !isCorrect) btn.classList.add("wrong");
-        btn.disabled = true;
-      } else if(progress.revealed && currentClassMode === 'test'){
-        if(isCorrect) btn.classList.add("correct");
-        else if(isPicked && !isCorrect) btn.classList.add("wrong");
-        btn.disabled = true;
-      } else {
-        if(isPicked) btn.classList.add("selected");
+      // 練習模式：勾選當下立刻顯示對／錯（即時回饋，不需要交卷）
+      // 測驗模式：全程只顯示「已勾選」中性樣式，正確與否要等交卷結算才公布
+      if(!isTest && isPicked){
+        btn.classList.add(isCorrect ? "correct" : "wrong");
+      } else if(isPicked){
+        btn.classList.add("selected");
       }
       if(!interactive) btn.disabled = true;
 
@@ -2589,9 +2616,9 @@
       `;
 
       btn.onclick = function(){
-        if(!interactive || (progress.revealed && currentClassMode === 'test')) return;
+        if(!interactive) return;
         multiPicks[cid] = !multiPicks[cid];
-        if(multiPicks[cid] && currentClassMode !== 'test'){
+        if(multiPicks[cid] && !isTest){
           if(isCorrect) playCorrectSound(); else playWrongSound();
         }
         writeProgress(q.id, { multiPicks: multiPicks });
@@ -2600,13 +2627,6 @@
     });
 
     wrap.appendChild(cBox);
-
-    if(progress.revealed && currentClassMode === 'test'){
-      var note = document.createElement("p");
-      note.style.fontSize = "13px"; note.style.color = "var(--bamboo)"; note.style.marginTop = "14px"; note.style.fontWeight = "700";
-      note.textContent = "📊 成績已結算：正確答案已標示為綠色。";
-      wrap.appendChild(note);
-    }
     container.appendChild(wrap);
   }
 
@@ -2614,7 +2634,9 @@
   function renderReorderBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
-    var isRevealed = (currentClassMode === 'test') ? !!progress.revealed : true;
+    // 練習模式：只有在使用者實際排對之後才會標記 revealed（見 evaluateReorderState）
+    // 測驗模式：全程不公布答案，要交卷結算才知道對錯
+    var isRevealed = currentClassMode !== 'test' && !!progress.revealed;
     var correctWords = q.words || [];
 
     if(!progress._shuffledWords || progress._qIdSaved !== q.id){
@@ -2725,23 +2747,7 @@
         chip.onclick = function(){
           poolWords.splice(idx, 1);
           userWords.push(w);
-
-          if(userWords.length === correctWords.length){
-            var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
-            if(isMatch){
-              playCorrectSound();
-              writeProgress(q.id, { userWords: userWords, poolWords: poolWords, revealed: true });
-              return;
-            } else {
-              playWrongSound();
-              slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
-              setTimeout(function(){
-                writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
-              }, 500);
-              return;
-            }
-          }
-          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+          evaluateReorderState(q, userWords, poolWords, correctWords);
         };
       }
       poolZone.appendChild(chip);
@@ -3090,6 +3096,7 @@
 
     canvas.onmousedown = function(e){
       if(!canInteract()) return;
+      e.preventDefault(); // 避免瀏覽器預設的 mousedown 行為把新建立的文字輸入框焦點搶走
       var p = getPos(e);
       activeSelectedTextId = null;
 
@@ -3098,18 +3105,19 @@
         return;
       }
       if(boardState.tool === "text"){
-        var txt = prompt("請輸入文字內容（漢字或拼音）：");
-        if(txt && txt.trim()){
-          texts.push({
-            id: uid("t"),
-            text: txt.trim(),
-            x: p.x,
-            y: p.y,
-            color: boardState.color,
-            fontSize: boardState.fontSize || 36
-          });
-          writeProgress(q.id, { texts: texts });
-        }
+        showInlineTextInput(cWrap, p, function(txt){
+          if(txt && txt.trim()){
+            texts.push({
+              id: uid("t"),
+              text: txt.trim(),
+              x: p.x,
+              y: p.y,
+              color: boardState.color,
+              fontSize: boardState.fontSize || 36
+            });
+            writeProgress(q.id, { texts: texts });
+          }
+        });
         return;
       }
 
