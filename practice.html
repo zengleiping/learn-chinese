@@ -590,28 +590,34 @@
 </dialog>
 
 <!-- 測驗成績結算單彈窗 -->
-<dialog class="dialog-modal" id="score-dialog" style="max-width:640px;">
+<dialog class="dialog-modal" id="score-dialog" style="max-width:680px;">
   <div class="dialog-head">
-    <h2 style="display:flex; align-items:center; gap:8px;">📊 課堂測驗成績結算</h2>
+    <h2 style="display:flex; align-items:center; gap:8px;">📊 課堂測驗成績與錯題檢討</h2>
     <p id="score-meta-text" style="font-size:13px; color:var(--ink-soft); margin:4px 0 0;"></p>
   </div>
   <div class="dialog-body" id="score-dialog-body"></div>
   <div class="dialog-foot" style="justify-content:space-between; flex-wrap:wrap;">
     <div style="display:flex; gap:8px;">
-      <button type="button" class="btn btn-sm btn-ghost" id="btn-copy-score-report" style="border:1px solid var(--grid-line);">📋 複製成績文字報告</button>
-      <button type="button" class="btn btn-sm btn-primary" id="btn-broadcast-score" style="display:none;">📢 廣播成績給學生</button>
+      <button type="button" class="btn btn-sm btn-ghost" id="btn-copy-score-report" style="border:1px solid var(--grid-line);">📋 複製成績報告</button>
+      <button type="button" class="btn btn-sm btn-primary" id="btn-broadcast-score" style="display:none;">📢 廣播成績</button>
     </div>
     <button type="button" class="btn btn-sm" id="btn-close-score">關閉</button>
   </div>
 </dialog>
 
-<!-- 設定彈窗：僅限老師使用 -->
+<!-- 設定彈窗：包含練習模式與測驗模式切換 -->
 <dialog class="dialog-modal" id="settings-dialog">
   <div class="dialog-head">
-    <h2>⚙️ 課堂環境與外觀設定</h2>
+    <h2>⚙️ 課堂環境與模式設定</h2>
   </div>
   <div class="dialog-body">
-    <label>🎨 網站主視覺模式（切換後全房即時同步）</label>
+    <label>🎯 課堂互動模式（切換後全房即時同步）</label>
+    <div style="display:flex; gap:8px; margin-top:6px;">
+      <button type="button" class="btn btn-sm btn-mode-toggle" data-mode="practice" style="flex:1; justify-content:center;">🟢 平常練習模式 (即時回饋)</button>
+      <button type="button" class="btn btn-sm btn-mode-toggle" data-mode="test" style="flex:1; justify-content:center;">🔴 正式測驗模式 (交卷結算)</button>
+    </div>
+
+    <label style="margin-top:18px;">🎨 網站主視覺模式</label>
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
       <button type="button" class="btn btn-sm btn-theme-bg" data-bg="light">☀️ 雅致米白 (預設)</button>
       <button type="button" class="btn btn-sm btn-theme-bg" data-bg="eyecare" style="background:#E8EFE6; color:#243328; border-color:#5C6B60;">🌿 溫和護眼 (豆沙綠)</button>
@@ -628,7 +634,7 @@
 
     <hr style="border:none;border-top:1px solid var(--grid-line);margin:20px 0;">
 
-    <label>🔊 作答音效風格（5 種立體風格任意挑選）</label>
+    <label>🔊 作答音效風格</label>
     <select id="setting-sound-style" style="width:100%;padding:9px;border-radius:8px;border:1.5px solid var(--grid-line);font-size:14px;background:var(--surface-2);color:var(--ink);">
       <option value="magic">🌟 奇幻魔法 (Magic Sparkle / 推薦)</option>
       <option value="arcade">🎮 復古電玩 (8-Bit Arcade)</option>
@@ -684,7 +690,7 @@
   </form>
 </dialog>
 
-<!-- 小題題目編輯／編輯現有題目彈窗 -->
+<!-- 小題題目編輯彈窗 -->
 <dialog class="dialog-modal" id="editor-dialog">
   <form id="editor-form">
     <div class="dialog-head">
@@ -800,23 +806,19 @@
     dlg.removeAttribute("open");
   }
 
-  /* ================== 自動去除 logo.png 白色背景 (去背處理) ================== */
+  /* ================== 自動去除 logo.png 白色背景 ================== */
   function autoTransparentLogo(){
     var img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = function(){
       try {
         var canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        var ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
+        canvas.width = img.width; canvas.height = img.height;
+        var ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0);
         var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         var d = imgData.data;
         for(var i = 0; i < d.length; i += 4){
-          if(d[i] > 238 && d[i+1] > 238 && d[i+2] > 238){
-            d[i+3] = 0;
-          }
+          if(d[i] > 238 && d[i+1] > 238 && d[i+2] > 238){ d[i+3] = 0; }
         }
         ctx.putImageData(imgData, 0, 0);
         var transparentDataUrl = canvas.toDataURL("image/png");
@@ -832,7 +834,6 @@
 
   /* ================== 畫面縮放控制引擎 ================== */
   var currentZoomRatio = parseFloat(localStorage.getItem("hanyu_zoom_ratio")) || 1.0;
-
   function applyStageZoom(ratio){
     currentZoomRatio = Math.max(0.65, Math.min(1.5, Math.round(ratio * 100) / 100));
     var stageEl = document.getElementById("stage");
@@ -841,80 +842,67 @@
       stageEl.style.transformOrigin = "top center";
     }
     var zoomText = document.getElementById("zoom-percent-text");
-    if(zoomText){
-      zoomText.textContent = Math.round(currentZoomRatio * 100) + "%";
-    }
+    if(zoomText) zoomText.textContent = Math.round(currentZoomRatio * 100) + "%";
     localStorage.setItem("hanyu_zoom_ratio", currentZoomRatio);
     window.dispatchEvent(new Event("resize"));
   }
 
-  /* ================== 主題引擎 ================== */
+  /* ================== 主題與模式引擎 ================== */
   var currentBgMode = localStorage.getItem("hanyu_theme_bg") || "light";
   var currentAccentColor = localStorage.getItem("hanyu_theme_accent") || "seal";
+  var currentClassMode = localStorage.getItem("hanyu_class_mode") || "practice"; // "practice" 或 "test"
 
   function applyTheme(bgMode, accentColor, syncToFirebase){
     if(syncToFirebase === undefined) syncToFirebase = true;
     var root = document.documentElement;
 
     if(bgMode === "dark"){
-      root.style.setProperty("--paper", "#191C1B");
-      root.style.setProperty("--surface", "#242826");
-      root.style.setProperty("--surface-2", "#2E3330");
-      root.style.setProperty("--ink", "#E5EAE6");
-      root.style.setProperty("--ink-soft", "#9BA79F");
-      root.style.setProperty("--grid-line", "rgba(255,255,255,0.14)");
+      root.style.setProperty("--paper", "#191C1B"); root.style.setProperty("--surface", "#242826");
+      root.style.setProperty("--surface-2", "#2E3330"); root.style.setProperty("--ink", "#E5EAE6");
+      root.style.setProperty("--ink-soft", "#9BA79F"); root.style.setProperty("--grid-line", "rgba(255,255,255,0.14)");
     } else if(bgMode === "eyecare"){
-      root.style.setProperty("--paper", "#E8EFE6");
-      root.style.setProperty("--surface", "#F3F7F1");
-      root.style.setProperty("--surface-2", "#DCE6D9");
-      root.style.setProperty("--ink", "#243328");
-      root.style.setProperty("--ink-soft", "#5C6B60");
-      root.style.setProperty("--grid-line", "rgba(36,51,40,0.12)");
+      root.style.setProperty("--paper", "#E8EFE6"); root.style.setProperty("--surface", "#F3F7F1");
+      root.style.setProperty("--surface-2", "#DCE6D9"); root.style.setProperty("--ink", "#243328");
+      root.style.setProperty("--ink-soft", "#5C6B60"); root.style.setProperty("--grid-line", "rgba(36,51,40,0.12)");
     } else {
-      root.style.setProperty("--paper", "#FAF8F5");
-      root.style.setProperty("--surface", "#FFFFFF");
-      root.style.setProperty("--surface-2", "#F2EFE9");
-      root.style.setProperty("--ink", "#1C211E");
-      root.style.setProperty("--ink-soft", "#5A635E");
-      root.style.setProperty("--grid-line", "rgba(28,33,30,0.07)");
+      root.style.setProperty("--paper", "#FAF8F5"); root.style.setProperty("--surface", "#FFFFFF");
+      root.style.setProperty("--surface-2", "#F2EFE9"); root.style.setProperty("--ink", "#1C211E");
+      root.style.setProperty("--ink-soft", "#5A635E"); root.style.setProperty("--grid-line", "rgba(28,33,30,0.07)");
     }
 
     if(accentColor === "bamboo"){
-      root.style.setProperty("--seal", "#4C7A5E");
-      root.style.setProperty("--seal-soft", bgMode === "dark" ? "#223229" : "#DEEBE3");
+      root.style.setProperty("--seal", "#4C7A5E"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#223229" : "#DEEBE3");
       root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(123,178,148,0.55)" : "rgba(76,122,94,0.42)");
     } else if(accentColor === "blue"){
-      root.style.setProperty("--seal", "#1E88E5");
-      root.style.setProperty("--seal-soft", bgMode === "dark" ? "#1A2E40" : "#E3F2FD");
+      root.style.setProperty("--seal", "#1E88E5"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#1A2E40" : "#E3F2FD");
       root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(66,165,245,0.55)" : "rgba(30,136,229,0.42)");
     } else if(accentColor === "amber"){
-      root.style.setProperty("--seal", "#E65100");
-      root.style.setProperty("--seal-soft", bgMode === "dark" ? "#382414" : "#FFE0B2");
+      root.style.setProperty("--seal", "#E65100"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#382414" : "#FFE0B2");
       root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(255,152,0,0.55)" : "rgba(230,81,0,0.42)");
     } else {
-      root.style.setProperty("--seal", "#B23B32");
-      root.style.setProperty("--seal-soft", bgMode === "dark" ? "#3D2624" : "#F5DFDB");
+      root.style.setProperty("--seal", "#B23B32"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#3D2624" : "#F5DFDB");
       root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(226,105,92,0.55)" : "rgba(178,59,50,0.42)");
     }
 
     localStorage.setItem("hanyu_theme_bg", bgMode);
     localStorage.setItem("hanyu_theme_accent", accentColor);
-    currentBgMode = bgMode;
-    currentAccentColor = accentColor;
+    currentBgMode = bgMode; currentAccentColor = accentColor;
 
     document.querySelectorAll(".btn-theme-bg").forEach(function(b){
-      if(b.dataset.bg === bgMode) b.classList.add("active");
-      else b.classList.remove("active");
+      b.dataset.bg === bgMode ? b.classList.add("active") : b.classList.remove("active");
     });
     document.querySelectorAll(".btn-theme-accent").forEach(function(b){
-      if(b.dataset.accent === accentColor) b.classList.add("active");
-      else b.classList.remove("active");
+      b.dataset.accent === accentColor ? b.classList.add("active") : b.classList.remove("active");
+    });
+    document.querySelectorAll(".btn-mode-toggle").forEach(function(b){
+      b.dataset.mode === currentClassMode ? (b.className = "btn btn-sm btn-primary btn-mode-toggle") : (b.className = "btn btn-sm btn-ghost btn-mode-toggle");
     });
 
     if(syncToFirebase && inRoom() && roomRole === "teacher"){
       update(ref(db, "rooms/" + activeRoomId), {
         "theme/bgMode": bgMode,
-        "theme/accent": accentColor
+        "theme/accent": accentColor,
+        "classMode": currentClassMode
       });
     }
   }
@@ -938,141 +926,33 @@
       var ctx = getAudioContext();
       if(ctx.state === 'suspended') ctx.resume();
       var now = ctx.currentTime;
-
       if(isCorrect){
-        if(style === "magic"){
-          [1046.5, 1318.5, 1567.98, 1975.5, 2093].forEach(function(freq, idx){
-            var osc = ctx.createOscillator(), g = ctx.createGain();
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(freq, now + idx * 0.055);
-            g.gain.setValueAtTime(0.18, now + idx * 0.055);
-            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.35);
-            osc.connect(g); g.connect(ctx.destination);
-            osc.start(now + idx * 0.055); osc.stop(now + idx * 0.055 + 0.35);
-          });
-        } else if(style === "arcade"){
-          var aOsc = ctx.createOscillator(), aG = ctx.createGain();
-          aOsc.type = "square";
-          aOsc.frequency.setValueAtTime(987.77, now);
-          aOsc.frequency.setValueAtTime(1318.51, now + 0.08);
-          aG.gain.setValueAtTime(0.12, now);
-          aG.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-          aOsc.connect(aG); aG.connect(ctx.destination);
-          aOsc.start(now); aOsc.stop(now + 0.35);
-        } else if(style === "gameshow"){
-          [1046.5, 1567.98, 2093].forEach(function(freq, idx){
-            var gOsc = ctx.createOscillator(), gG = ctx.createGain();
-            gOsc.type = "triangle";
-            gOsc.frequency.setValueAtTime(freq, now + idx * 0.09);
-            gG.gain.setValueAtTime(0.25, now + idx * 0.09);
-            gG.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.4);
-            gOsc.connect(gG); gG.connect(ctx.destination);
-            gOsc.start(now + idx * 0.09); gOsc.stop(now + idx * 0.09 + 0.4);
-          });
-        } else if(style === "cartoon"){
-          [523.25, 659.25, 783.99, 1046.5].forEach(function(freq, idx){
-            var cOsc = ctx.createOscillator(), cG = ctx.createGain();
-            cOsc.type = "sine";
-            cOsc.frequency.setValueAtTime(freq, now + idx * 0.07);
-            cG.gain.setValueAtTime(0.22, now + idx * 0.07);
-            cG.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
-            cOsc.connect(cG); cG.connect(ctx.destination);
-            cOsc.start(now + idx * 0.07); cOsc.stop(now + idx * 0.07 + 0.25);
-          });
-        } else {
-          var osc1 = ctx.createOscillator(), gain1 = ctx.createGain();
-          osc1.type = "sine"; osc1.frequency.setValueAtTime(1318.5, now);
-          gain1.gain.setValueAtTime(0.2, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-          osc1.connect(gain1); gain1.connect(ctx.destination); osc1.start(now); osc1.stop(now + 0.4);
-
-          var osc2 = ctx.createOscillator(), gain2 = ctx.createGain();
-          osc2.type = "sine"; osc2.frequency.setValueAtTime(1567.9, now + 0.1);
-          gain2.gain.setValueAtTime(0.22, now + 0.1); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-          osc2.connect(gain2); gain2.connect(ctx.destination); osc2.start(now + 0.1); osc2.stop(now + 0.55);
-        }
-      } else {
-        if(style === "magic"){
-          var mOsc = ctx.createOscillator(), mG = ctx.createGain();
-          mOsc.type = "sine";
-          mOsc.frequency.setValueAtTime(320, now);
-          mOsc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
-          mG.gain.setValueAtTime(0.26, now);
-          mG.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-          mOsc.connect(mG); mG.connect(ctx.destination);
-          mOsc.start(now); mOsc.stop(now + 0.35);
-        } else if(style === "arcade"){
-          var rOsc = ctx.createOscillator(), rG = ctx.createGain();
-          rOsc.type = "sawtooth";
-          rOsc.frequency.setValueAtTime(260, now);
-          rOsc.frequency.setValueAtTime(190, now + 0.08);
-          rOsc.frequency.setValueAtTime(130, now + 0.16);
-          rG.gain.setValueAtTime(0.2, now);
-          rG.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
-          rOsc.connect(rG); rG.connect(ctx.destination);
-          rOsc.start(now); rOsc.stop(now + 0.38);
-        } else if(style === "gameshow"){
-          [0, 0.15].forEach(function(delay){
-            var bOsc = ctx.createOscillator(), bG = ctx.createGain();
-            bOsc.type = "sawtooth";
-            bOsc.frequency.setValueAtTime(140, now + delay);
-            bG.gain.setValueAtTime(0.28, now + delay);
-            bG.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.11);
-            bOsc.connect(bG); bG.connect(ctx.destination);
-            bOsc.start(now + delay); bOsc.stop(now + delay + 0.11);
-          });
-        } else if(style === "cartoon"){
-          var cTOsc = ctx.createOscillator(), cTG = ctx.createGain();
-          cTOsc.type = "triangle";
-          cTOsc.frequency.setValueAtTime(240, now);
-          cTOsc.frequency.linearRampToValueAtTime(170, now + 0.38);
-          cTG.gain.setValueAtTime(0.28, now);
-          cTG.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
-          cTOsc.connect(cTG); cTG.connect(ctx.destination);
-          cTOsc.start(now); cTOsc.stop(now + 0.38);
-        } else {
+        [1046.5, 1318.5, 1567.98, 1975.5, 2093].forEach(function(freq, idx){
           var osc = ctx.createOscillator(), g = ctx.createGain();
-          osc.type = "triangle"; osc.frequency.setValueAtTime(220, now); osc.frequency.setValueAtTime(185, now + 0.1);
-          g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
-          osc.connect(g); g.connect(ctx.destination); osc.start(now); osc.stop(now + 0.32);
-        }
+          osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + idx * 0.055);
+          g.gain.setValueAtTime(0.18, now + idx * 0.055); g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.35);
+          osc.connect(g); g.connect(ctx.destination); osc.start(now + idx * 0.055); osc.stop(now + idx * 0.055 + 0.35);
+        });
+      } else {
+        var osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = "sine"; osc.frequency.setValueAtTime(320, now); osc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
+        g.gain.setValueAtTime(0.26, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(g); g.connect(ctx.destination); osc.start(now); osc.stop(now + 0.35);
       }
     }catch(e){}
   }
 
-  function playCorrectSound(){ playTone(currentSoundStyle, true); }
-  function playWrongSound(){ playTone(currentSoundStyle, false); }
+  function playCorrectSound(){ if(currentClassMode !== 'test') playTone(currentSoundStyle, true); }
+  function playWrongSound(){ if(currentClassMode !== 'test') playTone(currentSoundStyle, false); }
+  function playVictorySound(){ playTone(currentSoundStyle, true); }
 
-  function playVictorySound(){
-    if(currentSoundStyle === "mute") return;
-    try{
-      var ctx = getAudioContext(), now = ctx.currentTime;
-      [523.25, 659.25, 783.99, 1046.5].forEach(function(freq, idx){
-        var osc = ctx.createOscillator(), g = ctx.createGain();
-        osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + idx * 0.12);
-        g.gain.setValueAtTime(0.2, now + idx * 0.12); g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
-        osc.connect(g); g.connect(ctx.destination);
-        osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
-      });
-    }catch(e){}
-  }
-
-  /* ================== 寫字板持久狀態 ================== */
-  var boardState = {
-    tool: "pen",
-    color: "#B23B32",
-    size: 3,
-    fontSize: 36
-  };
-
-  /* ================== 資料庫載入與自動遷移 (Data Migration) ================== */
+  /* ================== 資料庫預設與遷移 ================== */
   var STORAGE_FS_KEY = "hanyu-mandamy-v6";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var DEFAULT_FS = {
     folders: {
-      "f_thai": {
-        id: "f_thai", parentId: null, title: "115-1 對泰華語轉銜線上華語課", desc: "泰國學生轉銜華語專案班級資料夾"
-      }
+      "f_thai": { id: "f_thai", parentId: null, title: "115-1 對泰華語轉銜線上華語課", desc: "泰國學生轉銜華語專案班級資料夾" }
     },
     projects: {
       "proj_thai_l1": {
@@ -1116,33 +996,14 @@
   };
 
   function createDefaultProjectData(title, desc, folderId){
-    var secId = uid("sec");
-    var qId = uid("q");
+    var secId = uid("sec"); var qId = uid("q");
     return {
-      id: uid("proj"),
-      folderId: folderId || null,
-      title: title,
-      desc: desc || "",
-      currentQId: qId,
+      id: uid("proj"), folderId: folderId || null, title: title, desc: desc || "", currentQId: qId,
       sections: {
         [secId]: {
-          id: secId,
-          title: "第一大題：生詞配對",
-          type: "match",
-          order: 0,
-          collapsed: false,
+          id: secId, title: "第一大題：生詞配對", type: "match", order: 0, collapsed: false,
           questions: {
-            [qId]: {
-              id: qId,
-              title: "第 1 題：基礎問候",
-              order: 0,
-              leftLabel: "生詞",
-              rightLabel: "拼音",
-              pairs: {
-                p1: { id: "p1", left: "你好", right: "nǐ hǎo" },
-                p2: { id: "p2", left: "謝謝", right: "xièxie" }
-              }
-            }
+            [qId]: { id: qId, title: "第 1 題：基礎問候", order: 0, leftLabel: "生詞", rightLabel: "拼音", pairs: { p1: { id: "p1", left: "你好", right: "nǐ hǎo" } } }
           }
         }
       }
@@ -1154,26 +1015,18 @@
     Object.keys(data.projects).forEach(function(pid){
       var p = data.projects[pid];
       if(!p.sections && p.sets){
-        p.sections = {};
-        var secId = uid("sec");
-        p.sections[secId] = {
-          id: secId, title: "匯入練習大題", type: "match", order: 0, collapsed: false, questions: {}
-        };
+        p.sections = {}; var secId = uid("sec");
+        p.sections[secId] = { id: secId, title: "匯入練習大題", type: "match", order: 0, collapsed: false, questions: {} };
         var qOrder = 0;
-        Object.keys(p.sets).forEach(function(setId){
-          var s = p.sets[setId];
-          p.sections[secId].questions[setId] = Object.assign({}, s, { order: qOrder++ });
-        });
+        Object.keys(p.sets).forEach(function(setId){ p.sections[secId].questions[setId] = Object.assign({}, p.sets[setId], { order: qOrder++ }); });
         delete p.sets;
       }
       if(p.sections){
-        var secKeys = Object.keys(p.sections);
-        secKeys.forEach(function(sId, sIdx){
+        Object.keys(p.sections).forEach(function(sId, sIdx){
           var sec = p.sections[sId];
           if(sec.order === undefined) sec.order = sIdx;
           if(sec.questions){
-            var qKeys = Object.keys(sec.questions);
-            qKeys.forEach(function(qId, qIdx){
+            Object.keys(sec.questions).forEach(function(qId, qIdx){
               var q = sec.questions[qId];
               if(q.order === undefined) q.order = qIdx;
             });
@@ -1187,92 +1040,49 @@
   function loadFS(){
     try{
       var raw = localStorage.getItem(STORAGE_FS_KEY);
-      if(raw){
-        var parsed = JSON.parse(raw);
-        if(parsed && parsed.folders && parsed.projects){
-          return migrateFS(parsed);
-        }
-      }
+      if(raw){ var parsed = JSON.parse(raw); if(parsed && parsed.folders && parsed.projects) return migrateFS(parsed); }
     }catch(e){}
     return JSON.parse(JSON.stringify(DEFAULT_FS));
   }
 
   var fsData = loadFS();
-  function saveFS(){
-    try{ localStorage.setItem(STORAGE_FS_KEY, JSON.stringify(fsData)); }catch(e){}
-  }
-
-  function isDescendantOf(folderId, ancestorId){
-    if(!fsData.folders || !fsData.folders[folderId]) return false;
-    var cur = fsData.folders[folderId];
-    var visited = {};
-    while(cur && (cur.parentId || null)){
-      var pId = cur.parentId || null;
-      if(pId === ancestorId) return true;
-      if(visited[pId]) break;
-      visited[pId] = true;
-      cur = fsData.folders[pId];
-    }
-    return false;
-  }
+  function saveFS(){ try{ localStorage.setItem(STORAGE_FS_KEY, JSON.stringify(fsData)); }catch(e){} }
 
   var params = new URLSearchParams(location.search);
-  var urlRoom = params.get("room");
-  var urlRole = params.get("role");
-  var urlName = params.get("name");
-
+  var urlRoom = params.get("room"); var urlRole = params.get("role"); var urlName = params.get("name");
   var isStudent = (urlRole === "student");
   var app_ = document.getElementById("app");
   if(isStudent) app_.classList.add("student-mode");
 
-  var activeRoomId = null;
-  var roomRole = isStudent ? "student" : "teacher";
+  var activeRoomId = null; var roomRole = isStudent ? "student" : "teacher";
   var myName = urlName || (isStudent ? "" : "老師");
   var myId = isStudent ? (localStorage.getItem("hanyu_my_id") || uid("stu")) : "teacher";
   localStorage.setItem("hanyu_my_id", myId);
 
-  var roomData = null;
-  var cursorOn = true;
-  var currentFolderId = null;
-  var activeProjectId = null;
-  var editingFolderId = null;
-  var editingProjectId = null;
-  var activeSectionForAdd = null;
-  var editingSectionId = null;
-  var editingQuestionId = null;
-
-  var draggedSecId = null;
-  var draggedQ = null;
+  var roomData = null; var cursorOn = true; var currentFolderId = null; var activeProjectId = null;
+  var editingFolderId = null; var editingProjectId = null; var activeSectionForAdd = null; var editingQuestionId = null;
+  var draggedSecId = null; var draggedQ = null;
 
   function clearAllDragIndicators(){
-    document.querySelectorAll(".drag-indicator-top, .drag-indicator-bottom").forEach(function(el){
-      el.classList.remove("drag-indicator-top", "drag-indicator-bottom");
-    });
+    document.querySelectorAll(".drag-indicator-top, .drag-indicator-bottom").forEach(function(el){ el.classList.remove("drag-indicator-top", "drag-indicator-bottom"); });
   }
 
   var CURSOR_COLORS = ["#1E88E5", "#4C7A5E", "#FB8C00", "#8E24AA", "#00897B", "#D81B60"];
   function getColorForStudent(nameOrId, role){
     if(role === "teacher" || nameOrId === "teacher" || nameOrId === "老師" || nameOrId === "👑 老師") return "#B23B32";
-    var sum = 0;
-    for(var i=0; i<nameOrId.length; i++) sum += nameOrId.charCodeAt(i);
+    var sum = 0; for(var i=0; i<nameOrId.length; i++) sum += nameOrId.charCodeAt(i);
     return CURSOR_COLORS[sum % CURSOR_COLORS.length];
   }
 
   function inRoom(){ return !!activeRoomId; }
   function getActiveProject(){
     if(inRoom()) {
-      if(roomData && roomData.project) {
-        migrateFS({ projects: { temp: roomData.project } });
-        return roomData.project;
-      }
+      if(roomData && roomData.project) { migrateFS({ projects: { temp: roomData.project } }); return roomData.project; }
       return null;
     }
     return activeProjectId ? fsData.projects[activeProjectId] : null;
   }
-  function getSections(){
-    var proj = getActiveProject();
-    return (proj && proj.sections) || {};
-  }
+  function getSections(){ var proj = getActiveProject(); return (proj && proj.sections) || {}; }
 
   function getSortedSectionKeys(){
     var secs = getSections();
@@ -1293,43 +1103,29 @@
   }
 
   function getAllQuestionsList(){
-    var secs = getSections();
-    var secKeys = getSortedSectionKeys();
-    var list = [];
+    var secs = getSections(); var secKeys = getSortedSectionKeys(); var list = [];
     secKeys.forEach(function(secId){
       var sec = secs[secId];
-      var qKeys = getSortedQuestionKeys(sec);
-      qKeys.forEach(function(qId){
-        var q = sec.questions[qId];
-        list.push({ section: sec, question: q });
-      });
+      getSortedQuestionKeys(sec).forEach(function(qId){ list.push({ section: sec, question: sec.questions[qId] }); });
     });
     return list;
   }
 
   function getCurrentQInfo(){
-    var proj = getActiveProject();
-    var qId = (proj && proj.currentQId);
-    var list = getAllQuestionsList();
+    var proj = getActiveProject(); var qId = (proj && proj.currentQId); var list = getAllQuestionsList();
     if(!list.length) return null;
     var found = list.find(function(it){ return it.question.id === qId; });
     return found || list[0];
   }
 
   function isOpenForStudent(){ return inRoom() ? (roomData && roomData.isOpen !== undefined ? !!roomData.isOpen : true) : true; }
-  function canInteract(){ 
-    if(!inRoom() || roomRole === "teacher") return true; 
-    return isOpenForStudent();
-  }
+  function canInteract(){ if(!inRoom() || roomRole === "teacher") return true; return isOpenForStudent(); }
 
   function getProgress(qId){
-    if(inRoom()){
-      return (roomData && roomData.sharedProgress && roomData.sharedProgress[qId]) || {};
-    }
+    if(inRoom()) return (roomData && roomData.sharedProgress && roomData.sharedProgress[qId]) || {};
     var proj = getActiveProject();
     if(proj){
-      if(!proj.progress) proj.progress = {};
-      if(!proj.progress[qId]) proj.progress[qId] = {};
+      if(!proj.progress) proj.progress = {}; if(!proj.progress[qId]) proj.progress[qId] = {};
       return proj.progress[qId];
     }
     return {};
@@ -1342,119 +1138,265 @@
       update(ref(db, "rooms/" + activeRoomId), patch);
     } else {
       var proj = getActiveProject();
-      if(proj){
-        proj.sections = newSections;
-        if(newCurrentQId !== undefined) proj.currentQId = newCurrentQId;
-        saveFS(); renderSidebar(); renderStage();
-      }
+      if(proj){ proj.sections = newSections; if(newCurrentQId !== undefined) proj.currentQId = newCurrentQId; saveFS(); renderSidebar(); renderStage(); }
     }
   }
 
   function setCurrentQ(qId){
-    if(inRoom()){ update(ref(db, "rooms/" + activeRoomId + "/project"), { currentQId: qId }); }
-    else { 
-      var proj = getActiveProject();
-      if(proj){
-        proj.currentQId = qId; saveFS(); renderSidebar(); renderStage(); 
-      }
-    }
+    if(inRoom()) update(ref(db, "rooms/" + activeRoomId + "/project"), { currentQId: qId });
+    else { var proj = getActiveProject(); if(proj){ proj.currentQId = qId; saveFS(); renderSidebar(); renderStage(); } }
   }
 
   function writeProgress(qId, patch){
-    if(inRoom()){ 
-      update(ref(db, "rooms/" + activeRoomId + "/sharedProgress/" + qId), patch); 
-    } else { 
-      Object.assign(getProgress(qId), patch); 
-      saveFS(); 
-      renderStage(); 
-    }
+    if(inRoom()) update(ref(db, "rooms/" + activeRoomId + "/sharedProgress/" + qId), patch);
+    else { Object.assign(getProgress(qId), patch); saveFS(); renderStage(); }
   }
 
-  /* 大廳切換 */
+  /* ================== 成績與錯題結算引擎 ================== */
+  function calculateScoreReport(targetQId){
+    var secs = getSections();
+    var secKeys = getSortedSectionKeys();
+    var results = [];
+    var totalScoreable = 0;
+    var totalEarned = 0;
+
+    secKeys.forEach(function(secId){
+      var sec = secs[secId];
+      var qKeys = getSortedQuestionKeys(sec);
+      var secRes = { title: sec.title, type: sec.type, questions: [] };
+
+      qKeys.forEach(function(qId, idx){
+        var q = sec.questions[qId];
+        var progress = getProgress(qId);
+        var qRes = {
+          id: q.id,
+          secId: sec.id,
+          title: q.title || (`第 ${idx + 1} 題`),
+          isScoreable: true,
+          score: 0,
+          status: "wrong",
+          detail: ""
+        };
+
+        if(sec.type === "match"){
+          totalScoreable++;
+          var pairs = q.pairs || {}; var pKeys = Object.keys(pairs); var totalPairs = pKeys.length;
+          var matched = progress.matched || {}; var matchedCount = Object.keys(matched).filter(k => matched[k]).length;
+          if(totalPairs > 0 && matchedCount === totalPairs){
+            qRes.score = 1; qRes.status = "correct"; qRes.detail = `全部配對成功 (${matchedCount}/${totalPairs})`; totalEarned += 1;
+          } else {
+            qRes.score = totalPairs > 0 ? (matchedCount / totalPairs) : 0;
+            qRes.status = matchedCount > 0 ? "partial" : "wrong";
+            qRes.detail = `配對進度: ${matchedCount}/${totalPairs}`; totalEarned += qRes.score;
+          }
+        } else if(sec.type === "choice"){
+          totalScoreable++;
+          var ansIds = (q.answerIds && q.answerIds.length) ? q.answerIds : (q.answerId ? [q.answerId] : []);
+          var userPicks = progress.multiPicks ? Object.keys(progress.multiPicks).filter(k => progress.multiPicks[k]) : (progress.choicePick ? [progress.choicePick] : []);
+          var sortedAns = ansIds.slice().sort().join(","); var sortedPicks = userPicks.slice().sort().join(",");
+          if(sortedAns && sortedAns === sortedPicks){
+            qRes.score = 1; qRes.status = "correct"; qRes.detail = "答案正確"; totalEarned += 1;
+          } else {
+            qRes.score = 0; qRes.status = "wrong";
+            var correctLabels = ansIds.map(id => (q.choices && q.choices[id]) ? q.choices[id].text : id).join(", ");
+            qRes.detail = `未答對 (正解: ${correctLabels || "無"})`;
+          }
+        } else if(sec.type === "reorder"){
+          totalScoreable++;
+          var correctWords = q.words || []; var userWords = progress.userWords || [];
+          var isMatch = (userWords.length === correctWords.length && correctWords.length > 0) && userWords.every((w, i) => w === correctWords[i]);
+          if(isMatch){
+            qRes.score = 1; qRes.status = "correct"; qRes.detail = "句子語序完全正確"; totalEarned += 1;
+          } else {
+            qRes.score = 0; qRes.status = "wrong"; qRes.detail = `語序未完成或有誤 (正解: ${correctWords.join(" ")})`;
+          }
+        } else if(sec.type === "board"){
+          qRes.isScoreable = false;
+          var strokes = progress.strokes || [];
+          qRes.status = strokes.length > 0 ? "completed" : "empty";
+          qRes.detail = strokes.length > 0 ? `已完成書寫 (${strokes.length} 筆畫)` : "尚未書寫";
+        }
+
+        secRes.questions.push(qRes);
+      });
+      results.push(secRes);
+    });
+
+    var finalScore = totalScoreable > 0 ? Math.round((totalEarned / totalScoreable) * 100) : 100;
+    return {
+      studentName: myName || "學生",
+      projectName: (getActiveProject() && getActiveProject().title) || "華語課堂測驗",
+      timeString: new Date().toLocaleString(),
+      finalScore: finalScore,
+      totalScoreable: totalScoreable,
+      totalEarned: Math.round(totalEarned * 10) / 10,
+      results: results
+    };
+  }
+
+  function showScoreModal(report){
+    var dlg = document.getElementById("score-dialog");
+    var metaText = document.getElementById("score-meta-text");
+    var body = document.getElementById("score-dialog-body");
+    var btnBroadcast = document.getElementById("btn-broadcast-score");
+    if(!dlg || !body) return;
+
+    if(metaText) metaText.textContent = `學員：${report.studentName} · 課次：${report.projectName} · 時間：${report.timeString}`;
+
+    var rankText = "💪 繼續加油！";
+    if(report.finalScore === 100) rankText = "🌟 滿分！太優秀了！";
+    else if(report.finalScore >= 90) rankText = "🏅 優等！表現出色！";
+    else if(report.finalScore >= 80) rankText = "👍 良好！掌握熟練！";
+    else if(report.finalScore >= 60) rankText = "📖 及格！多加複習！";
+
+    var correctCount = 0; var wrongItems = [];
+    report.results.forEach(sec => {
+      sec.questions.forEach(q => {
+        if(q.isScoreable){
+          if(q.score === 1) correctCount++;
+          else wrongItems.push(q);
+        }
+      });
+    });
+
+    var html = `
+      <div class="score-header-box">
+        <div>
+          <span style="font-size:13px; color:var(--ink-soft); font-weight:600;">測驗得分</span>
+          <div class="score-circle">${report.finalScore}<span style="font-size:18px; margin-left:2px;">分</span></div>
+          <span class="score-rank-badge">${rankText}</span>
+        </div>
+        <div class="score-stats-grid">
+          <div class="score-stat-cell"><span>計分題數</span><b>${report.totalScoreable}</b></div>
+          <div class="score-stat-cell"><span>完全答對</span><b style="color:var(--bamboo);">${correctCount}</b></div>
+          <div class="score-stat-cell"><span>錯誤題數</span><b style="color:#E63946;">${wrongItems.length}</b></div>
+        </div>
+      </div>
+    `;
+
+    if(wrongItems.length > 0){
+      html += `
+        <div style="background:var(--seal-soft); border:1.5px solid var(--seal-ring); border-radius:12px; padding:14px; margin-bottom:16px;">
+          <div style="font-size:14px; font-weight:700; color:var(--seal); margin-bottom:8px;">⚠️ 需加強錯題特快車 (點擊題目快速前往檢討)：</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+      `;
+      wrongItems.forEach(w => {
+        html += `
+          <button type="button" class="btn btn-sm btn-ghost btn-jump-wrong" data-qid="${w.id}" style="justify-content:space-between; background:var(--surface); border:1px solid var(--grid-line);">
+            <span style="font-weight:700; color:var(--ink);">❌ ${w.title}</span>
+            <span style="font-size:11.5px; color:var(--seal);">${w.detail}</span>
+          </button>
+        `;
+      });
+      html += `</div></div>`;
+    }
+
+    html += `<div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:8px;">📋 全卷作答明細</div><div class="score-details-list">`;
+    report.results.forEach(sec => {
+      html += `<div class="score-sec-item"><div class="score-sec-title"><span>${sec.title}</span></div>`;
+      sec.questions.forEach(q => {
+        var badge = q.score === 1 ? `<span style="color:var(--bamboo); font-weight:700;">✅ 正確</span>` : `<span style="color:#E63946; font-weight:700;">❌ 錯誤</span>`;
+        if(!q.isScoreable) badge = `<span style="color:var(--bamboo);">✍️ 書寫</span>`;
+        html += `
+          <div class="score-q-row">
+            <div>
+              <span style="font-weight:600; cursor:pointer;" class="btn-jump-wrong" data-qid="${q.id}">📖 ${q.title}</span>
+              <span style="font-size:11.5px; color:var(--ink-soft); margin-left:8px;">${q.detail}</span>
+            </div>
+            <div>${badge}</div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+    body.innerHTML = html;
+
+    // 錯題點擊跳轉監聽
+    body.querySelectorAll(".btn-jump-wrong").forEach(function(b){
+      b.onclick = function(){
+        var targetQId = b.dataset.qid;
+        closeModalDialog(dlg);
+        setCurrentQ(targetQId);
+      };
+    });
+
+    var btnCopy = document.getElementById("btn-copy-score-report");
+    if(btnCopy){
+      btnCopy.onclick = function(){
+        var txt = `【曼米中文 Mandamy 成績報告】\n學員：${report.studentName}\n得分：${report.finalScore} 分\n錯題數：${wrongItems.length} 題\n--------------------\n`;
+        report.results.forEach(sec => {
+          sec.questions.forEach(q => { txt += `${q.score === 1 ? '✅' : '❌'} ${q.title}：${q.detail}\n`; });
+        });
+        navigator.clipboard.writeText(txt).then(function(){ alert("✅ 成績報告已複製！"); });
+      };
+    }
+
+    if(btnBroadcast){
+      if(inRoom() && roomRole === "teacher"){
+        btnBroadcast.style.display = "inline-flex";
+        btnBroadcast.onclick = function(){
+          update(ref(db, "rooms/" + activeRoomId), { broadcastScore: report, broadcastTime: Date.now() });
+          alert("📢 成績已廣播給學生！");
+        };
+      } else { btnBroadcast.style.display = "none"; }
+    }
+    safeShowModal(dlg);
+  }
+
+  var btnCloseScore = document.getElementById("btn-close-score");
+  if(btnCloseScore) btnCloseScore.onclick = function(){ closeModalDialog(document.getElementById("score-dialog")); };
+
+  /* 大廳與舞台切換 */
   var lobbyView = document.getElementById("lobby-view");
   var classroomView = document.getElementById("classroom-view");
 
   function showLobby(){
-    activeProjectId = null;
-    lobbyView.style.display = "block";
-    classroomView.style.display = "none";
+    activeProjectId = null; lobbyView.style.display = "block"; classroomView.style.display = "none";
     document.getElementById("brand-sub").textContent = "專案課次大廳";
-    renderBreadcrumb();
-    renderLobbyGrid();
-    renderTopbar();
+    renderBreadcrumb(); renderLobbyGrid(); renderTopbar();
   }
 
   function openProject(projId){
-    activeProjectId = projId;
-    var proj = fsData.projects[projId];
-    lobbyView.style.display = "none";
-    classroomView.style.display = "grid";
+    activeProjectId = projId; var proj = fsData.projects[projId];
+    lobbyView.style.display = "none"; classroomView.style.display = "grid";
     document.getElementById("brand-sub").textContent = proj.title;
-    renderTopbar();
-    renderSidebar();
-    renderStage();
+    renderTopbar(); renderSidebar(); renderStage();
   }
 
   document.getElementById("brand-logo").onclick = function(){
     if(isStudent) return;
-    if(inRoom()){
-      if(confirm("目前正在進行線上連線，確定要結束連線並返回課次大廳嗎？")){
-        leaveRoom(); showLobby();
-      }
-    } else { showLobby(); }
+    if(inRoom()){ if(confirm("確定結束連線並返回大廳？")){ leaveRoom(); showLobby(); } } else { showLobby(); }
   };
 
   /* 麵包屑 */
   var breadcrumbBar = document.getElementById("breadcrumb-bar");
   function renderBreadcrumb(){
-    breadcrumbBar.innerHTML = "";
-    var path = []; var cur = currentFolderId;
-    while(cur){
-      var f = fsData.folders[cur];
-      if(f){ path.unshift(f); cur = f.parentId; } else { break; }
-    }
+    breadcrumbBar.innerHTML = ""; var path = []; var cur = currentFolderId;
+    while(cur){ var f = fsData.folders[cur]; if(f){ path.unshift(f); cur = f.parentId; } else break; }
     var rootItem = document.createElement("span");
     rootItem.className = "breadcrumb-item" + ((currentFolderId || null) === null ? " active" : "");
     rootItem.innerHTML = "🏠 全部專案大廳";
-    rootItem.onclick = function(){
-      if(currentFolderId !== null){ currentFolderId = null; renderBreadcrumb(); renderLobbyGrid(); }
-    };
+    rootItem.onclick = function(){ if(currentFolderId !== null){ currentFolderId = null; renderBreadcrumb(); renderLobbyGrid(); } };
     breadcrumbBar.appendChild(rootItem);
 
     path.forEach(function(folder, idx){
-      var sep = document.createElement("span"); sep.className = "breadcrumb-sep"; sep.textContent = "/";
-      breadcrumbBar.appendChild(sep);
-      var item = document.createElement("span");
-      var isLast = (idx === path.length - 1);
-      item.className = "breadcrumb-item" + (isLast ? " active" : "");
-      item.innerHTML = `📁 ${folder.title}`;
-      if(!isLast){
-        item.onclick = function(){ currentFolderId = folder.id; renderBreadcrumb(); renderLobbyGrid(); };
-      }
+      var sep = document.createElement("span"); sep.className = "breadcrumb-sep"; sep.textContent = "/"; breadcrumbBar.appendChild(sep);
+      var item = document.createElement("span"); var isLast = (idx === path.length - 1);
+      item.className = "breadcrumb-item" + (isLast ? " active" : ""); item.innerHTML = `📁 ${folder.title}`;
+      if(!isLast){ item.onclick = function(){ currentFolderId = folder.id; renderBreadcrumb(); renderLobbyGrid(); }; }
       breadcrumbBar.appendChild(item);
     });
   }
 
   var projectGrid = document.getElementById("project-grid");
   function renderLobbyGrid(){
-    projectGrid.innerHTML = "";
-    var targetFolder = currentFolderId || null;
-
-    var subFolders = Object.keys(fsData.folders || {})
-      .map(function(k){ return fsData.folders[k]; })
-      .filter(function(f){ return (f.parentId || null) === targetFolder; });
-
-    var subProjects = Object.keys(fsData.projects || {})
-      .map(function(k){ return fsData.projects[k]; })
-      .filter(function(p){ return (p.folderId || null) === targetFolder; });
+    projectGrid.innerHTML = ""; var targetFolder = currentFolderId || null;
+    var subFolders = Object.keys(fsData.folders || {}).map(function(k){ return fsData.folders[k]; }).filter(function(f){ return (f.parentId || null) === targetFolder; });
+    var subProjects = Object.keys(fsData.projects || {}).map(function(k){ return fsData.projects[k]; }).filter(function(p){ return (p.folderId || null) === targetFolder; });
 
     if(subFolders.length === 0 && subProjects.length === 0){
-      projectGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align:center; padding: 48px 20px; color:var(--ink-soft); background:var(--surface); border: 2px dashed var(--grid-line); border-radius:14px;">
-          <p style="font-size:16px; margin:0 0 6px;">📂 這裡目前還是空的喔！</p>
-          <p style="font-size:13px; margin:0;">可以點擊右上角按鈕建立「子資料夾」或「課次專案」</p>
-        </div>
-      `;
+      projectGrid.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding: 48px; color:var(--ink-soft); background:var(--surface); border: 2px dashed var(--grid-line); border-radius:14px;"><p>📂 這裡目前還是空的喔！</p></div>`;
       return;
     }
 
@@ -1463,15 +1405,12 @@
       var childP = Object.keys(fsData.projects).filter(function(k){ return (fsData.projects[k].folderId || null) === folder.id; }).length;
       var card = document.createElement("div"); card.className = "item-card is-folder";
       card.innerHTML = `
-        <div>
-          <div class="item-card-head"><h3 class="item-title zh">📁 ${folder.title}</h3></div>
-          <p class="item-desc">${folder.desc || "資料夾類別"}</p>
-        </div>
+        <div><div class="item-card-head"><h3 class="item-title zh">📁 ${folder.title}</h3></div><p class="item-desc">${folder.desc || "資料夾"}</p></div>
         <div class="item-card-foot">
           <span class="item-badge" style="background:var(--bamboo-soft); color:var(--bamboo);">${childF ? childF + ' 個子目錄 · ' : ''}${childP} 個課次</span>
           <div class="item-actions-btns">
-            <button type="button" class="btn btn-sm btn-ghost btn-edit-f" title="編輯資料夾">✏️</button>
-            <button type="button" class="btn btn-sm btn-ghost btn-del-f" title="刪除資料夾" style="color:var(--seal);">🗑️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-edit-f">✏️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-del-f" style="color:var(--seal);">🗑️</button>
             <button type="button" class="btn btn-sm btn-open-f" style="border:1px solid var(--bamboo); color:var(--bamboo); font-weight:700;">開啟 ➔</button>
           </div>
         </div>
@@ -1479,26 +1418,21 @@
       card.querySelector(".btn-open-f").onclick = function(){ currentFolderId = folder.id; renderBreadcrumb(); renderLobbyGrid(); };
       card.querySelector(".btn-edit-f").onclick = function(e){ e.stopPropagation(); openFolderDialog(folder.id); };
       card.querySelector(".btn-del-f").onclick = function(e){
-        e.stopPropagation();
-        if(confirm(`確定刪除資料夾「${folder.title}」及其內容嗎？`)){ deleteFolderRecursively(folder.id); saveFS(); renderLobbyGrid(); }
+        e.stopPropagation(); if(confirm(`確定刪除資料夾「${folder.title}」？`)){ deleteFolderRecursively(folder.id); saveFS(); renderLobbyGrid(); }
       };
       projectGrid.appendChild(card);
     });
 
     subProjects.forEach(function(proj){
-      var totalQ = 0;
-      Object.keys(proj.sections || {}).forEach(function(sid){ totalQ += Object.keys(proj.sections[sid].questions || {}).length; });
+      var totalQ = 0; Object.keys(proj.sections || {}).forEach(function(sid){ totalQ += Object.keys(proj.sections[sid].questions || {}).length; });
       var card = document.createElement("div"); card.className = "item-card";
       card.innerHTML = `
-        <div>
-          <div class="item-card-head"><h3 class="item-title zh">📘 ${proj.title}</h3></div>
-          <p class="item-desc">${proj.desc || "線上教學練習"}</p>
-        </div>
+        <div><div class="item-card-head"><h3 class="item-title zh">📘 ${proj.title}</h3></div><p class="item-desc">${proj.desc || "線上教學練習"}</p></div>
         <div class="item-card-foot">
           <span class="item-badge">📄 ${Object.keys(proj.sections||{}).length} 大題 · ${totalQ} 小題</span>
           <div class="item-actions-btns">
-            <button type="button" class="btn btn-sm btn-ghost btn-edit-p" title="編輯課次">✏️</button>
-            <button type="button" class="btn btn-sm btn-ghost btn-del-p" title="刪除課次" style="color:var(--seal);">🗑️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-edit-p">✏️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-del-p" style="color:var(--seal);">🗑️</button>
             <button type="button" class="btn btn-sm btn-primary btn-enter-p">進入上課 →</button>
           </div>
         </div>
@@ -1506,8 +1440,7 @@
       card.querySelector(".btn-enter-p").onclick = function(){ openProject(proj.id); };
       card.querySelector(".btn-edit-p").onclick = function(e){ e.stopPropagation(); openProjectDialog(proj.id); };
       card.querySelector(".btn-del-p").onclick = function(e){
-        e.stopPropagation();
-        if(confirm(`確定刪除「${proj.title}」？`)){ delete fsData.projects[proj.id]; saveFS(); renderLobbyGrid(); }
+        e.stopPropagation(); if(confirm(`確定刪除「${proj.title}」？`)){ delete fsData.projects[proj.id]; saveFS(); renderLobbyGrid(); }
       };
       projectGrid.appendChild(card);
     });
@@ -1517,32 +1450,6 @@
     Object.keys(fsData.projects).forEach(function(pid){ if((fsData.projects[pid].folderId || null) === folderId) delete fsData.projects[pid]; });
     Object.keys(fsData.folders).forEach(function(fid){ if((fsData.folders[fid].parentId || null) === folderId) deleteFolderRecursively(fid); });
     delete fsData.folders[folderId];
-  }
-
-  function populateFolderSelect(selectEl, selectedFolderId, excludeFolderId){
-    selectEl.innerHTML = "";
-    var rootOpt = document.createElement("option");
-    rootOpt.value = "";
-    rootOpt.textContent = "📂 最外層 (專案大廳根目錄)";
-    selectEl.appendChild(rootOpt);
-
-    function appendChildren(parentId, indent){
-      var children = Object.keys(fsData.folders || {})
-        .map(function(k){ return fsData.folders[k]; })
-        .filter(function(f){ return (f.parentId || null) === parentId; });
-
-      children.forEach(function(f){
-        if(excludeFolderId && (f.id === excludeFolderId || isDescendantOf(f.id, excludeFolderId))) return;
-        var opt = document.createElement("option");
-        opt.value = f.id;
-        opt.textContent = indent + "📁 " + f.title;
-        selectEl.appendChild(opt);
-        appendChildren(f.id, indent + "  ");
-      });
-    }
-
-    appendChildren(null, " ");
-    selectEl.value = selectedFolderId || "";
   }
 
   var folderDialog = document.getElementById("folder-dialog");
@@ -1556,35 +1463,23 @@
       document.getElementById("f-folder-desc").value = f ? (f.desc || "") : "";
       populateFolderSelect(parentSelect, f ? (f.parentId || null) : null, editingFolderId);
     } else {
-      document.getElementById("f-folder-title").value = "";
-      document.getElementById("f-folder-desc").value = "";
+      document.getElementById("f-folder-title").value = ""; document.getElementById("f-folder-desc").value = "";
       populateFolderSelect(parentSelect, currentFolderId || null, null);
     }
     safeShowModal(folderDialog);
   }
-
   document.getElementById("btn-create-folder").onclick = function(){ openFolderDialog(null); };
   document.getElementById("btn-cancel-folder").onclick = function(){ closeModalDialog(folderDialog); };
-
   document.getElementById("folder-form").onsubmit = function(e){
     e.preventDefault();
-    var title = document.getElementById("f-folder-title").value.trim();
-    var desc = document.getElementById("f-folder-desc").value.trim();
-    var parentId = document.getElementById("f-folder-parent").value || null;
-    if(!title) return;
-
+    var title = document.getElementById("f-folder-title").value.trim(); var desc = document.getElementById("f-folder-desc").value.trim();
+    var parentId = document.getElementById("f-folder-parent").value || null; if(!title) return;
     if(editingFolderId && fsData.folders[editingFolderId]){
-      fsData.folders[editingFolderId].title = title;
-      fsData.folders[editingFolderId].desc = desc;
-      fsData.folders[editingFolderId].parentId = parentId;
+      fsData.folders[editingFolderId].title = title; fsData.folders[editingFolderId].desc = desc; fsData.folders[editingFolderId].parentId = parentId;
     } else {
-      var newFId = uid("f");
-      fsData.folders[newFId] = { id: newFId, parentId: parentId, title: title, desc: desc };
+      var newFId = uid("f"); fsData.folders[newFId] = { id: newFId, parentId: parentId, title: title, desc: desc };
     }
-    saveFS();
-    closeModalDialog(folderDialog);
-    renderBreadcrumb();
-    renderLobbyGrid();
+    saveFS(); closeModalDialog(folderDialog); renderBreadcrumb(); renderLobbyGrid();
   };
 
   var projectDialog = document.getElementById("project-dialog");
@@ -1598,34 +1493,23 @@
       document.getElementById("f-proj-desc").value = p ? (p.desc || "") : "";
       populateFolderSelect(projParentSelect, p ? (p.folderId || null) : null, null);
     } else {
-      document.getElementById("f-proj-title").value = "";
-      document.getElementById("f-proj-desc").value = "";
+      document.getElementById("f-proj-title").value = ""; document.getElementById("f-proj-desc").value = "";
       populateFolderSelect(projParentSelect, currentFolderId || null, null);
     }
     safeShowModal(projectDialog);
   }
-
   document.getElementById("btn-create-project").onclick = function(){ openProjectDialog(null); };
   document.getElementById("btn-cancel-project").onclick = function(){ closeModalDialog(projectDialog); };
-
   document.getElementById("project-form").onsubmit = function(e){
     e.preventDefault();
-    var title = document.getElementById("f-proj-title").value.trim();
-    var desc = document.getElementById("f-proj-desc").value.trim();
-    var folderId = document.getElementById("f-proj-parent").value || null;
-    if(!title) return;
-
+    var title = document.getElementById("f-proj-title").value.trim(); var desc = document.getElementById("f-proj-desc").value.trim();
+    var folderId = document.getElementById("f-proj-parent").value || null; if(!title) return;
     if(editingProjectId && fsData.projects[editingProjectId]){
-      fsData.projects[editingProjectId].title = title;
-      fsData.projects[editingProjectId].desc = desc;
-      fsData.projects[editingProjectId].folderId = folderId;
+      fsData.projects[editingProjectId].title = title; fsData.projects[editingProjectId].desc = desc; fsData.projects[editingProjectId].folderId = folderId;
     } else {
-      var newPId = uid("proj");
-      fsData.projects[newPId] = createDefaultProjectData(title, desc, folderId);
+      var newPId = uid("proj"); fsData.projects[newPId] = createDefaultProjectData(title, desc, folderId);
     }
-    saveFS();
-    closeModalDialog(projectDialog);
-    renderLobbyGrid();
+    saveFS(); closeModalDialog(projectDialog); renderLobbyGrid();
   };
 
   /* 頂部控制列 */
@@ -1637,8 +1521,7 @@
     }
     if(inRoom()){
       var c2 = document.createElement("div"); c2.className = "room-cluster";
-      var onlineCount = 0;
-      if(roomData && roomData.presence){ Object.keys(roomData.presence).forEach(function(k){ if(roomData.presence[k].online) onlineCount++; }); }
+      var onlineCount = 0; if(roomData && roomData.presence){ Object.keys(roomData.presence).forEach(function(k){ if(roomData.presence[k].online) onlineCount++; }); }
       c2.innerHTML = `<span class="room-code">房間 <b>${activeRoomId}</b></span><span class="presence-dot ${onlineCount > 1 ? 'online' : ''}"></span><span style="font-size:12px;">${isStudent ? `已加入（${myName}）` : `在線：${onlineCount} 人`}</span>`;
       if(!isStudent){
         var toggleOpen = document.createElement("label"); toggleOpen.className = "toggle" + (isOpenForStudent() ? " on" : "");
@@ -1655,7 +1538,7 @@
         var shareBtn = document.createElement("button"); shareBtn.className = "btn btn-sm btn-primary"; shareBtn.textContent = "🔗 複製學生連結";
         shareBtn.onclick = function(){
           var link = location.origin + location.pathname + "?room=" + activeRoomId + "&role=student";
-          navigator.clipboard.writeText(link).then(function(){ alert("✅ 學生連結已複製！傳給學生點開即可加入這課。"); });
+          navigator.clipboard.writeText(link).then(function(){ alert("✅ 學生連結已複製！"); });
         };
         topbarActions.appendChild(shareBtn);
         var leaveBtn = document.createElement("button"); leaveBtn.className = "btn btn-sm btn-ghost"; leaveBtn.textContent = "結束連線"; leaveBtn.onclick = leaveRoom; topbarActions.appendChild(leaveBtn);
@@ -1672,10 +1555,9 @@
 
   async function createRoom(){
     var rId = String(Math.floor(1000 + Math.random() * 9000));
-    activeRoomId = rId;
-    var currentProj = fsData.projects[activeProjectId];
+    activeRoomId = rId; var currentProj = fsData.projects[activeProjectId];
     await set(ref(db, "rooms/" + rId), {
-      project: currentProj, sharedProgress: {}, isOpen: true, theme: { bgMode: currentBgMode, accent: currentAccentColor }, presence: { teacher: { online:true, name:"老師" } }
+      project: currentProj, sharedProgress: {}, isOpen: true, theme: { bgMode: currentBgMode, accent: currentAccentColor }, classMode: currentClassMode, presence: { teacher: { online:true, name:"老師" } }
     });
     attachPresence(rId, "teacher", "老師"); startRoom(rId, "teacher");
     history.replaceState(null, "", "?room=" + rId); renderTopbar();
@@ -1686,8 +1568,7 @@
   function leaveRoom(){
     if(activeRoomId) set(ref(db, "rooms/" + activeRoomId + "/presence/" + myId), { online: false });
     activeRoomId = null; roomData = null; history.replaceState(null, "", location.pathname);
-    renderTopbar();
-    if(activeProjectId){ renderSidebar(); renderStage(); } else { showLobby(); }
+    renderTopbar(); if(activeProjectId){ renderSidebar(); renderStage(); } else { showLobby(); }
   }
 
   function attachPresence(rId, id, name){
@@ -1700,6 +1581,7 @@
     onValue(ref(db, "rooms/" + rId), function(snap){
       roomData = snap.val() || {};
       if(roomData.theme) applyTheme(roomData.theme.bgMode || "light", roomData.theme.accent || "seal", false);
+      if(roomData.classMode){ currentClassMode = roomData.classMode; }
 
       if(roomData.broadcastScore && roomData.broadcastTime){
         if(window.__lastBroadcastTime !== roomData.broadcastTime){
@@ -1718,7 +1600,7 @@
     onValue(ref(db, "roomCursors/" + rId), function(snap){ renderMultiCursors(snap.val()); });
   }
 
-  /* ================== 側欄：大題與小題清單 ================== */
+  /* ================== 側欄渲染 ================== */
   var sectionTreeListEl = document.getElementById("section-tree-list");
   function renderSidebar(){
     if(isStudent) return;
@@ -1737,22 +1619,16 @@
       var block = document.createElement("div"); block.className = "section-block"; block.setAttribute("draggable", "true");
 
       block.ondragstart = function(e){
-        if(draggedQ) return;
-        draggedSecId = secId; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "sec:" + secId);
-        block.classList.add("is-dragging");
+        if(draggedQ) return; draggedSecId = secId; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "sec:" + secId); block.classList.add("is-dragging");
       };
-      block.ondragend = function(e){
-        block.classList.remove("is-dragging"); draggedSecId = null; clearAllDragIndicators();
-      };
+      block.ondragend = function(e){ block.classList.remove("is-dragging"); draggedSecId = null; clearAllDragIndicators(); };
       block.ondragover = function(e){
         if(!draggedSecId || draggedSecId === secId) return;
         e.preventDefault(); e.dataTransfer.dropEffect = "move";
         var rect = block.getBoundingClientRect(); var isTop = (e.clientY - rect.top) < (rect.height / 2);
         block.classList.toggle("drag-indicator-top", isTop); block.classList.toggle("drag-indicator-bottom", !isTop);
       };
-      block.ondragleave = function(e){
-        if(!block.contains(e.relatedTarget)) block.classList.remove("drag-indicator-top", "drag-indicator-bottom");
-      };
+      block.ondragleave = function(e){ if(!block.contains(e.relatedTarget)) block.classList.remove("drag-indicator-top", "drag-indicator-bottom"); };
       block.ondrop = function(e){
         e.preventDefault(); var isTop = block.classList.contains("drag-indicator-top"); clearAllDragIndicators();
         if(draggedSecId && draggedSecId !== secId){
@@ -1760,8 +1636,7 @@
           var fromIdx = currentSecKeys.indexOf(draggedSecId);
           if(fromIdx > -1){
             currentSecKeys.splice(fromIdx, 1);
-            var toIdx = currentSecKeys.indexOf(secId);
-            if(!isTop) toIdx += 1;
+            var toIdx = currentSecKeys.indexOf(secId); if(!isTop) toIdx += 1;
             currentSecKeys.splice(toIdx, 0, draggedSecId);
             currentSecKeys.forEach(function(k, idx){ secs[k].order = idx; });
             writeSections(secs);
@@ -1895,6 +1770,7 @@
     navBar.innerHTML = `
       <div style="font-size:13.5px; font-weight:700; color:var(--seal); display:flex; align-items:center; gap:6px;">
         <span>📝 ${sec.title}</span><span style="opacity:0.4;">/</span><span style="color:var(--ink);">${q.title}</span>
+        ${currentClassMode === 'test' ? '<span style="font-size:11px; background:var(--seal-soft); color:var(--seal); padding:2px 6px; border-radius:4px; margin-left:6px;">🔴 測驗模式中</span>' : ''}
       </div>
       <div class="nav-page-group">
         <button type="button" class="btn btn-sm btn-ghost btn-prev-q" ${currentIndex <= 0 ? 'disabled style="opacity:0.4;"' : ''}>◀ 上一題</button>
@@ -1912,12 +1788,11 @@
     var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
     
     var scoreBtn = document.createElement("button");
-    scoreBtn.className = "btn btn-sm";
-    scoreBtn.style.cssText = "border-color:var(--seal); color:var(--seal); font-weight:700;";
-    scoreBtn.textContent = "📊 結算成績";
+    scoreBtn.className = "btn btn-sm btn-primary";
+    scoreBtn.textContent = "📊 結算成績與檢討";
     scoreBtn.onclick = function(){
       var report = calculateScoreReport();
-      showScoreModal(report, true);
+      showScoreModal(report);
     };
     actWrap.appendChild(scoreBtn);
 
@@ -1927,12 +1802,6 @@
         writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, userWords:[], poolWords:[], _shuffledWords:false, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
       };
       actWrap.appendChild(resetBtn);
-
-      if(sec.type === "choice"){
-        var revBtn = document.createElement("button"); revBtn.className = "btn btn-sm btn-primary"; revBtn.textContent = "公布答案";
-        revBtn.onclick = function(){ writeProgress(q.id, { revealed: true }); };
-        actWrap.appendChild(revBtn);
-      }
     }
     head.appendChild(actWrap);
     stageEl.appendChild(head);
@@ -1948,12 +1817,12 @@
     applyStageZoom(currentZoomRatio);
   }
 
-  /* 選擇題（支援複選） */
+  /* 選擇題（測驗模式不即時公布對錯，交卷結算後才顯示） */
   function renderChoiceBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
     var multiPicks = progress.multiPicks || {};
-    var isRevealed = !!progress.revealed;
+    var isRevealed = (currentClassMode === 'test') ? !!progress.revealed : true; // 測驗模式下作答中不顯示正解
     var correctIds = q.answerIds || (q.answerId ? [q.answerId] : []);
 
     var wrap = document.createElement("div");
@@ -1970,7 +1839,12 @@
       var isPicked = !!multiPicks[cid];
       var isCorrect = correctIds.indexOf(cid) !== -1;
 
-      if(isRevealed){
+      if(isRevealed && currentClassMode !== 'test'){
+        if(isCorrect) btn.classList.add("correct");
+        else if(isPicked && !isCorrect) btn.classList.add("wrong");
+        btn.disabled = true;
+      } else if(progress.revealed && currentClassMode === 'test'){
+        // 結算後顯示
         if(isCorrect) btn.classList.add("correct");
         else if(isPicked && !isCorrect) btn.classList.add("wrong");
         btn.disabled = true;
@@ -1985,10 +1859,12 @@
       `;
 
       btn.onclick = function(){
-        if(!interactive || isRevealed) return;
+        if(!interactive || (progress.revealed && currentClassMode === 'test')) return;
         multiPicks[cid] = !multiPicks[cid];
         if(multiPicks[cid]){
-          if(isCorrect) playCorrectSound(); else playWrongSound();
+          if(currentClassMode !== 'test'){
+            if(isCorrect) playCorrectSound(); else playWrongSound();
+          }
         }
         writeProgress(q.id, { multiPicks: multiPicks });
       };
@@ -1997,16 +1873,16 @@
 
     wrap.appendChild(cBox);
 
-    if(isRevealed){
+    if(progress.revealed && currentClassMode === 'test'){
       var note = document.createElement("p");
       note.style.fontSize = "13px"; note.style.color = "var(--bamboo)"; note.style.marginTop = "14px"; note.style.fontWeight = "700";
-      note.textContent = "✅ 正確答案已標示為綠色。";
+      note.textContent = "📊 成績已結算：正確答案已標示為綠色。";
       wrap.appendChild(note);
     }
     container.appendChild(wrap);
   }
 
-  /* 排序題（句子重組 - 全拖曳、放上可更正、排滿兩秒自動判定） */
+  /* 排序題（句子重組） */
   function renderReorderBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
@@ -2032,27 +1908,16 @@
     
     slotZone.ondragover = function(e){
       if(!interactive || isRevealed) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      slotZone.classList.add("drag-over-zone");
+      e.preventDefault(); e.dataTransfer.dropEffect = "move"; slotZone.classList.add("drag-over-zone");
     };
-    slotZone.ondragleave = function(){
-      slotZone.classList.remove("drag-over-zone");
-    };
+    slotZone.ondragleave = function(){ slotZone.classList.remove("drag-over-zone"); };
     slotZone.ondrop = function(e){
-      e.preventDefault();
-      slotZone.classList.remove("drag-over-zone");
-      var data = e.dataTransfer.getData("text/plain");
-      if(!data) return;
-
-      var parts = data.split(":");
-      var type = parts[0];
-      var idx = parseInt(parts[2], 10);
-
+      e.preventDefault(); slotZone.classList.remove("drag-over-zone");
+      var data = e.dataTransfer.getData("text/plain"); if(!data) return;
+      var parts = data.split(":"); var type = parts[0]; var idx = parseInt(parts[2], 10);
       if(type === "pool"){
         if(!isNaN(idx) && poolWords[idx] !== undefined){
-          var word = poolWords.splice(idx, 1)[0];
-          userWords.push(word);
+          var word = poolWords.splice(idx, 1)[0]; userWords.push(word);
           evaluateReorderState(q, userWords, poolWords, correctWords);
         }
       }
@@ -2067,15 +1932,8 @@
         chip.textContent = w;
         if(!isRevealed && interactive){
           chip.setAttribute("draggable", "true");
-          chip.ondragstart = function(e){
-            e.dataTransfer.setData("text/plain", "user:" + w + ":" + idx);
-            e.stopPropagation();
-          };
-          chip.onclick = function(){
-            userWords.splice(idx, 1);
-            poolWords.push(w);
-            writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
-          };
+          chip.ondragstart = function(e){ e.dataTransfer.setData("text/plain", "user:" + w + ":" + idx); e.stopPropagation(); };
+          chip.onclick = function(){ userWords.splice(idx, 1); poolWords.push(w); writeProgress(q.id, { userWords: userWords, poolWords: poolWords }); };
         }
         slotZone.appendChild(chip);
       });
@@ -2084,60 +1942,27 @@
 
     var poolZone = document.createElement("div");
     poolZone.style.cssText = "display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; min-height:64px; align-items:center;";
-    poolZone.ondragover = function(e){
-      if(!interactive || isRevealed) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-    };
+    poolZone.ondragover = function(e){ if(!interactive || isRevealed) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; };
     poolZone.ondrop = function(e){
-      e.preventDefault();
-      var data = e.dataTransfer.getData("text/plain");
-      if(!data) return;
-      var parts = data.split(":");
-      var type = parts[0];
-      var idx = parseInt(parts[2], 10);
-
+      e.preventDefault(); var data = e.dataTransfer.getData("text/plain"); if(!data) return;
+      var parts = data.split(":"); var type = parts[0]; var idx = parseInt(parts[2], 10);
       if(type === "user"){
         if(!isNaN(idx) && userWords[idx] !== undefined){
-          var word = userWords.splice(idx, 1)[0];
-          poolWords.push(word);
+          var word = userWords.splice(idx, 1)[0]; poolWords.push(word);
           writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
         }
       }
     };
 
     poolWords.forEach(function(w, idx){
-      var chip = document.createElement("div");
-      chip.className = "reorder-chip";
-      chip.textContent = w;
-      if(isRevealed){
-        chip.classList.add("correct-done");
-      } else if(interactive){
+      var chip = document.createElement("div"); chip.className = "reorder-chip"; chip.textContent = w;
+      if(isRevealed){ chip.classList.add("correct-done"); }
+      else if(interactive){
         chip.setAttribute("draggable", "true");
-        chip.ondragstart = function(e){
-          e.dataTransfer.setData("text/plain", "pool:" + w + ":" + idx);
-          e.stopPropagation();
-        };
+        chip.ondragstart = function(e){ e.dataTransfer.setData("text/plain", "pool:" + w + ":" + idx); e.stopPropagation(); };
         chip.onclick = function(){
-          poolWords.splice(idx, 1);
-          userWords.push(w);
-          
-          if(userWords.length === correctWords.length){
-            var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
-            if(isMatch){
-              playCorrectSound();
-              writeProgress(q.id, { userWords: userWords, poolWords: poolWords, revealed: true });
-              return;
-            } else {
-              playWrongSound();
-              slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
-              setTimeout(function(){
-                writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
-              }, 500);
-              return;
-            }
-          }
-          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+          poolWords.splice(idx, 1); userWords.push(w);
+          evaluateReorderState(q, userWords, poolWords, correctWords);
         };
       }
       poolZone.appendChild(chip);
@@ -2147,55 +1972,55 @@
     if(isRevealed){
       var note = document.createElement("p");
       note.style.fontSize = "13px"; note.style.color = "var(--bamboo)"; note.style.marginTop = "10px"; note.style.fontWeight = "700";
-      note.textContent = "🎉 答對了！正確解答： " + correctWords.join(" ");
+      note.textContent = "🎉 句子重組正確！解答： " + correctWords.join(" ");
       wrap.appendChild(note);
     }
-
     container.appendChild(wrap);
   }
 
   var reorderTimer = null;
   function evaluateReorderState(q, userWords, poolWords, correctWords){
     if(reorderTimer) clearTimeout(reorderTimer);
+    writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
 
     if(userWords.length === correctWords.length){
-      writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
-
       reorderTimer = setTimeout(function(){
         var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
-        if(isMatch){
-          playCorrectSound();
-          writeProgress(q.id, { revealed: true });
+        if(currentClassMode === 'test'){
+          // 測驗模式下：排滿即默默記錄，不即時出音效或提示
+          writeProgress(q.id, { userWords: userWords, poolWords: poolWords, testSubmitted: true });
         } else {
-          playWrongSound();
-          var slotZone = document.querySelector(".reorder-slot-zone");
-          if(slotZone) slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
-          setTimeout(function(){
-            writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
-          }, 500);
+          // 練習模式：即時回饋
+          if(isMatch){
+            playCorrectSound();
+            writeProgress(q.id, { revealed: true });
+          } else {
+            playWrongSound();
+            var slotZone = document.querySelector(".reorder-slot-zone");
+            if(slotZone) slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
+            setTimeout(function(){
+              writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
+            }, 500);
+          }
         }
       }, 2000);
-    } else {
-      writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
     }
   }
 
   /* 寫字板功能 */
   function renderDrawBoard(q, container){
     var progress = getProgress(q.id);
-    var strokes = progress.strokes || [];
-    var texts = progress.texts || [];
+    var strokes = progress.strokes || []; var texts = progress.texts || [];
     var currentGrid = progress.gridType || q.gridType || "jiu";
     var currentBg = progress.bgImage || q.bgImage || "";
 
     var layout = document.createElement("div"); layout.className = "draw-board-layout";
-
     var vToolbar = document.createElement("div"); vToolbar.className = "draw-toolbar-vertical";
     vToolbar.innerHTML = `
       <button type="button" class="tool-btn-v ${boardState.tool==='pen'?'active':''}" data-tool="pen" title="畫筆"><span>✏️</span><span style="font-size:10px;">畫筆</span></button>
       <button type="button" class="tool-btn-v ${boardState.tool==='text'?'active':''}" data-tool="text" title="打字"><span>🔤</span><span style="font-size:10px;">打字</span></button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='stroke-eraser'?'active':''}" data-tool="stroke-eraser" title="筆畫整條擦除"><span>🪄</span><span style="font-size:10px;">筆畫擦</span></button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部橡皮擦"><span>🧽</span><span style="font-size:10px;">局部擦</span></button>
+      <button type="button" class="tool-btn-v ${boardState.tool==='stroke-eraser'?'active':''}" data-tool="stroke-eraser" title="筆畫擦"><span>🪄</span><span style="font-size:10px;">筆畫擦</span></button>
+      <button type="button" class="tool-btn-v ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部擦"><span>🧽</span><span style="font-size:10px;">局部擦</span></button>
       <div class="tool-v-sep"></div>
       <div class="grid-btn-group">
         <button type="button" class="grid-btn-v ${currentGrid==='none'?'active':''}" data-grid="none">無格</button>
@@ -2204,11 +2029,11 @@
       </div>
       <div class="tool-v-sep"></div>
       <div class="color-dot-grid">
-        <div class="color-dot ${boardState.color==='#B23B32'?'active':''}" data-color="#B23B32" style="background:#B23B32;" title="紅色"></div>
+        <div class="color-dot ${boardState.color==='#B23B32'?'active':''}" data-color="#B23B32" style="background:#B23B32;" title="紅"></div>
         <div class="color-dot ${(boardState.color==='#2A333C'||boardState.color==='#E5EAE6'||boardState.color==='#FFFFFF')?'active':''}" id="btn-theme-dark-color" data-color="#2A333C" style="background:#2A333C;" title="黑/白"></div>
-        <div class="color-dot ${boardState.color==='#1E88E5'?'active':''}" data-color="#1E88E5" style="background:#1E88E5;" title="藍色"></div>
-        <div class="color-dot ${boardState.color==='#4C7A5E'?'active':''}" data-color="#4C7A5E" style="background:#4C7A5E;" title="綠色"></div>
-        <div class="color-dot ${boardState.color==='#FB8C00'?'active':''}" data-color="#FB8C00" style="background:#FB8C00;" title="橘色"></div>
+        <div class="color-dot ${boardState.color==='#1E88E5'?'active':''}" data-color="#1E88E5" style="background:#1E88E5;" title="藍"></div>
+        <div class="color-dot ${boardState.color==='#4C7A5E'?'active':''}" data-color="#4C7A5E" style="background:#4C7A5E;" title="綠"></div>
+        <div class="color-dot ${boardState.color==='#FB8C00'?'active':''}" data-color="#FB8C00" style="background:#FB8C00;" title="橘"></div>
       </div>
       <div class="tool-v-sep"></div>
       <div class="size-btn-group">
@@ -2230,23 +2055,19 @@
       <button type="button" class="tool-btn-v" id="btn-remove-bg" style="display:${currentBg ? 'flex' : 'none'}; color:#E63946;" title="清除底圖"><span>✕</span><span style="font-size:9.5px;">清底圖</span></button>
       <input type="file" id="board-bg-file" accept="image/*" style="display:none;">
       <div class="tool-v-sep"></div>
-      <button type="button" class="tool-btn-v" id="btn-clear-draw" style="color:var(--seal);" title="清空畫布"><span>🗑️</span><span style="font-size:9.5px;">清空</span></button>
+      <button type="button" class="tool-btn-v" id="btn-clear-draw" style="color:var(--seal);" title="清空"><span>🗑️</span><span style="font-size:9.5px;">清空</span></button>
     `;
-
     layout.appendChild(vToolbar);
 
     var cWrap = document.createElement("div"); 
     cWrap.className = "canvas-stage-wrap " + (currentGrid === 'tian' ? 'grid-tian' : (currentGrid === 'jiu' ? 'grid-jiu' : ''));
-    if(currentBg){
-      var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg; cWrap.appendChild(img);
-    }
+    if(currentBg){ var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg; cWrap.appendChild(img); }
     var canvas = document.createElement("canvas"); canvas.id = "paint-canvas";
     var textLayer = document.createElement("div"); textLayer.className = "text-layer";
     cWrap.appendChild(canvas); cWrap.appendChild(textLayer);
     layout.appendChild(cWrap); container.appendChild(layout);
 
-    var ctx = canvas.getContext("2d");
-    var isDrawing = false; var currentPath = []; var activeSelectedTextId = null;
+    var ctx = canvas.getContext("2d"); var isDrawing = false; var currentPath = []; var activeSelectedTextId = null;
 
     vToolbar.querySelectorAll(".tool-btn-v").forEach(function(b){
       b.onclick = function(){
@@ -2271,8 +2092,7 @@
         reader.onload = function(evt){
           var img = new Image();
           img.onload = function(){
-            var c = document.createElement("canvas");
-            var scale = Math.min(1, 1000 / img.width);
+            var c = document.createElement("canvas"); var scale = Math.min(1, 1000 / img.width);
             c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
             var cx = c.getContext("2d"); cx.drawImage(img, 0, 0, c.width, c.height);
             var b64 = c.toDataURL("image/jpeg", 0.8);
@@ -2285,24 +2105,18 @@
     }
 
     if(btnRemoveBg){
-      btnRemoveBg.onclick = function(e){
-        e.preventDefault(); e.stopPropagation(); q.bgImage = ""; writeProgress(q.id, { bgImage: "" }); writeSections(getSections()); renderStage();
-      };
+      btnRemoveBg.onclick = function(e){ e.preventDefault(); e.stopPropagation(); q.bgImage = ""; writeProgress(q.id, { bgImage: "" }); writeSections(getSections()); renderStage(); };
     }
 
     var darkColorDot = vToolbar.querySelector("#btn-theme-dark-color");
     if(darkColorDot){
-      if(currentBgMode === "dark"){
-        darkColorDot.style.background = "#E5EAE6"; darkColorDot.dataset.color = "#FFFFFF"; if(boardState.color === "#2A333C") boardState.color = "#FFFFFF";
-      } else {
-        darkColorDot.style.background = "#2A333C"; darkColorDot.dataset.color = "#2A333C"; if(boardState.color === "#FFFFFF") boardState.color = "#2A333C";
-      }
+      if(currentBgMode === "dark"){ darkColorDot.style.background = "#E5EAE6"; darkColorDot.dataset.color = "#FFFFFF"; if(boardState.color === "#2A333C") boardState.color = "#FFFFFF"; }
+      else { darkColorDot.style.background = "#2A333C"; darkColorDot.dataset.color = "#2A333C"; if(boardState.color === "#FFFFFF") boardState.color = "#2A333C"; }
     }
 
     function getScaleRatio(){ var w = cWrap.clientWidth || canvas.width || 640; return Math.max(0.4, w / 640); }
     function resizeCanvas(){
-      var r = cWrap.getBoundingClientRect();
-      if(r.width > 0 && r.height > 0){ canvas.width = r.width; canvas.height = r.height; redrawStrokes(); renderTexts(); }
+      var r = cWrap.getBoundingClientRect(); if(r.width > 0 && r.height > 0){ canvas.width = r.width; canvas.height = r.height; redrawStrokes(); renderTexts(); }
     }
     requestAnimationFrame(resizeCanvas); window.addEventListener("resize", resizeCanvas);
 
@@ -2322,59 +2136,42 @@
     }
 
     function renderTexts(){
-      textLayer.innerHTML = "";
-      var scale = getScaleRatio();
+      textLayer.innerHTML = ""; var scale = getScaleRatio();
       texts.forEach(function(t, idx){
         var div = document.createElement("div");
         div.className = "movable-text" + (t.id === activeSelectedTextId ? " active" : "");
         div.style.left = t.x + "%"; div.style.top = t.y + "%"; div.style.color = t.color || "var(--ink)";
         var baseSize = t.fontSize || 36; div.style.fontSize = Math.round(baseSize * scale) + "px";
-        div.innerHTML = `<span class="text-content">${t.text}</span><div class="resize-handle" title="按住拖動縮放字體"></div>`;
+        div.innerHTML = `<span class="text-content">${t.text}</span><div class="resize-handle"></div>`;
 
         var handle = div.querySelector(".resize-handle");
         handle.onmousedown = function(e){
           e.stopPropagation(); e.preventDefault();
-          var startSize = t.fontSize || 36;
-          var centerRect = div.getBoundingClientRect();
-          var centerX = centerRect.left + centerRect.width / 2;
-          var centerY = centerRect.top + centerRect.height / 2;
+          var startSize = t.fontSize || 36; var centerRect = div.getBoundingClientRect();
+          var centerX = centerRect.left + centerRect.width / 2; var centerY = centerRect.top + centerRect.height / 2;
           var startDist = Math.hypot(e.clientX - centerX, e.clientY - centerY) || 1;
-
           function onResizeMove(ev){
             var currentDist = Math.hypot(ev.clientX - centerX, ev.clientY - centerY);
-            var ratio = currentDist / startDist;
-            var newSize = Math.max(16, Math.min(120, Math.round(startSize * ratio)));
+            var ratio = currentDist / startDist; var newSize = Math.max(16, Math.min(120, Math.round(startSize * ratio)));
             t.fontSize = newSize; div.style.fontSize = Math.round(newSize * scale) + "px";
-            var fontSelect = vToolbar.querySelector(".board-font-select");
-            if(fontSelect) fontSelect.value = String(newSize);
+            var fontSelect = vToolbar.querySelector(".board-font-select"); if(fontSelect) fontSelect.value = String(newSize);
           }
-          function onResizeUp(){
-            window.removeEventListener("mousemove", onResizeMove); window.removeEventListener("mouseup", onResizeUp);
-            writeProgress(q.id, { texts: texts });
-          }
+          function onResizeUp(){ window.removeEventListener("mousemove", onResizeMove); window.removeEventListener("mouseup", onResizeUp); writeProgress(q.id, { texts: texts }); }
           window.addEventListener("mousemove", onResizeMove); window.addEventListener("mouseup", onResizeUp);
         };
 
         div.onmousedown = function(e){
           e.stopPropagation();
-          if(boardState.tool === "stroke-eraser"){
-            texts.splice(idx, 1); writeProgress(q.id, { texts: texts }); return;
-          }
+          if(boardState.tool === "stroke-eraser"){ texts.splice(idx, 1); writeProgress(q.id, { texts: texts }); return; }
           activeSelectedTextId = t.id; div.classList.add("active");
-          var fontSelect = vToolbar.querySelector(".board-font-select");
-          if(fontSelect) fontSelect.value = String(t.fontSize || 36);
-
-          var startX = e.clientX, startY = e.clientY; var origX = t.x, origY = t.y;
-          var rect = cWrap.getBoundingClientRect();
+          var fontSelect = vToolbar.querySelector(".board-font-select"); if(fontSelect) fontSelect.value = String(t.fontSize || 36);
+          var startX = e.clientX, startY = e.clientY; var origX = t.x, origY = t.y; var rect = cWrap.getBoundingClientRect();
           function onMove(ev){
             var dx = (ev.clientX - startX) / rect.width * 100; var dy = (ev.clientY - startY) / rect.height * 100;
             t.x = Math.max(5, Math.min(95, origX + dx)); t.y = Math.max(5, Math.min(95, origY + dy));
             div.style.left = t.x + "%"; div.style.top = t.y + "%";
           }
-          function onUp(){
-            div.classList.remove("active"); window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp);
-            writeProgress(q.id, { texts: texts });
-          }
+          function onUp(){ div.classList.remove("active"); window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); writeProgress(q.id, { texts: texts }); }
           window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", onUp);
         };
         textLayer.appendChild(div);
@@ -2387,55 +2184,39 @@
       return { x: (cx - r.left) / r.width * 100, y: (cy - r.top) / r.height * 100 };
     }
 
-    function checkStrokeHit(p){
-      for(var i = strokes.length - 1; i >= 0; i--){
-        var pts = strokes[i].points;
-        for(var j=0; j<pts.length; j++){
-          if(Math.hypot(pts[j].x - p.x, pts[j].y - p.y) < 3.5){
-            strokes.splice(i, 1); writeProgress(q.id, { strokes: strokes }); return true;
-          }
-        }
-      }
-      return false;
-    }
-
     canvas.onmousedown = function(e){
       if(!canInteract()) return;
       var p = getPos(e); activeSelectedTextId = null;
-      if(boardState.tool === "stroke-eraser"){ checkStrokeHit(p); return; }
-      if(boardState.tool === "text"){
-        var txt = prompt("請輸入文字內容（漢字或拼音）：");
-        if(txt && txt.trim()){
-          texts.push({ id: uid("t"), text: txt.trim(), x: p.x, y: p.y, color: boardState.color, fontSize: boardState.fontSize || 36 });
-          writeProgress(q.id, { texts: texts });
+      if(boardState.tool === "stroke-eraser"){
+        for(var i = strokes.length - 1; i >= 0; i--){
+          var pts = strokes[i].points;
+          for(var j=0; j<pts.length; j++){
+            if(Math.hypot(pts[j].x - p.x, pts[j].y - p.y) < 3.5){ strokes.splice(i, 1); writeProgress(q.id, { strokes: strokes }); return; }
+          }
         }
+        return;
+      }
+      if(boardState.tool === "text"){
+        var txt = prompt("請輸入文字內容：");
+        if(txt && txt.trim()){ texts.push({ id: uid("t"), text: txt.trim(), x: p.x, y: p.y, color: boardState.color, fontSize: boardState.fontSize || 36 }); writeProgress(q.id, { texts: texts }); }
         return;
       }
       isDrawing = true; currentPath = [p];
     };
 
     window.onmousemove = function(e){
-      if(!isDrawing) return;
-      var p = getPos(e); currentPath.push(p);
-      var scale = getScaleRatio(); ctx.save();
-      if(boardState.tool === "pixel-eraser"){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, st.size * 2.5 * scale); }
+      if(!isDrawing) return; var p = getPos(e); currentPath.push(p); var scale = getScaleRatio(); ctx.save();
+      if(boardState.tool === "pixel-eraser"){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, boardState.size * 2.5 * scale); }
       else { ctx.globalCompositeOperation = "source-over"; ctx.strokeStyle = boardState.color; ctx.lineWidth = Math.max(1, boardState.size * scale); }
       ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath();
       var pts = currentPath;
-      if(pts.length >= 2){
-        ctx.moveTo(pts[pts.length-2].x * canvas.width / 100, pts[pts.length-2].y * canvas.height / 100);
-        ctx.lineTo(p.x * canvas.width / 100, p.y * canvas.height / 100); ctx.stroke();
-      }
+      if(pts.length >= 2){ ctx.moveTo(pts[pts.length-2].x * canvas.width / 100, pts[pts.length-2].y * canvas.height / 100); ctx.lineTo(p.x * canvas.width / 100, p.y * canvas.height / 100); ctx.stroke(); }
       ctx.restore();
     };
 
     window.onmouseup = function(){
-      if(!isDrawing) return;
-      isDrawing = false;
-      if(currentPath.length >= 2){
-        strokes.push({ id: uid("st"), points: currentPath, color: boardState.color, size: boardState.size, isEraser: boardState.tool === "pixel-eraser" });
-        writeProgress(q.id, { strokes: strokes });
-      }
+      if(!isDrawing) return; isDrawing = false;
+      if(currentPath.length >= 2){ strokes.push({ id: uid("st"), points: currentPath, color: boardState.color, size: boardState.size, isEraser: boardState.tool === "pixel-eraser" }); writeProgress(q.id, { strokes: strokes }); }
       currentPath = [];
     };
 
@@ -2443,10 +2224,7 @@
     if(fontSelect){
       fontSelect.onchange = function(){
         boardState.fontSize = Number(fontSelect.value);
-        if(activeSelectedTextId){
-          var selObj = texts.find(function(item){ return item.id === activeSelectedTextId; });
-          if(selObj){ selObj.fontSize = boardState.fontSize; writeProgress(q.id, { texts: texts }); }
-        }
+        if(activeSelectedTextId){ var selObj = texts.find(function(item){ return item.id === activeSelectedTextId; }); if(selObj){ selObj.fontSize = boardState.fontSize; writeProgress(q.id, { texts: texts }); } }
       };
     }
 
@@ -2460,62 +2238,37 @@
     });
 
     vToolbar.querySelectorAll(".color-dot").forEach(function(d){
-      d.onclick = function(){
-        toolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
-        d.classList.add("active"); boardState.color = d.dataset.color;
-      };
+      d.onclick = function(){ vToolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); }); d.classList.add("active"); boardState.color = d.dataset.color; };
     });
 
     vToolbar.querySelectorAll(".size-btn-v").forEach(function(sBtn){
-      sBtn.onclick = function(){
-        vToolbar.querySelectorAll(".size-btn-v").forEach(function(x){ x.classList.remove("active"); });
-        sBtn.classList.add("active"); boardState.size = Number(sBtn.dataset.size);
-      };
+      sBtn.onclick = function(){ vToolbar.querySelectorAll(".size-btn-v").forEach(function(x){ x.classList.remove("active"); }); sBtn.classList.add("active"); boardState.size = Number(sBtn.dataset.size); };
     });
 
     var clearBtn = vToolbar.querySelector("#btn-clear-draw");
-    if(clearBtn){
-      clearBtn.onclick = function(){
-        if(confirm("確定要清空畫布上的所有內容嗎？")){
-          strokes = []; texts = []; writeProgress(q.id, { strokes: strokes, texts: texts });
-        }
-      };
-    }
+    if(clearBtn){ clearBtn.onclick = function(){ if(confirm("確定清空畫布？")){ strokes = []; texts = []; writeProgress(q.id, { strokes: strokes, texts: texts }); } }; }
   }
 
   /* 連連看 */
   function renderMatchBoard(q, container){
-    var progress = getProgress(q.id);
-    var matched = progress.matched || {};
-    var selections = progress.selections || {};
-    var interactive = canInteract();
-
+    var progress = getProgress(q.id); var matched = progress.matched || {}; var selections = progress.selections || {}; var interactive = canInteract();
     var wrap = document.createElement("div"); wrap.className = "match-board";
-    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","match-svg");
-    wrap.appendChild(svg);
+    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","match-svg"); wrap.appendChild(svg);
     var cols = document.createElement("div"); cols.className = "match-cols";
-    var lCol = document.createElement("div"); lCol.className = "match-col";
-    var rCol = document.createElement("div"); rCol.className = "match-col";
+    var lCol = document.createElement("div"); lCol.className = "match-col"; var rCol = document.createElement("div"); rCol.className = "match-col";
     lCol.innerHTML = '<div class="match-col-label">' + (q.leftLabel || "項目一") + '</div>';
     rCol.innerHTML = '<div class="match-col-label">' + (q.rightLabel || "項目二") + '</div>';
 
-    var pIds = Object.keys(q.pairs || {}).sort();
-    var rOrder = pIds.slice().sort();
+    var pIds = Object.keys(q.pairs || {}).sort(); var rOrder = pIds.slice().sort();
 
     pIds.forEach(function(pid){
-      var p = q.pairs[pid];
-      var btn = document.createElement("button"); btn.type="button"; 
-      var isMatched = !!matched[pid];
-      btn.className = "match-item zh" + (isMatched ? " matched" : "");
-      btn.textContent = p.left; btn.dataset.id = pid; btn.dataset.side = "left";
-
+      var p = q.pairs[pid]; var btn = document.createElement("button"); btn.type="button"; var isMatched = !!matched[pid];
+      btn.className = "match-item zh" + (isMatched ? " matched" : ""); btn.textContent = p.left; btn.dataset.id = pid; btn.dataset.side = "left";
       var userWhoSelectedL = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].left === pid; });
       if(userWhoSelectedL && !isMatched){
-        btn.classList.add("selected");
-        var uInfoL = selections[userWhoSelectedL]; var uColorL = getColorForStudent(uInfoL.name || "學生", uInfoL.role);
+        btn.classList.add("selected"); var uInfoL = selections[userWhoSelectedL]; var uColorL = getColorForStudent(uInfoL.name || "學生", uInfoL.role);
         btn.style.borderColor = uColorL; btn.style.boxShadow = "0 0 0 3.5px " + uColorL + "44 inset";
-      } else if(!isMatched){ btn.style.boxShadow = ""; }
-
+      } else if(!isMatched) btn.style.boxShadow = "";
       if(isMatched || !interactive) btn.disabled = true;
 
       btn.onclick = function(){
@@ -2523,26 +2276,19 @@
         var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
         mySel.left = (mySel.left === pid) ? null : pid;
         var newSelections = Object.assign({}, selections, { [myId]: mySel });
-        writeProgress(q.id, { selections: newSelections });
-        checkMatch(mySel);
+        writeProgress(q.id, { selections: newSelections }); checkMatch(mySel);
       };
       lCol.appendChild(btn);
     });
 
     rOrder.forEach(function(pid){
-      var p = q.pairs[pid];
-      var btn = document.createElement("button"); btn.type="button"; 
-      var isMatched = !!matched[pid];
-      btn.className = "match-item" + (isMatched ? " matched" : "");
-      btn.textContent = p.right; btn.dataset.id = pid; btn.dataset.side = "right";
-
+      var p = q.pairs[pid]; var btn = document.createElement("button"); btn.type="button"; var isMatched = !!matched[pid];
+      btn.className = "match-item" + (isMatched ? " matched" : ""); btn.textContent = p.right; btn.dataset.id = pid; btn.dataset.side = "right";
       var userWhoSelectedR = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].right === pid; });
       if(userWhoSelectedR && !isMatched){
-        btn.classList.add("selected");
-        var uInfoR = selections[userWhoSelectedR]; var uColorR = getColorForStudent(uInfoR.name || "學生", uInfoR.role);
+        btn.classList.add("selected"); var uInfoR = selections[userWhoSelectedR]; var uColorR = getColorForStudent(uInfoR.name || "學生", uInfoR.role);
         btn.style.borderColor = uColorR; btn.style.boxShadow = "0 0 0 3.5px " + uColorR + "44 inset";
-      } else if(!isMatched){ btn.style.boxShadow = ""; }
-
+      } else if(!isMatched) btn.style.boxShadow = "";
       if(isMatched || !interactive) btn.disabled = true;
 
       btn.onclick = function(){
@@ -2550,20 +2296,18 @@
         var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
         mySel.right = (mySel.right === pid) ? null : pid;
         var newSelections = Object.assign({}, selections, { [myId]: mySel });
-        writeProgress(q.id, { selections: newSelections });
-        checkMatch(mySel);
+        writeProgress(q.id, { selections: newSelections }); checkMatch(mySel);
       };
       rCol.appendChild(btn);
     });
 
     function checkMatch(currentMySel){
       if(currentMySel && currentMySel.left && currentMySel.right){
-        var newSelections = Object.assign({}, getProgress(q.id).selections || {});
-        delete newSelections[myId];
+        var newSelections = Object.assign({}, getProgress(q.id).selections || {}); delete newSelections[myId];
         if(currentMySel.left === currentMySel.right){
           playCorrectSound(); matched[currentMySel.left] = true;
           writeProgress(q.id, { matched: matched, lastWrong: null, selections: newSelections });
-          if(Object.keys(matched).length === pIds.length){ setTimeout(playVictorySound, 400); }
+          if(Object.keys(matched).length === pIds.length) setTimeout(playVictorySound, 400);
         } else {
           playWrongSound();
           writeProgress(q.id, { lastWrong: { left: currentMySel.left, right: currentMySel.right, t: Date.now(), who: myName }, selections: newSelections });
@@ -2603,8 +2347,7 @@
 
   /* 遠端游標 */
   function renderMultiCursors(cursorData){
-    var container = document.getElementById("multi-cursor-box");
-    if(!container) return; container.innerHTML = "";
+    var container = document.getElementById("multi-cursor-box"); if(!container) return; container.innerHTML = "";
     if(!cursorData || !cursorOn) return;
     Object.keys(cursorData).forEach(function(peerId){
       if(peerId === myId) return;
@@ -2641,9 +2384,18 @@
   if(btnZoomOut) btnZoomOut.onclick = function(){ applyStageZoom(currentZoomRatio - 0.1); };
   if(btnZoomReset) btnZoomReset.onclick = function(){ applyStageZoom(1.0); };
 
-  /* 設定面板 */
+  /* 設定面板與模式切換 */
   var soundSelect = document.getElementById("setting-sound-style"); soundSelect.value = currentSoundStyle;
   soundSelect.onchange = function(){ currentSoundStyle = soundSelect.value; localStorage.setItem("hanyu_sound_style", currentSoundStyle); };
+  
+  document.querySelectorAll(".btn-mode-toggle").forEach(function(b){
+    b.onclick = function(){
+      currentClassMode = b.dataset.mode;
+      localStorage.setItem("hanyu_class_mode", currentClassMode);
+      applyTheme(currentBgMode, currentAccentColor, true);
+    };
+  });
+
   document.querySelectorAll(".btn-theme-bg").forEach(function(b){ b.onclick = function(){ applyTheme(b.dataset.bg, currentAccentColor, true); }; });
   document.querySelectorAll(".btn-theme-accent").forEach(function(b){ b.onclick = function(){ applyTheme(currentBgMode, b.dataset.accent, true); }; });
   
