@@ -440,23 +440,28 @@
   :root:not([data-theme="light"]) .grid-btn-v{ border-color:rgba(255,255,255,0.14); }
   .grid-btn-v.active{background:var(--seal); color:#fff; border-color:var(--seal);}
 
-  /* 寫字板畫布：以視窗高度為主要依據放大，讓「收合側欄／加大視窗」都能直接感受到畫布變大，
-     寬度上限拉高到一般螢幕幾乎不會被卡住 */
+  /* 寫字板畫布：實際寬高改由 JS 依「剩餘可用空間」直接量測後用 inline style 設定（見 fitCanvasToViewport），
+     沒有特別設定格線時，整個剩餘空白處都是可以書寫的畫布，不再侷限成正方形或固定上限寬度。
+     這裡的 width/height 只是 JS 量測完成前的保底樣式。 */
   .canvas-stage-wrap{
-    position:relative; width:100%; max-width:min(1040px, 84vh); aspect-ratio:1 / 1;
+    position:relative; width:100%; height:100%;
     background:transparent; border:2.5px solid var(--seal-ring); border-radius:18px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); flex-grow:1;
-    transition:max-width .2s ease;
   }
-  /* 側欄收合後給寫字板更大的空間 */
-  .layout.sidebar-collapsed .canvas-stage-wrap{ max-width:min(1220px, 88vh); }
-  .canvas-stage-wrap.grid-tian{
+  /* 格線只是畫面正中央一塊「參考用」的浮層，本身不接收滑鼠事件（pointer-events:none），
+     底下的 canvas 仍是整個 canvas-stage-wrap 的大小，所以格線以外的空白處一樣可以直接下筆書寫。
+     實際的寬高由 JS 依可用空間量測後置中設定（見 positionGridOverlay）。 */
+  .grid-overlay{
+    position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+    pointer-events:none; z-index:1; border:1.5px solid var(--seal-ring); border-radius:4px;
+  }
+  .grid-overlay.grid-tian{
     background-image: linear-gradient(to right, var(--seal-ring) 2px, transparent 2px), linear-gradient(to bottom, var(--seal-ring) 2px, transparent 2px); background-size:50% 50%;
   }
-  .canvas-stage-wrap.grid-jiu{
+  .grid-overlay.grid-jiu{
     background-image: linear-gradient(to right, var(--seal-ring) 2px, transparent 2px), linear-gradient(to bottom, var(--seal-ring) 2px, transparent 2px); background-size:33.333% 33.333%;
   }
 
-  .bg-img-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:1;}
+  .bg-img-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:0;}
   canvas#paint-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;touch-action:none;cursor:crosshair;}
   .text-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
 
@@ -1357,6 +1362,22 @@
   function writeProgress(qId, patch){
     if(inRoom()) update(ref(db, "rooms/" + activeRoomId + "/sharedProgress/" + qId), patch);
     else { Object.assign(getProgress(qId), patch); saveFS(); renderStage(); }
+  }
+
+  // 答對／答錯的音效與動畫改成跟著 progress 裡的 lastEvent 同步觸發，不再由點擊的那一端自己直接播放，
+  // 這樣老師端與學生端不管是誰作答，雙方畫面與音效都會同時出現，而不是只有動手的那一端看得到／聽得到。
+  // 用 token 記錄「這個事件是否已經處理過」，避免同一個事件在重繪時被重複觸發。
+  var lastFeedbackToken = {};
+  function playFeedbackOnce(key, evt){
+    // 回傳 true 代表這是「這次渲染才第一次看到」的新事件（可以用來額外觸發像搖晃這種一次性動畫）
+    if(!evt || !evt.token) return false;
+    if(lastFeedbackToken[key] === evt.token) return false;
+    lastFeedbackToken[key] = evt.token;
+    if(evt.type === "correct") playCorrectSound(); else if(evt.type === "wrong") playWrongSound();
+    return true;
+  }
+  function makeEventToken(){
+    return Date.now() + "_" + Math.random().toString(36).slice(2, 7);
   }
 
   /* ================== 成績與錯題結算引擎 ================== */
@@ -2328,7 +2349,7 @@
       qObj.title = titleInput || ("第 " + (order + 1) + " 題");
       qObj.desc = document.getElementById("f-board-desc").value.trim();
       qObj.bgImage = editorBoardImgData || "";
-      qObj.gridType = (existing && existing.gridType) || "tian";
+      qObj.gridType = (existing && existing.gridType) || "none";
     }
 
     sec.questions[qId] = qObj;
@@ -2439,7 +2460,7 @@
         if(type === "match") sec.questions[qId] = { id: qId, title: qTitle, order: order, leftLabel: "生詞", rightLabel: "意思", pairs: {} };
         else if(type === "choice") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt, choices: {}, answerIds: [] };
         else if(type === "reorder") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt || "請將下列詞語重組為正確句子", words: [] };
-        else if(type === "board") sec.questions[qId] = { id: qId, title: qTitle, order: order, desc: qPrompt || String(c1 || ""), bgImage: "", gridType: "tian" };
+        else if(type === "board") sec.questions[qId] = { id: qId, title: qTitle, order: order, desc: qPrompt || String(c1 || ""), bgImage: "", gridType: "none" };
       }
       var q = sec.questions[qId];
 
@@ -2487,13 +2508,28 @@
 
   /* 主舞台渲染 */
   var stageEl = document.getElementById("stage");
+  // 寫字板每畫完一筆、或對方畫了一筆，都會呼叫 writeProgress → renderStage()。
+  // 如果每次都整個畫面砍掉重建（工具列、畫布全部重新建立），使用者會感覺畫面「抖一下」。
+  // 這兩個變數讓 renderStage() 能判斷「這次只是同一題寫字板的內容更新」，改成呼叫局部刷新函式，
+  // 不重建 DOM；一旦題目、大題標題、題號等「非 progress」的東西有變化，signature 就會不同，仍會走完整重繪。
+  var liveBoardQId = null;
+  var liveBoardRefresh = null;
+  var lastStageSignature = null;
   function renderStage(){
     var currentInfo = getCurrentQInfo();
-    stageEl.innerHTML = "";
-    if(!currentInfo) return;
+    if(!currentInfo){ stageEl.innerHTML = ""; liveBoardQId = null; liveBoardRefresh = null; lastStageSignature = null; return; }
 
     var sec = currentInfo.section; var q = currentInfo.question;
     var allList = getAllQuestionsList(); var currentIndex = allList.findIndex(function(it){ return it.question.id === q.id; });
+    var stageSignature = JSON.stringify([q.id, sec.title, sec.desc || "", q.title, q.desc || "", currentIndex, allList.length, currentClassMode, !!isStudent]);
+
+    if(sec.type === "board" && liveBoardQId === q.id && stageSignature === lastStageSignature && liveBoardRefresh && liveBoardRefresh()){
+      return; // 局部刷新成功：只更新畫布內容（筆畫／文字／格線／底圖），不重建整個舞台
+    }
+
+    stageEl.innerHTML = "";
+    lastStageSignature = stageSignature;
+    liveBoardQId = null; liveBoardRefresh = null; // 若這題是寫字板，稍後 renderDrawBoard() 會重新指定
 
     var navBar = document.createElement("div"); navBar.className = "stage-header-nav";
     navBar.innerHTML = `
@@ -2528,7 +2564,7 @@
     if(!isStudent){
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.onclick = function(){
-        var resetPatch = { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, userPairs:{}, userWords:[], revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} };
+        var resetPatch = { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, userPairs:{}, userWords:[], revealed:false, strokes:[], texts:[], selection:null, wrongFlash:null, lastEvent:null };
         resetPatch.poolWords = (sec.type === "reorder") ? seededShuffle(q.words || [], q.id + "|reorder-pool") : [];
         writeProgress(q.id, resetPatch);
       };
@@ -2561,6 +2597,11 @@
 
     var matched = progress.matched || {};
     var userPairs = progress.userPairs || {};
+    // 選取與答錯提示都改成寫進共用的 progress，讓老師／學生兩端都能即時看到彼此的點擊與對錯動畫，
+    // 而不是只有點擊的那一端自己看得到（本機 DOM class 不會同步給對方）。
+    var selection = progress.selection || null; // { side: "left"|"right", pid: string }
+    var wrongFlash = progress.wrongFlash || null; // { leftPid, rightPid, token } 短暫的答錯提示
+    playFeedbackOnce("match:" + q.id, progress.lastEvent); // 答對／答錯音效同步：雙方都會在同一個事件觸發時各自播放一次
 
     var wrap = document.createElement("div"); wrap.className = "match-board";
     var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -2575,59 +2616,45 @@
 
     // 選取狀態不限定一定要先點左欄：不論先點左邊還是右邊的項目，都會先顯示「已選取」的變色提示，
     // 接著點另一側的項目才會嘗試配對；點同一側的另一個項目則是換成新的選取。
-    var selection = null; // { side: "left"|"right", pid: string }
-
-    function clearSelectedVisual(){
-      wrap.querySelectorAll(".match-item.selected").forEach(function(x){ x.classList.remove("selected"); });
-    }
-
-    function handleItemClick(side, pid, btn, locked){
+    function handleItemClick(side, pid, locked){
       if(!interactive || locked) return;
 
       // 再點一次目前已選取的項目：取消選取
       if(selection && selection.side === side && selection.pid === pid){
-        selection = null;
-        clearSelectedVisual();
+        writeProgress(q.id, { selection: null });
         return;
       }
 
       // 還沒選任何東西，或是點了同一側的另一個項目：更新為新的選取（兩側都可以是「第一次點擊」）
       if(!selection || selection.side === side){
-        selection = { side: side, pid: pid };
-        clearSelectedVisual();
-        btn.classList.add("selected");
+        writeProgress(q.id, { selection: { side: side, pid: pid } });
         return;
       }
 
       // 已經選了另一側的項目，這次點的是不同側 → 嘗試配對
       var leftPid = side === "left" ? pid : selection.pid;
       var rightPid = side === "right" ? pid : selection.pid;
-      var leftBtn = leftCol.querySelector('[data-pid="' + leftPid + '"]');
-      var rightBtn = rightCol.querySelector('[data-pid="' + rightPid + '"]');
 
       if(isTest){
         userPairs[leftPid] = rightPid;
-        writeProgress(q.id, { userPairs: userPairs });
-        selection = null;
-        renderStage();
+        writeProgress(q.id, { userPairs: userPairs, selection: null });
         return;
       }
 
       if(leftPid === rightPid){
         matched[leftPid] = true;
-        playCorrectSound();
-        writeProgress(q.id, { matched: matched });
-        selection = null;
-        renderStage();
+        var correctToken = makeEventToken();
+        writeProgress(q.id, { matched: matched, selection: null, wrongFlash: null, lastEvent: { type: "correct", token: correctToken } });
       } else {
-        if(leftBtn) leftBtn.classList.add("wrong");
-        if(rightBtn) rightBtn.classList.add("wrong");
-        playWrongSound();
-        selection = null;
+        var token = makeEventToken();
+        writeProgress(q.id, { selection: null, wrongFlash: { leftPid: leftPid, rightPid: rightPid, token: token }, lastEvent: { type: "wrong", token: token } });
+        // 用 token 標記這一次的答錯提示，時間到了才清除；避免清除到使用者這段時間內又觸發的新提示
         setTimeout(function(){
-          if(leftBtn) leftBtn.classList.remove("wrong", "selected");
-          if(rightBtn) rightBtn.classList.remove("wrong", "selected");
-        }, 450);
+          var freshProgress = getProgress(q.id);
+          if(freshProgress.wrongFlash && freshProgress.wrongFlash.token === token){
+            writeProgress(q.id, { wrongFlash: null });
+          }
+        }, 500);
       }
     }
 
@@ -2639,7 +2666,9 @@
       var locked = !isTest && !!matched[pid];
       if(locked){ btn.classList.add("matched"); btn.disabled = true; }
       if(!interactive) btn.disabled = true;
-      btn.onclick = function(){ handleItemClick("left", pid, btn, locked); };
+      if(selection && selection.side === "left" && selection.pid === pid) btn.classList.add("selected");
+      if(wrongFlash && wrongFlash.leftPid === pid) btn.classList.add("wrong");
+      btn.onclick = function(){ handleItemClick("left", pid, locked); };
       leftCol.appendChild(btn);
     });
 
@@ -2651,7 +2680,9 @@
       var rLocked = !isTest && !!matched[pid];
       if(rLocked){ btn.classList.add("matched"); btn.disabled = true; }
       if(!interactive) btn.disabled = true;
-      btn.onclick = function(){ handleItemClick("right", pid, btn, rLocked); };
+      if(selection && selection.side === "right" && selection.pid === pid) btn.classList.add("selected");
+      if(wrongFlash && wrongFlash.rightPid === pid) btn.classList.add("wrong");
+      btn.onclick = function(){ handleItemClick("right", pid, rLocked); };
       rightCol.appendChild(btn);
     });
 
@@ -2705,6 +2736,7 @@
     var multiPicks = progress.multiPicks || {};
     var isTest = currentClassMode === 'test';
     var correctIds = q.answerIds || (q.answerId ? [q.answerId] : []);
+    playFeedbackOnce("choice:" + q.id, progress.lastEvent); // 勾選對／錯的音效同步：雙方都在同一個事件觸發時各自播放一次
 
     var wrap = document.createElement("div");
     wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || q.title}</p>`;
@@ -2737,10 +2769,11 @@
       btn.onclick = function(){
         if(!interactive) return;
         multiPicks[cid] = !multiPicks[cid];
+        var patch = { multiPicks: multiPicks };
         if(multiPicks[cid] && !isTest){
-          if(isCorrect) playCorrectSound(); else playWrongSound();
+          patch.lastEvent = { type: isCorrect ? "correct" : "wrong", token: makeEventToken() };
         }
-        writeProgress(q.id, { multiPicks: multiPicks });
+        writeProgress(q.id, patch);
       };
       cBox.appendChild(btn);
     });
@@ -2862,6 +2895,17 @@
     }
     wrap.appendChild(slotZone);
 
+    // 答對／答錯的音效跟搖晃動畫都改成跟著共用的 lastEvent 觸發，雙方（老師端／學生端）都會在同一次
+    // 事件時各自看到、聽到，而不是只有實際拖曳排列的那一端才有反應。
+    var isNewReorderEvent = playFeedbackOnce("reorder:" + q.id, progress.lastEvent);
+    if(isNewReorderEvent && progress.lastEvent.type === "wrong"){
+      var wrongChips = slotZone.querySelectorAll(".reorder-chip");
+      wrongChips.forEach(function(el){ el.classList.add("wrong-shake"); });
+      setTimeout(function(){
+        wrongChips.forEach(function(el){ el.classList.remove("wrong-shake"); });
+      }, 550);
+    }
+
     var poolZone = document.createElement("div");
     poolZone.style.cssText = "display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; min-height:64px; align-items:center;";
     poolZone.ondragover = function(e){
@@ -2930,24 +2974,16 @@
         if(currentClassMode === 'test'){
           writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
         } else {
+          // 答對／答錯都寫進 lastEvent 讓兩端同步觸發音效與動畫（搖晃提示），不是只有動手排列的那一端自己看得到。
+          // 答錯不清空已排列的詞語：只做搖晃提示，讓學生可以直接拖曳方塊調整順序，不需要整個重新作答。
+          var evtToken = makeEventToken();
           if(isMatch){
-            playCorrectSound();
-            writeProgress(q.id, { revealed: true });
+            writeProgress(q.id, { revealed: true, lastEvent: { type: "correct", token: evtToken } });
           } else {
-            playWrongSound();
-            // 答錯不清空已排列的詞語：只做搖晃提示，讓學生可以直接拖曳方塊調整順序，
-            // 不需要整個重新作答（把詞語一個個點回詞語池再重排）
-            var slotZone = document.querySelector(".reorder-slot-zone");
-            if(slotZone){
-              var wrongChips = slotZone.querySelectorAll(".reorder-chip");
-              wrongChips.forEach(function(el){ el.classList.add("wrong-shake"); });
-              setTimeout(function(){
-                wrongChips.forEach(function(el){ el.classList.remove("wrong-shake"); });
-              }, 550);
-            }
+            writeProgress(q.id, { lastEvent: { type: "wrong", token: evtToken } });
           }
         }
-      }, 750);
+      }, 200);
     } else {
       writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
     }
@@ -2962,7 +2998,9 @@
     var progress = getProgress(q.id);
     var strokes = progress.strokes || [];
     var texts = progress.texts || [];
-    var currentGrid = progress.gridType || q.gridType || "jiu";
+    // 沒有特別設定格線的話，預設是「無格」：整個空白處都可以直接書寫，不侷限成一個固定大小的方格區域。
+    // 老師需要田字格／九宮格時再自己點選，格線只會是畫面正中央一塊參考用的浮層，格線以外一樣能寫字。
+    var currentGrid = progress.gridType || q.gridType || "none";
     var currentBg = progress.bgImage || q.bgImage || "";
 
     var layout = document.createElement("div"); layout.className = "draw-board-layout";
@@ -3019,11 +3057,16 @@
     layout.appendChild(vToolbar);
 
     var cWrap = document.createElement("div");
-    cWrap.className = "canvas-stage-wrap " + (currentGrid === 'tian' ? 'grid-tian' : (currentGrid === 'jiu' ? 'grid-jiu' : ''));
+    cWrap.className = "canvas-stage-wrap";
     if(currentBg){
       var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg;
       cWrap.appendChild(img);
     }
+    // 格線浮層：pointer-events:none，只是畫面正中央一塊參考用的方框，不會擋住下面 canvas 的書寫範圍
+    var gridOverlay = document.createElement("div");
+    gridOverlay.className = "grid-overlay" + (currentGrid === 'tian' ? ' grid-tian' : (currentGrid === 'jiu' ? ' grid-jiu' : ''));
+    gridOverlay.style.display = currentGrid === 'none' ? 'none' : 'block';
+    cWrap.appendChild(gridOverlay);
     var canvas = document.createElement("canvas"); canvas.id = "paint-canvas";
     var textLayer = document.createElement("div"); textLayer.className = "text-layer";
     cWrap.appendChild(canvas);
@@ -3032,17 +3075,26 @@
     container.appendChild(layout);
 
     // 讓畫布依「實際剩餘空間」放大到最大，而不是用固定的 vh 猜測比例：
-    // 這樣不管螢幕高矮、側欄是否收合，畫布都會剛好撐滿剩下的高度，不會多留空白，也不會把畫面撐到需要捲動
+    // 這樣不管螢幕高矮、側欄是否收合，畫布都會剛好撐滿剩下的高度跟寬度，不會多留空白，也不會把畫面撐到需要捲動。
+    // 沒有格線時整個 cWrap（=整個 canvas）就是可書寫範圍；有格線時格線只是置中疊在上面的一塊參考浮層。
     if(boardResizeHandler) window.removeEventListener("resize", boardResizeHandler);
     var stageWrapEl = document.querySelector(".stage-wrap");
+    function positionGridOverlay(){
+      var w = cWrap.clientWidth, h = cWrap.clientHeight;
+      if(!w || !h) return;
+      var side = Math.floor(Math.min(w, h) * 0.64);
+      gridOverlay.style.width = side + "px";
+      gridOverlay.style.height = side + "px";
+    }
     function fitCanvasToViewport(){
       if(!document.body.contains(cWrap)) return; // 題目已經切換掉了，這份畫布不在畫面上，略過
       var wrapRect = layout.getBoundingClientRect();
       var bottomLimit = stageWrapEl ? stageWrapEl.getBoundingClientRect().bottom : window.innerHeight;
-      var availableHeight = bottomLimit - wrapRect.top - 6;
-      var availableWidth = layout.clientWidth - vToolbar.offsetWidth - 16;
-      var size = Math.max(220, Math.min(availableHeight, availableWidth));
-      cWrap.style.maxWidth = Math.floor(size) + "px";
+      var availableHeight = Math.max(220, bottomLimit - wrapRect.top - 6);
+      var availableWidth = Math.max(220, layout.clientWidth - vToolbar.offsetWidth - 16);
+      cWrap.style.width = Math.floor(availableWidth) + "px";
+      cWrap.style.height = Math.floor(availableHeight) + "px";
+      positionGridOverlay();
     }
     boardResizeHandler = fitCanvasToViewport;
     requestAnimationFrame(fitCanvasToViewport);
@@ -3368,7 +3420,9 @@
         vToolbar.querySelectorAll(".grid-btn-v").forEach(function(x){ x.classList.remove("active"); });
         gb.classList.add("active");
         var gType = gb.dataset.grid;
-        cWrap.className = "canvas-stage-wrap " + (gType === 'tian' ? 'grid-tian' : (gType === 'jiu' ? 'grid-jiu' : ''));
+        gridOverlay.className = "grid-overlay" + (gType === 'tian' ? ' grid-tian' : (gType === 'jiu' ? ' grid-jiu' : ''));
+        gridOverlay.style.display = gType === 'none' ? 'none' : 'block';
+        positionGridOverlay();
         writeProgress(q.id, { gridType: gType });
       };
     });
@@ -3401,6 +3455,40 @@
         }
       };
     }
+
+    // 局部刷新：對方（或自己送出後的回寫）畫了一筆、換了格線、換了底圖時呼叫，只更新畫布內容，
+    // 不重建工具列與畫布 DOM，避免整個舞台重繪造成的「抖動」。回傳 false 代表這份畫布已經不在畫面上了，
+    // renderStage() 收到 false 會改走原本的完整重繪。
+    function refreshFromProgress(){
+      if(!document.body.contains(cWrap)) return false;
+      var freshProgress = getProgress(q.id);
+      strokes = freshProgress.strokes || [];
+      texts = freshProgress.texts || [];
+      var freshGrid = freshProgress.gridType || q.gridType || "none";
+      var freshBg = freshProgress.bgImage || q.bgImage || "";
+
+      gridOverlay.className = "grid-overlay" + (freshGrid === 'tian' ? ' grid-tian' : (freshGrid === 'jiu' ? ' grid-jiu' : ''));
+      gridOverlay.style.display = freshGrid === 'none' ? 'none' : 'block';
+      positionGridOverlay();
+      vToolbar.querySelectorAll(".grid-btn-v").forEach(function(gb){
+        gb.classList.toggle("active", gb.dataset.grid === freshGrid);
+      });
+
+      var existingImg = cWrap.querySelector(".bg-img-layer");
+      if(freshBg){
+        if(existingImg){ if(existingImg.src !== freshBg) existingImg.src = freshBg; }
+        else { var newImg = document.createElement("img"); newImg.className = "bg-img-layer"; newImg.src = freshBg; cWrap.insertBefore(newImg, cWrap.firstChild); }
+      } else if(existingImg){
+        existingImg.remove();
+      }
+      if(btnRemoveBg) btnRemoveBg.style.display = freshBg ? "flex" : "none";
+
+      redrawStrokes();
+      renderTexts();
+      return true;
+    }
+    liveBoardQId = q.id;
+    liveBoardRefresh = refreshFromProgress;
   }
 
   /* ================== 啟動流程（大廳 / 學生加入房間） ================== */
