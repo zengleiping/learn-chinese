@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>曼米中文 Mandamy</title>
-<!-- 替換瀏覽器分頁標籤的灰色醜地球圖示 (Favicon) -->
+<!-- 替換瀏覽器分頁標籤的灰色地球圖示 (Favicon) -->
 <link rel="icon" id="dynamic-favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='52' r='38' fill='%2398D7FF' stroke='%231C211E' stroke-width='4'/%3E%3Cpath d='M 14 44 C 20 22, 38 16, 50 16 C 62 16, 80 22, 86 44 C 76 52, 66 38, 50 44 C 34 38, 24 52, 14 44 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 22 75 C 36 90, 64 90, 78 75 C 66 78, 34 78, 22 75 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='37' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Cellipse cx='63' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Crect x='36' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Crect x='61.5' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Cellipse cx='50' cy='32' rx='4.5' ry='3.5' fill='%231C211E'/%3E%3Cpath d='M 50 67 C 36 55, 31 43, 39 37 C 45 32, 50 37, 50 40 C 50 37, 55 32, 61 37 C 69 43, 64 55, 50 67 Z' fill='%23FF7A8E' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 14 56 C 20 48, 38 52, 38 58 C 36 64, 20 64, 14 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 86 56 C 80 48, 62 52, 62 58 C 64 64, 80 64, 86 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='78' cy='18' rx='11' ry='9' fill='%23FFFFFF' stroke='%231C211E' stroke-width='3'/%3E%3Cpath d='M 71 24 L 67 29 L 75 26 Z' fill='%23FFFFFF' stroke='%231C211E' stroke-width='2'/%3E%3C/svg%3E">
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
@@ -38,7 +38,7 @@
   button, input, textarea, select{font-family:inherit; color:var(--ink);}
   button:focus-visible{outline:2px solid var(--seal); outline-offset:2px;}
 
-  /* topbar */
+  /* topbar：曼米中文在上方、Mandamy在下方，課次大廳於中英文名字旁垂直置中 */
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
     padding:12px 28px;background:var(--surface);
@@ -49,11 +49,26 @@
     width:42px;height:42px;flex:none;
     display:flex;align-items:center;justify-content:center;
   }
-  .brand-logo-wrap svg, .brand-logo-wrap img{
+  .brand-logo-wrap img{
     width:100%;height:100%;object-fit:contain;
   }
-  .brand-text h1{margin:0;font-size:18px;font-weight:700;display:flex;align-items:baseline;gap:6px;}
-  .brand-text p{margin:2px 0 0;font-size:11.5px;color:var(--ink-soft);font-weight:500;}
+  .brand-text-col{
+    display:flex; flex-direction:column; justify-content:center; line-height:1.2;
+  }
+  .brand-zh{
+    font-family:"LXGW WenKai TC", serif; font-size:18px; font-weight:700; color:var(--ink); letter-spacing:0.04em;
+  }
+  .brand-en{
+    font-family:"Plus Jakarta Sans", sans-serif; font-size:12px; font-weight:600; color:var(--ink-soft); letter-spacing:0.02em; margin-top:1px;
+  }
+  .brand-divider{
+    width:1.5px; height:24px; background:var(--grid-line); margin:0 4px;
+  }
+  .brand-sub-badge{
+    font-size:13px; font-weight:600; color:var(--ink-soft);
+    background:var(--surface-2); padding:4px 10px; border-radius:8px; border:1px solid var(--grid-line);
+  }
+
   .topbar-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
 
   .btn{
@@ -404,6 +419,43 @@
   .peer-cursor-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 2px 8px rgba(0,0,0,0.35);}
   .peer-cursor-label{color:#fff;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
 
+  /* 成績結算彈窗專用樣式 */
+  .score-header-box{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--surface-2); padding:20px; border-radius:14px; margin-bottom:18px; border:1px solid var(--grid-line);
+  }
+  .score-circle{
+    font-size:38px; font-weight:800; font-family:"Plus Jakarta Sans",sans-serif;
+    color:var(--seal); line-height:1; font-variant-numeric:tabular-nums;
+  }
+  .score-rank-badge{
+    display:inline-block; font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px;
+    background:var(--seal-soft); color:var(--seal); margin-top:4px;
+  }
+  .score-stats-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; text-align:center;
+  }
+  .score-stat-cell{
+    background:var(--surface); border:1px solid var(--grid-line); border-radius:10px; padding:10px 8px;
+  }
+  .score-stat-cell b{ font-size:17px; display:block; margin-top:2px; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .score-stat-cell span{ font-size:11.5px; color:var(--ink-soft); }
+
+  .score-details-list{
+    display:flex; flex-direction:column; gap:12px; margin-top:14px;
+  }
+  .score-sec-item{
+    border:1px solid var(--grid-line); border-radius:10px; padding:12px; background:var(--surface);
+  }
+  .score-sec-title{
+    font-size:13.5px; font-weight:700; margin-bottom:8px; color:var(--ink); display:flex; justify-content:space-between;
+  }
+  .score-q-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-size:12.5px; padding:6px 0; border-bottom:1px dashed var(--grid-line);
+  }
+  .score-q-row:last-child{ border-bottom:none; }
+
   /* 彈窗設計 */
   .dialog-modal{border:none;border-radius:20px;padding:0;background:var(--surface);color:var(--ink);box-shadow: 0 20px 40px rgba(0,0,0,0.15);width:min(580px,92vw);max-height:88vh;}
   .dialog-modal::backdrop{background:rgba(20,20,18,0.6); backdrop-filter: blur(3px);}
@@ -435,14 +487,15 @@
 <div class="app" id="app">
   <header class="topbar">
     <div class="brand" id="brand-logo" title="點擊返回課程大廳">
-      <!-- 內嵌透明去背向量 Logo (可愛地球與愛心) -->
       <div class="brand-logo-wrap">
-        <img id="brand-logo-img" alt="曼米中文 Mandamy Logo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='52' r='38' fill='%2398D7FF' stroke='%231C211E' stroke-width='4'/%3E%3Cpath d='M 14 44 C 20 22, 38 16, 50 16 C 62 16, 80 22, 86 44 C 76 52, 66 38, 50 44 C 34 38, 24 52, 14 44 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 22 75 C 36 90, 64 90, 78 75 C 66 78, 34 78, 22 75 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='37' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Cellipse cx='63' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Crect x='36' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Crect x='61.5' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Cellipse cx='50' cy='32' rx='4.5' ry='3.5' fill='%231C211E'/%3E%3Cpath d='M 50 67 C 36 55, 31 43, 39 37 C 45 32, 50 37, 50 40 C 50 37, 55 32, 61 37 C 69 43, 64 55, 50 67 Z' fill='%23FF7A8E' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 14 56 C 20 48, 38 52, 38 58 C 36 64, 20 64, 14 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 86 56 C 80 48, 62 52, 62 58 C 64 64, 80 64, 86 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='78' cy='18' rx='11' ry='9' fill='%23FFFFFF' stroke='%231C211E' stroke-width='3'/%3E%3Cpath d='M 71 24 L 67 29 L 75 26 Z' fill='%23FFFFFF' stroke='%231C211E' stroke-width='2'/%3E%3C/svg%3E">
+        <img id="brand-logo-img" alt="曼米中文 Logo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='52' r='38' fill='%2398D7FF' stroke='%231C211E' stroke-width='4'/%3E%3Cpath d='M 14 44 C 20 22, 38 16, 50 16 C 62 16, 80 22, 86 44 C 76 52, 66 38, 50 44 C 34 38, 24 52, 14 44 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 22 75 C 36 90, 64 90, 78 75 C 66 78, 34 78, 22 75 Z' fill='%2395D165' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='37' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Cellipse cx='63' cy='36' rx='5.5' ry='3.5' fill='%23FF859A'/%3E%3Crect x='36' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Crect x='61.5' y='30' width='2.5' height='5' rx='1.2' fill='%231C211E'/%3E%3Cellipse cx='50' cy='32' rx='4.5' ry='3.5' fill='%231C211E'/%3E%3Cpath d='M 50 67 C 36 55, 31 43, 39 37 C 45 32, 50 37, 50 40 C 50 37, 55 32, 61 37 C 69 43, 64 55, 50 67 Z' fill='%23FF7A8E' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 14 56 C 20 48, 38 52, 38 58 C 36 64, 20 64, 14 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cpath d='M 86 56 C 80 48, 62 52, 62 58 C 64 64, 80 64, 86 56 Z' fill='%2398D7FF' stroke='%231C211E' stroke-width='3.5'/%3E%3Cellipse cx='78' cy='18' rx='11' ry='9' fill='%23FFFFFF' stroke='%231C211E' stroke-width='3'/%3E%3Cpath d='M 71 24 L 67 29 L 75 26 Z' fill='%23FFFFFF' stroke='%231C211E' stroke-width='2'/%3E%3C/svg%3E">
       </div>
-      <div class="brand-text">
-        <h1 id="brand-title">曼米中文 <span style="font-size:13px; font-weight:600; opacity:0.65; letter-spacing:0.04em;">Mandamy</span></h1>
-        <p id="brand-sub">專案課次大廳</p>
+      <div class="brand-text-col">
+        <div class="brand-zh">曼米中文</div>
+        <div class="brand-en">Mandamy</div>
       </div>
+      <div class="brand-divider"></div>
+      <div class="brand-sub-badge" id="brand-sub">專案課次大廳</div>
     </div>
     <div class="topbar-actions" id="topbar-actions"></div>
   </header>
@@ -534,6 +587,22 @@
       <button type="submit" class="btn btn-primary">儲存課次</button>
     </div>
   </form>
+</dialog>
+
+<!-- 測驗成績結算單彈窗 -->
+<dialog class="dialog-modal" id="score-dialog" style="max-width:640px;">
+  <div class="dialog-head">
+    <h2 style="display:flex; align-items:center; gap:8px;">📊 課堂測驗成績結算</h2>
+    <p id="score-meta-text" style="font-size:13px; color:var(--ink-soft); margin:4px 0 0;"></p>
+  </div>
+  <div class="dialog-body" id="score-dialog-body"></div>
+  <div class="dialog-foot" style="justify-content:space-between; flex-wrap:wrap;">
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn btn-sm btn-ghost" id="btn-copy-score-report" style="border:1px solid var(--grid-line);">📋 複製成績文字報告</button>
+      <button type="button" class="btn btn-sm btn-primary" id="btn-broadcast-score" style="display:none;">📢 廣播成績給學生</button>
+    </div>
+    <button type="button" class="btn btn-sm" id="btn-close-score">關閉</button>
+  </div>
 </dialog>
 
 <!-- 設定彈窗：僅限老師使用 -->
@@ -744,7 +813,6 @@
         ctx.drawImage(img, 0, 0);
         var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         var d = imgData.data;
-        // 將所有白色或近白色像素（R, G, B > 238）的 Alpha 設為 0
         for(var i = 0; i < d.length; i += 4){
           if(d[i] > 238 && d[i+1] > 238 && d[i+2] > 238){
             d[i+3] = 0;
@@ -965,7 +1033,8 @@
           var osc = ctx.createOscillator(), g = ctx.createGain();
           osc.type = "triangle"; osc.frequency.setValueAtTime(220, now); osc.frequency.setValueAtTime(185, now + 0.1);
           g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
-          osc.connect(g); g.connect(ctx.destination); osc.start(now); osc.stop(now + 0.32);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.32);
         }
       }
     }catch(e){}
@@ -996,7 +1065,7 @@
     fontSize: 36
   };
 
-  /* ================== 資料庫載入與儲存 ================== */
+  /* ================== 資料庫預設結構 (曼米中文 Mandamy) ================== */
   var STORAGE_FS_KEY = "hanyu-mandamy-v4";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
@@ -1257,6 +1326,240 @@
       saveFS(); 
       renderStage(); 
     }
+  }
+
+  /* ================== 成績結算引擎 (Score Settlement) ================== */
+  function calculateScoreReport(){
+    var secs = getSections();
+    var secKeys = getSortedSectionKeys();
+    var results = [];
+    var totalScoreable = 0;
+    var totalEarned = 0;
+
+    secKeys.forEach(function(secId){
+      var sec = secs[secId];
+      var qKeys = getSortedQuestionKeys(sec);
+      var secRes = {
+        title: sec.title,
+        type: sec.type,
+        questions: []
+      };
+
+      qKeys.forEach(function(qId, idx){
+        var q = sec.questions[qId];
+        var progress = getProgress(qId);
+        var qRes = {
+          title: q.title || (`第 ${idx + 1} 題`),
+          isScoreable: true,
+          score: 0,
+          status: "wrong",
+          detail: ""
+        };
+
+        if(sec.type === "match"){
+          totalScoreable++;
+          var pairs = q.pairs || {};
+          var pKeys = Object.keys(pairs);
+          var totalPairs = pKeys.length;
+          var matched = progress.matched || {};
+          var matchedCount = Object.keys(matched).filter(k => matched[k]).length;
+
+          if(totalPairs > 0 && matchedCount === totalPairs){
+            qRes.score = 1;
+            qRes.status = "correct";
+            qRes.detail = `全部配對成功 (${matchedCount}/${totalPairs})`;
+            totalEarned += 1;
+          } else {
+            qRes.score = totalPairs > 0 ? (matchedCount / totalPairs) : 0;
+            qRes.status = matchedCount > 0 ? "partial" : "wrong";
+            qRes.detail = `配對進度: ${matchedCount}/${totalPairs}`;
+            totalEarned += qRes.score;
+          }
+        } else if(sec.type === "choice"){
+          totalScoreable++;
+          var ansIds = (q.answerIds && q.answerIds.length) ? q.answerIds : (q.answerId ? [q.answerId] : []);
+          var userPicks = [];
+          if(progress.multiPicks){
+            userPicks = Object.keys(progress.multiPicks).filter(k => progress.multiPicks[k]);
+          } else if(progress.choicePick){
+            userPicks = [progress.choicePick];
+          }
+
+          var sortedAns = ansIds.slice().sort().join(",");
+          var sortedPicks = userPicks.slice().sort().join(",");
+          if(sortedAns && sortedAns === sortedPicks){
+            qRes.score = 1;
+            qRes.status = "correct";
+            qRes.detail = "答案正確";
+            totalEarned += 1;
+          } else {
+            qRes.score = 0;
+            qRes.status = "wrong";
+            var correctLabels = ansIds.map(id => (q.choices && q.choices[id]) ? q.choices[id].text : id).join(", ");
+            qRes.detail = `未答對 (正解: ${correctLabels || "無"})`;
+          }
+        } else if(sec.type === "reorder"){
+          totalScoreable++;
+          var correctWords = q.words || [];
+          var userWords = progress.userWords || [];
+          var isMatch = (userWords.length === correctWords.length && correctWords.length > 0) &&
+                        userWords.every((w, i) => w === correctWords[i]);
+          if(isMatch){
+            qRes.score = 1;
+            qRes.status = "correct";
+            qRes.detail = "句子語序完全正確";
+            totalEarned += 1;
+          } else {
+            qRes.score = 0;
+            qRes.status = "wrong";
+            qRes.detail = `語序未完成或有誤 (正解: ${correctWords.join(" ")})`;
+          }
+        } else if(sec.type === "board"){
+          qRes.isScoreable = false;
+          var strokes = progress.strokes || [];
+          qRes.status = strokes.length > 0 ? "completed" : "empty";
+          qRes.detail = strokes.length > 0 ? `已完成書寫 (${strokes.length} 筆畫)` : "尚未書寫";
+        }
+
+        secRes.questions.push(qRes);
+      });
+
+      results.push(secRes);
+    });
+
+    var finalScore = totalScoreable > 0 ? Math.round((totalEarned / totalScoreable) * 100) : 100;
+    return {
+      studentName: myName || "學生",
+      projectName: (getActiveProject() && getActiveProject().title) || "華語課堂測驗",
+      timeString: new Date().toLocaleString(),
+      finalScore: finalScore,
+      totalScoreable: totalScoreable,
+      totalEarned: Math.round(totalEarned * 10) / 10,
+      results: results
+    };
+  }
+
+  function showScoreModal(report, isTeacherView){
+    var dlg = document.getElementById("score-dialog");
+    var metaText = document.getElementById("score-meta-text");
+    var body = document.getElementById("score-dialog-body");
+    var btnBroadcast = document.getElementById("btn-broadcast-score");
+    if(!dlg || !body) return;
+
+    if(metaText){
+      metaText.textContent = `學員：${report.studentName} · 課次：${report.projectName} · 時間：${report.timeString}`;
+    }
+
+    var rankText = "💪 繼續加油！";
+    if(report.finalScore === 100) rankText = "🌟 滿分！太優秀了！";
+    else if(report.finalScore >= 90) rankText = "🏅 優等！表現出色！";
+    else if(report.finalScore >= 80) rankText = "👍 良好！掌握熟練！";
+    else if(report.finalScore >= 60) rankText = "📖 及格！多加複習！";
+
+    var correctQuestionsCount = 0;
+    report.results.forEach(sec => {
+      sec.questions.forEach(q => {
+        if(q.isScoreable && q.score === 1) correctQuestionsCount++;
+      });
+    });
+
+    var html = `
+      <div class="score-header-box">
+        <div>
+          <span style="font-size:13px; color:var(--ink-soft); font-weight:600;">測驗得分</span>
+          <div class="score-circle">${report.finalScore}<span style="font-size:18px; margin-left:2px;">分</span></div>
+          <span class="score-rank-badge">${rankText}</span>
+        </div>
+        <div class="score-stats-grid">
+          <div class="score-stat-cell">
+            <span>計分題數</span>
+            <b>${report.totalScoreable}</b>
+          </div>
+          <div class="score-stat-cell">
+            <span>完全答對</span>
+            <b style="color:var(--bamboo);">${correctQuestionsCount}</b>
+          </div>
+          <div class="score-stat-cell">
+            <span>正確率</span>
+            <b style="color:var(--seal);">${report.totalScoreable > 0 ? Math.round((correctQuestionsCount/report.totalScoreable)*100) : 100}%</b>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:14px; font-weight:700; color:var(--ink); margin-top:16px;">📋 答題明細清單</div>
+      <div class="score-details-list">
+    `;
+
+    report.results.forEach(sec => {
+      html += `
+        <div class="score-sec-item">
+          <div class="score-sec-title">
+            <span>${sec.title}</span>
+            <span style="font-size:11.5px; font-weight:600; color:var(--ink-soft);">${sec.type === 'board' ? '書寫練習' : '測驗題'}</span>
+          </div>
+      `;
+      sec.questions.forEach(q => {
+        var badgeHtml = `<span style="color:var(--bamboo); font-weight:700;">✅ 正確</span>`;
+        if(q.status === "wrong") badgeHtml = `<span style="color:#E63946; font-weight:700;">❌ 錯誤</span>`;
+        else if(q.status === "partial") badgeHtml = `<span style="color:#FB8C00; font-weight:700;">⚠️ 部分</span>`;
+        else if(q.status === "completed") badgeHtml = `<span style="color:var(--bamboo); font-weight:600;">✍️ 已完成</span>`;
+        else if(q.status === "empty") badgeHtml = `<span style="color:var(--ink-soft);">未作答</span>`;
+
+        html += `
+          <div class="score-q-row">
+            <div>
+              <span style="font-weight:600;">${q.title}</span>
+              <span style="font-size:11.5px; color:var(--ink-soft); margin-left:8px;">${q.detail}</span>
+            </div>
+            <div>${badgeHtml}</div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+    body.innerHTML = html;
+
+    var btnCopy = document.getElementById("btn-copy-score-report");
+    if(btnCopy){
+      btnCopy.onclick = function(){
+        var txt = `【曼米中文 Mandamy 課堂測驗結算單】\n學員：${report.studentName}\n課次：${report.projectName}\n時間：${report.timeString}\n總分：${report.finalScore} 分 (${rankText})\n計分題數：${report.totalScoreable} 題 | 正確率：${report.totalScoreable > 0 ? Math.round((correctQuestionsCount/report.totalScoreable)*100) : 100}%\n------------------------\n`;
+        report.results.forEach(sec => {
+          txt += `\n[${sec.title}]\n`;
+          sec.questions.forEach(q => {
+            var mark = (q.score === 1 || q.status === 'completed') ? '✅' : '❌';
+            txt += `  ${mark} ${q.title}：${q.detail}\n`;
+          });
+        });
+        navigator.clipboard.writeText(txt).then(function(){
+          alert("✅ 成績報告已複製至剪貼簿！可直接貼給家長或存檔。");
+        });
+      };
+    }
+
+    if(btnBroadcast){
+      if(inRoom() && roomRole === "teacher"){
+        btnBroadcast.style.display = "inline-flex";
+        btnBroadcast.onclick = function(){
+          update(ref(db, "rooms/" + activeRoomId), {
+            broadcastScore: report,
+            broadcastTime: Date.now()
+          });
+          alert("📢 已將成績報告廣播至學生螢幕！");
+        };
+      } else {
+        btnBroadcast.style.display = "none";
+      }
+    }
+
+    safeShowModal(dlg);
+  }
+
+  var btnCloseScore = document.getElementById("btn-close-score");
+  if(btnCloseScore){
+    btnCloseScore.onclick = function(){
+      closeModalDialog(document.getElementById("score-dialog"));
+    };
   }
 
   /* 大廳切換 */
@@ -1589,6 +1892,16 @@
     onValue(ref(db, "rooms/" + rId), function(snap){
       roomData = snap.val() || {};
       if(roomData.theme) applyTheme(roomData.theme.bgMode || "light", roomData.theme.accent || "seal", false);
+
+      // 監聽老師廣播成績
+      if(roomData.broadcastScore && roomData.broadcastTime){
+        if(window.__lastBroadcastTime !== roomData.broadcastTime){
+          window.__lastBroadcastTime = roomData.broadcastTime;
+          showScoreModal(roomData.broadcastScore, false);
+          playVictorySound();
+        }
+      }
+
       if(isStudent){
         lobbyView.style.display = "none"; classroomView.style.display = "grid";
         if(roomData.project) document.getElementById("brand-sub").textContent = roomData.project.title;
@@ -1761,7 +2074,7 @@
     });
   }
 
-  /* 主舞台渲染 */
+  /* 主舞台渲染（包含結算成績與題目作答） */
   var stageEl = document.getElementById("stage");
   function renderStage(){
     var currentInfo = getCurrentQInfo();
@@ -1789,8 +2102,20 @@
     var head = document.createElement("div"); head.className = "stage-head";
     head.innerHTML = `<div><h2 class="stage-title zh">${q.title}</h2><p class="stage-sub">${q.desc || sec.desc || "即時互動練習"}</p></div>`;
     
+    var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
+    
+    // 全題型成績結算按鈕
+    var scoreBtn = document.createElement("button");
+    scoreBtn.className = "btn btn-sm";
+    scoreBtn.style.cssText = "border-color:var(--seal); color:var(--seal); font-weight:700;";
+    scoreBtn.textContent = "📊 結算成績";
+    scoreBtn.onclick = function(){
+      var report = calculateScoreReport();
+      showScoreModal(report, true);
+    };
+    actWrap.appendChild(scoreBtn);
+
     if(!isStudent){
-      var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.onclick = function(){
         writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, userWords:[], poolWords:[], _shuffledWords:false, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
@@ -1802,8 +2127,8 @@
         revBtn.onclick = function(){ writeProgress(q.id, { revealed: true }); };
         actWrap.appendChild(revBtn);
       }
-      head.appendChild(actWrap);
     }
+    head.appendChild(actWrap);
     stageEl.appendChild(head);
 
     var boardArea = document.createElement("div"); boardArea.className = "board-area"; boardArea.id = "board-area"; stageEl.appendChild(boardArea);
@@ -1896,7 +2221,6 @@
     wrap.className = "reorder-container";
     wrap.innerHTML = `<p class="circle-prompt zh">${q.prompt || "請將下列詞語拖曳重組為正確句子："}</p>`;
 
-    // 上方放置槽 (Slot Zone)
     var slotZone = document.createElement("div");
     slotZone.className = "reorder-slot-zone";
     
@@ -1952,7 +2276,6 @@
     }
     wrap.appendChild(slotZone);
 
-    // 下方備選字庫區 (Pool Zone)
     var poolZone = document.createElement("div");
     poolZone.style.cssText = "display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; min-height:64px; align-items:center;";
     poolZone.ondragover = function(e){
@@ -1992,23 +2315,7 @@
         chip.onclick = function(){
           poolWords.splice(idx, 1);
           userWords.push(w);
-          
-          if(userWords.length === correctWords.length){
-            var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
-            if(isMatch){
-              playCorrectSound();
-              writeProgress(q.id, { userWords: userWords, poolWords: poolWords, revealed: true });
-              return;
-            } else {
-              playWrongSound();
-              slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
-              setTimeout(function(){
-                writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
-              }, 500);
-              return;
-            }
-          }
-          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+          evaluateReorderState(q, userWords, poolWords, correctWords);
         };
       }
       poolZone.appendChild(chip);
@@ -2025,7 +2332,6 @@
     container.appendChild(wrap);
   }
 
-  /* 句子重組自動判定邏輯 */
   var reorderTimer = null;
   function evaluateReorderState(q, userWords, poolWords, correctWords){
     if(reorderTimer) clearTimeout(reorderTimer);
@@ -2717,103 +3023,192 @@
     }
 
     if(!sec.questions) sec.questions = {};
-    sec.questions[qId] = newQ; writeSections(secs, qId); closeModalDialog(editorDialog);
+    sec.questions[qId] = newQ;
+    writeSections(secs, qId);
+    closeModalDialog(editorDialog);
   };
 
-  /* Excel 匯入 */
+  /* Excel 批次操作 */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
+
   excelInput.onchange = function(e){
-    var file = e.target.files[0]; if(!file) return;
+    var file = e.target.files[0];
+    if(!file) return;
+
     var reader = new FileReader();
     reader.onload = function(evt){
       try {
-        var data = new Uint8Array(evt.target.result); var wb = XLSX.read(data, { type: 'array' });
-        var ws = wb.Sheets[wb.SheetNames[0]]; var rows = XLSX.utils.sheet_to_json(ws);
+        var data = new Uint8Array(evt.target.result);
+        var wb = XLSX.read(data, { type: 'array' });
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(ws);
+
         if(!rows || rows.length === 0){ alert("Excel 檔案內沒有資料！"); return; }
-        var newSections = Object.assign({}, getSections()); var grouped = {};
+
+        var newSections = Object.assign({}, getSections());
+        var grouped = {};
+
         rows.forEach(function(row){
-          var secTitle = row["大題名稱"] || row["Section"] || "第一大題";
+          var secTitle = row["大題名稱"] || row["Section"] || "第一大題：生詞測驗";
           var type = (row["題型"] || row["Type"] || "match").toLowerCase();
-          if(!grouped[secTitle]) grouped[secTitle] = { title: secTitle, type: type, questions: {} };
-          var qTitle = row["小題名稱"] || row["Question"] || "第 1 題";
-          if(!grouped[secTitle].questions[qTitle]) grouped[secTitle].questions[qTitle] = { title: qTitle, rows: [] };
+          if(!grouped[secTitle]){
+            grouped[secTitle] = { title: secTitle, type: type, questions: {} };
+          }
+          var qTitle = row["小題名稱"] || row["Question"] || ("第 " + (Object.keys(grouped[secTitle].questions).length + 1) + " 題");
+          if(!grouped[secTitle].questions[qTitle]){
+            grouped[secTitle].questions[qTitle] = { title: qTitle, rows: [] };
+          }
           grouped[secTitle].questions[qTitle].rows.push(row);
         });
-        var firstNewQId = null; var secOrder = Object.keys(newSections).length;
+
+        var firstNewQId = null;
+        var secOrder = Object.keys(newSections).length;
         Object.keys(grouped).forEach(function(secTitle){
-          var gSec = grouped[secTitle]; var newSecId = uid("sec"); var questionsObj = {}; var qOrder = 0;
+          var gSec = grouped[secTitle];
+          var newSecId = uid("sec");
+          var questionsObj = {};
+
+          var qOrder = 0;
           Object.keys(gSec.questions).forEach(function(qTitle){
-            var gQ = gSec.questions[qTitle]; var newQId = uid("q"); if(!firstNewQId) firstNewQId = newQId;
+            var gQ = gSec.questions[qTitle];
+            var newQId = uid("q");
+            if(!firstNewQId) firstNewQId = newQId;
+
             if(gSec.type === "match"){
               var pairs = {};
               gQ.rows.forEach(function(it, idx){
-                var pid = "p" + (idx + 1); var l = it["左欄生詞"] || ""; var r = it["右欄拼音或意思"] || "";
+                var pid = "p" + (idx + 1);
+                var l = it["左欄生詞"] || it["Left"] || "";
+                var r = it["右欄拼音或意思"] || it["Right"] || "";
                 if(l && r) pairs[pid] = { id: pid, left: String(l), right: String(r) };
               });
-              questionsObj[newQId] = { id: newQId, title: qTitle, order: qOrder++, leftLabel: "生詞", rightLabel: "拼音", pairs: pairs };
+              questionsObj[newQId] = {
+                id: newQId, title: qTitle, order: qOrder++, leftLabel: "生詞", rightLabel: "拼音／意思", pairs: pairs
+              };
+            } else if(gSec.type === "choice"){
+              var it = gQ.rows[0];
+              var rawChoices = String(it["選項(逗號分開)"] || it["Choices"] || "").split(/[,，、]/);
+              var answer = String(it["正確答案"] || it["Answer"] || "").trim();
+              var choices = {}, answerId = null;
+              rawChoices.forEach(function(cText, cIdx){
+                var cid = "c" + (cIdx + 1);
+                var trimTxt = cText.trim();
+                if(trimTxt){
+                  choices[cid] = { id: cid, text: trimTxt };
+                  if(trimTxt === answer) answerId = cid;
+                }
+              });
+              if(!answerId && Object.keys(choices).length) answerId = Object.keys(choices)[0];
+              questionsObj[newQId] = {
+                id: newQId, title: qTitle, order: qOrder++, prompt: it["題目說明"] || qTitle, choices: choices, answerIds: [answerId]
+              };
             } else if(gSec.type === "reorder"){
-              var it = gQ.rows[0]; var wStr = it["正確句子"] || it["Words"] || "我,是,學生";
-              questionsObj[newQId] = { id: newQId, title: qTitle, order: qOrder++, prompt: it["題目說明"] || qTitle, words: wStr.split(/[,，\s]+/) };
+              var it = gQ.rows[0];
+              var wStr = it["正確句子"] || it["Words"] || "我,是,學生";
+              questionsObj[newQId] = {
+                id: newQId, title: qTitle, order: qOrder++, prompt: it["題目說明"] || qTitle, words: wStr.split(/[,，\s]+/)
+              };
             }
           });
-          newSections[newSecId] = { id: newSecId, title: secTitle, type: gSec.type, order: secOrder++, collapsed: false, questions: questionsObj };
+
+          newSections[newSecId] = {
+            id: newSecId, title: secTitle, type: gSec.type, order: secOrder++, collapsed: false, questions: questionsObj
+          };
         });
-        writeSections(newSections, firstNewQId); alert("🎉 成功由 Excel 匯入題庫！");
-      } catch(err){ alert("解析失敗。"); }
+
+        writeSections(newSections, firstNewQId);
+        alert("🎉 成功由 Excel 匯入試卷大題題庫！");
+      } catch(err){ alert("解析失敗，請確認檔案格式。"); }
     };
     reader.readAsArrayBuffer(file);
   };
 
   document.getElementById("btn-dl-template").onclick = function(){
     var templateData = [
-      { "大題名稱": "第一大題：生詞配對", "題型": "match", "小題名稱": "第1題", "左欄生詞": "你好", "右欄拼音或意思": "nǐ hǎo" },
-      { "大題名稱": "第三大題：句子重組", "題型": "reorder", "小題名稱": "第1題", "正確句子": "我,愛,學,華語" }
+      { "大題名稱": "第一大題：生詞配對", "題型": "match", "小題名稱": "第1題", "左欄生詞": "你好", "右欄拼音或意思": "nǐ hǎo", "題目說明": "", "選項(逗號分開)": "", "正確答案": "" },
+      { "大題名稱": "第二大題：語意選擇題", "題型": "choice", "小題名稱": "第1題", "左欄生詞": "", "右欄拼音或意思": "", "題目說明": "「謝謝」是什麼意思？", "選項(逗號分開)": "Hello, Thank you, Goodbye", "正確答案": "Thank you" },
+      { "大題名稱": "第三大題：句子重組", "題型": "reorder", "小題名稱": "第1題", "左欄生詞": "", "右欄拼音或意思": "", "題目說明": "自我介紹句子重組", "選項(逗號分開)": "", "正確答案": "我,是,泰國,人" }
     ];
-    var ws = XLSX.utils.json_to_sheet(templateData); var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "範本"); XLSX.writeFile(wb, "曼米中文_範本.xlsx");
+    var ws = XLSX.utils.json_to_sheet(templateData);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "考卷範本");
+    XLSX.writeFile(wb, "曼米中文_試卷大題題庫範本.xlsx");
   };
 
   document.getElementById("btn-export-excel").onclick = function(){
-    var secs = getSections(); var secKeys = getSortedSectionKeys(); var exportRows = [];
+    var secs = getSections();
+    var secKeys = getSortedSectionKeys();
+    var exportRows = [];
     secKeys.forEach(function(sid){
-      var sec = secs[sid]; var qKeys = getSortedQuestionKeys(sec);
+      var sec = secs[sid];
+      var qKeys = getSortedQuestionKeys(sec);
       qKeys.forEach(function(qid){
         var q = sec.questions[qid];
         if(sec.type === "match" && q.pairs){
           Object.keys(q.pairs).forEach(function(pid){
-            exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": q.pairs[pid].left, "右欄拼音或意思": q.pairs[pid].right });
+            exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": q.pairs[pid].left, "右欄拼音或意思": q.pairs[pid].right, "題目說明": "", "選項(逗號分開)": "", "正確答案": "" });
           });
+        } else if(sec.type === "choice" && q.choices){
+          var cTexts = Object.keys(q.choices).map(function(cid){ return q.choices[cid].text; }).join(", ");
+          var ansText = (q.answerIds && q.answerIds.length) ? q.answerIds.map(id => q.choices[id] ? q.choices[id].text : id).join(", ") : "";
+          exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": "", "右欄拼音或意思": "", "題目說明": q.prompt || "", "選項(逗號分開)": cTexts, "正確答案": ansText });
         } else if(sec.type === "reorder" && q.words){
-          exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "正確句子": q.words.join(",") });
+          exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": "", "右欄拼音或意思": "", "題目說明": q.prompt || "", "選項(逗號分開)": "", "正確答案": q.words.join(", ") });
         }
       });
     });
-    if(exportRows.length === 0){ alert("無題目可匯出"); return; }
-    var ws = XLSX.utils.json_to_sheet(exportRows); var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "題庫"); XLSX.writeFile(wb, "曼米中文題庫備份.xlsx");
+    if(exportRows.length === 0){ alert("目前沒有可匯出的題目。"); return; }
+    var ws = XLSX.utils.json_to_sheet(exportRows);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "題庫備份");
+    XLSX.writeFile(wb, "曼米中文題庫備份_" + new Date().toISOString().slice(0,10) + ".xlsx");
   };
 
+  /* 學生自填姓名引導 */
   function handleStudentJoin(){
     if(!urlRoom) return;
-    if(urlName){ myName = decodeURIComponent(urlName); attachPresence(urlRoom, myId, myName); startRoom(urlRoom, "student"); return; }
+    if(urlName){
+      myName = decodeURIComponent(urlName);
+      attachPresence(urlRoom, myId, myName);
+      startRoom(urlRoom, "student");
+      return;
+    }
     var nameDialog = document.getElementById("student-name-dialog");
     safeShowModal(nameDialog);
     var submitBtn = document.getElementById("btn-submit-student-name");
     if(submitBtn){
       submitBtn.onclick = function(){
-        var input = document.getElementById("input-student-name"); var entered = input ? input.value.trim() : "";
+        var input = document.getElementById("input-student-name");
+        var entered = input ? input.value.trim() : "";
         if(!entered) entered = "學生 " + Math.floor(10 + Math.random()*90);
-        myName = entered; closeModalDialog(nameDialog);
-        attachPresence(urlRoom, myId, myName); startRoom(urlRoom, "student");
+        myName = entered;
+        closeModalDialog(nameDialog);
+        attachPresence(urlRoom, myId, myName);
+        startRoom(urlRoom, "student");
       };
     }
   }
 
-  function onFirebaseReady(cb){ if(window.__firebaseReady) cb(); else window.addEventListener("firebase-bridge-ready", cb); }
-  if(isStudent){ lobbyView.style.display = "none"; onFirebaseReady(handleStudentJoin); }
-  else if(urlRoom){ onFirebaseReady(function(){ attachPresence(urlRoom, "teacher", "老師"); startRoom(urlRoom, "teacher"); }); }
-  else { showLobby(); }
+  function onFirebaseReady(cb){
+    if(window.__firebaseReady){
+      cb();
+    } else {
+      window.addEventListener("firebase-bridge-ready", cb);
+    }
+  }
+
+  if(isStudent){
+    lobbyView.style.display = "none";
+    onFirebaseReady(handleStudentJoin);
+  } else if(urlRoom){
+    onFirebaseReady(function(){
+      attachPresence(urlRoom, "teacher", "老師");
+      startRoom(urlRoom, "teacher");
+    });
+  } else {
+    showLobby();
+  }
 })();
 </script>
 </body>
