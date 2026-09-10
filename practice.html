@@ -605,7 +605,7 @@
   </div>
 </dialog>
 
-<!-- 設定彈窗：包含練習模式與測驗模式切換 -->
+<!-- 設定彈窗 -->
 <dialog class="dialog-modal" id="settings-dialog">
   <div class="dialog-head">
     <h2>⚙️ 課堂環境與模式設定</h2>
@@ -690,7 +690,7 @@
   </form>
 </dialog>
 
-<!-- 小題題目編輯彈窗 -->
+<!-- 小題題目編輯／編輯現有題目彈窗 -->
 <dialog class="dialog-modal" id="editor-dialog">
   <form id="editor-form">
     <div class="dialog-head">
@@ -834,6 +834,7 @@
 
   /* ================== 畫面縮放控制引擎 ================== */
   var currentZoomRatio = parseFloat(localStorage.getItem("hanyu_zoom_ratio")) || 1.0;
+
   function applyStageZoom(ratio){
     currentZoomRatio = Math.max(0.65, Math.min(1.5, Math.round(ratio * 100) / 100));
     var stageEl = document.getElementById("stage");
@@ -842,7 +843,9 @@
       stageEl.style.transformOrigin = "top center";
     }
     var zoomText = document.getElementById("zoom-percent-text");
-    if(zoomText) zoomText.textContent = Math.round(currentZoomRatio * 100) + "%";
+    if(zoomText){
+      zoomText.textContent = Math.round(currentZoomRatio * 100) + "%";
+    }
     localStorage.setItem("hanyu_zoom_ratio", currentZoomRatio);
     window.dispatchEvent(new Event("resize"));
   }
@@ -850,7 +853,7 @@
   /* ================== 主題與模式引擎 ================== */
   var currentBgMode = localStorage.getItem("hanyu_theme_bg") || "light";
   var currentAccentColor = localStorage.getItem("hanyu_theme_accent") || "seal";
-  var currentClassMode = localStorage.getItem("hanyu_class_mode") || "practice"; // "practice" 或 "test"
+  var currentClassMode = localStorage.getItem("hanyu_class_mode") || "practice";
 
   function applyTheme(bgMode, accentColor, syncToFirebase){
     if(syncToFirebase === undefined) syncToFirebase = true;
@@ -946,13 +949,15 @@
   function playWrongSound(){ if(currentClassMode !== 'test') playTone(currentSoundStyle, false); }
   function playVictorySound(){ playTone(currentSoundStyle, true); }
 
-  /* ================== 資料庫預設與遷移 ================== */
-  var STORAGE_FS_KEY = "hanyu-mandamy-v6";
+  /* ================== 資料庫載入與自動遷移 (Data Migration) ================== */
+  var STORAGE_FS_KEY = "hanyu-mandamy-v7";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var DEFAULT_FS = {
     folders: {
-      "f_thai": { id: "f_thai", parentId: null, title: "115-1 對泰華語轉銜線上華語課", desc: "泰國學生轉銜華語專案班級資料夾" }
+      "f_thai": {
+        id: "f_thai", parentId: null, title: "115-1 對泰華語轉銜線上華語課", desc: "泰國學生轉銜華語專案班級資料夾"
+      }
     },
     projects: {
       "proj_thai_l1": {
@@ -1048,6 +1053,20 @@
   var fsData = loadFS();
   function saveFS(){ try{ localStorage.setItem(STORAGE_FS_KEY, JSON.stringify(fsData)); }catch(e){} }
 
+  function isDescendantOf(folderId, ancestorId){
+    if(!fsData.folders || !fsData.folders[folderId]) return false;
+    var cur = fsData.folders[folderId];
+    var visited = {};
+    while(cur && (cur.parentId || null)){
+      var pId = cur.parentId || null;
+      if(pId === ancestorId) return true;
+      if(visited[pId]) break;
+      visited[pId] = true;
+      cur = fsData.folders[pId];
+    }
+    return false;
+  }
+
   var params = new URLSearchParams(location.search);
   var urlRoom = params.get("room"); var urlRole = params.get("role"); var urlName = params.get("name");
   var isStudent = (urlRole === "student");
@@ -1060,7 +1079,8 @@
   localStorage.setItem("hanyu_my_id", myId);
 
   var roomData = null; var cursorOn = true; var currentFolderId = null; var activeProjectId = null;
-  var editingFolderId = null; var editingProjectId = null; var activeSectionForAdd = null; var editingQuestionId = null;
+  var editingFolderId = null; var editingProjectId = null; var activeSectionForAdd = null; var editingSectionId = null;
+  var editingQuestionId = null;
   var draggedSecId = null; var draggedQ = null;
 
   function clearAllDragIndicators(){
@@ -1153,7 +1173,7 @@
   }
 
   /* ================== 成績與錯題結算引擎 ================== */
-  function calculateScoreReport(targetQId){
+  function calculateScoreReport(){
     var secs = getSections();
     var secKeys = getSortedSectionKeys();
     var results = [];
@@ -1181,13 +1201,23 @@
         if(sec.type === "match"){
           totalScoreable++;
           var pairs = q.pairs || {}; var pKeys = Object.keys(pairs); var totalPairs = pKeys.length;
-          var matched = progress.matched || {}; var matchedCount = Object.keys(matched).filter(k => matched[k]).length;
-          if(totalPairs > 0 && matchedCount === totalPairs){
-            qRes.score = 1; qRes.status = "correct"; qRes.detail = `全部配對成功 (${matchedCount}/${totalPairs})`; totalEarned += 1;
+          if(currentClassMode === 'test'){
+            var userPairs = progress.userPairs || {};
+            var correctCount = 0;
+            pKeys.forEach(function(pid){ if(userPairs[pid] === pid) correctCount++; });
+            qRes.score = totalPairs > 0 ? (correctCount / totalPairs) : 0;
+            qRes.status = (correctCount === totalPairs) ? "correct" : (correctCount > 0 ? "partial" : "wrong");
+            qRes.detail = `正確配對: ${correctCount}/${totalPairs}`;
+            totalEarned += qRes.score;
           } else {
-            qRes.score = totalPairs > 0 ? (matchedCount / totalPairs) : 0;
-            qRes.status = matchedCount > 0 ? "partial" : "wrong";
-            qRes.detail = `配對進度: ${matchedCount}/${totalPairs}`; totalEarned += qRes.score;
+            var matched = progress.matched || {}; var matchedCount = Object.keys(matched).filter(k => matched[k]).length;
+            if(totalPairs > 0 && matchedCount === totalPairs){
+              qRes.score = 1; qRes.status = "correct"; qRes.detail = `全部配對成功 (${matchedCount}/${totalPairs})`; totalEarned += 1;
+            } else {
+              qRes.score = totalPairs > 0 ? (matchedCount / totalPairs) : 0;
+              qRes.status = matchedCount > 0 ? "partial" : "wrong";
+              qRes.detail = `配對進度: ${matchedCount}/${totalPairs}`; totalEarned += qRes.score;
+            }
           }
         } else if(sec.type === "choice"){
           totalScoreable++;
@@ -1291,7 +1321,7 @@
       html += `</div></div>`;
     }
 
-    html += `<div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:8px;">📋 全卷作答明細</div><div class="score-details-list">`;
+    html += `<div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:8px;">📋 全卷作答明細 (點擊任意題號可返回檢討)</div><div class="score-details-list">`;
     report.results.forEach(sec => {
       html += `<div class="score-sec-item"><div class="score-sec-title"><span>${sec.title}</span></div>`;
       sec.questions.forEach(q => {
@@ -1300,7 +1330,7 @@
         html += `
           <div class="score-q-row">
             <div>
-              <span style="font-weight:600; cursor:pointer;" class="btn-jump-wrong" data-qid="${q.id}">📖 ${q.title}</span>
+              <span style="font-weight:600; cursor:pointer; color:var(--seal); text-decoration:underline;" class="btn-jump-wrong" data-qid="${q.id}">📖 ${q.title}</span>
               <span style="font-size:11.5px; color:var(--ink-soft); margin-left:8px;">${q.detail}</span>
             </div>
             <div>${badge}</div>
@@ -1312,7 +1342,6 @@
     html += `</div>`;
     body.innerHTML = html;
 
-    // 錯題點擊跳轉監聽
     body.querySelectorAll(".btn-jump-wrong").forEach(function(b){
       b.onclick = function(){
         var targetQId = b.dataset.qid;
@@ -1347,7 +1376,7 @@
   var btnCloseScore = document.getElementById("btn-close-score");
   if(btnCloseScore) btnCloseScore.onclick = function(){ closeModalDialog(document.getElementById("score-dialog")); };
 
-  /* 大廳與舞台切換 */
+  /* 大廳切換 */
   var lobbyView = document.getElementById("lobby-view");
   var classroomView = document.getElementById("classroom-view");
 
@@ -1538,7 +1567,7 @@
         var shareBtn = document.createElement("button"); shareBtn.className = "btn btn-sm btn-primary"; shareBtn.textContent = "🔗 複製學生連結";
         shareBtn.onclick = function(){
           var link = location.origin + location.pathname + "?room=" + activeRoomId + "&role=student";
-          navigator.clipboard.writeText(link).then(function(){ alert("✅ 學生連結已複製！"); });
+          navigator.clipboard.writeText(link).then(function(){ alert("✅ 學生連結已複製！傳給學生點開即可加入這課。"); });
         };
         topbarActions.appendChild(shareBtn);
         var leaveBtn = document.createElement("button"); leaveBtn.className = "btn btn-sm btn-ghost"; leaveBtn.textContent = "結束連線"; leaveBtn.onclick = leaveRoom; topbarActions.appendChild(leaveBtn);
@@ -1619,16 +1648,22 @@
       var block = document.createElement("div"); block.className = "section-block"; block.setAttribute("draggable", "true");
 
       block.ondragstart = function(e){
-        if(draggedQ) return; draggedSecId = secId; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "sec:" + secId); block.classList.add("is-dragging");
+        if(draggedQ) return;
+        draggedSecId = secId; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "sec:" + secId);
+        block.classList.add("is-dragging");
       };
-      block.ondragend = function(e){ block.classList.remove("is-dragging"); draggedSecId = null; clearAllDragIndicators(); };
+      block.ondragend = function(e){
+        block.classList.remove("is-dragging"); draggedSecId = null; clearAllDragIndicators();
+      };
       block.ondragover = function(e){
         if(!draggedSecId || draggedSecId === secId) return;
         e.preventDefault(); e.dataTransfer.dropEffect = "move";
         var rect = block.getBoundingClientRect(); var isTop = (e.clientY - rect.top) < (rect.height / 2);
         block.classList.toggle("drag-indicator-top", isTop); block.classList.toggle("drag-indicator-bottom", !isTop);
       };
-      block.ondragleave = function(e){ if(!block.contains(e.relatedTarget)) block.classList.remove("drag-indicator-top", "drag-indicator-bottom"); };
+      block.ondragleave = function(e){
+        if(!block.contains(e.relatedTarget)) block.classList.remove("drag-indicator-top", "drag-indicator-bottom");
+      };
       block.ondrop = function(e){
         e.preventDefault(); var isTop = block.classList.contains("drag-indicator-top"); clearAllDragIndicators();
         if(draggedSecId && draggedSecId !== secId){
@@ -1636,7 +1671,8 @@
           var fromIdx = currentSecKeys.indexOf(draggedSecId);
           if(fromIdx > -1){
             currentSecKeys.splice(fromIdx, 1);
-            var toIdx = currentSecKeys.indexOf(secId); if(!isTop) toIdx += 1;
+            var toIdx = currentSecKeys.indexOf(secId);
+            if(!isTop) toIdx += 1;
             currentSecKeys.splice(toIdx, 0, draggedSecId);
             currentSecKeys.forEach(function(k, idx){ secs[k].order = idx; });
             writeSections(secs);
@@ -1799,7 +1835,7 @@
     if(!isStudent){
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始";
       resetBtn.onclick = function(){
-        writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, userWords:[], poolWords:[], _shuffledWords:false, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
+        writeProgress(q.id, { matched:{}, selected:{}, choicePick:null, choiceStatus:null, multiPicks:{}, userPairs:{}, userWords:[], poolWords:[], _shuffledWords:false, revealed:false, strokes:[], texts:[], lastWrong:null, selections:{} });
       };
       actWrap.appendChild(resetBtn);
     }
@@ -1817,12 +1853,169 @@
     applyStageZoom(currentZoomRatio);
   }
 
-  /* 選擇題（測驗模式不即時公布對錯，交卷結算後才顯示） */
+  /* 連連看（支援測驗模式延遲判定與重選） */
+  function renderMatchBoard(q, container){
+    var progress = getProgress(q.id);
+    var interactive = canInteract();
+    var isTest = (currentClassMode === 'test');
+    var matched = isTest ? (progress.matched || {}) : (progress.matched || {});
+    var userPairs = progress.userPairs || {};
+    var selections = progress.selections || {};
+
+    var wrap = document.createElement("div"); wrap.className = "match-board";
+    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","match-svg");
+    wrap.appendChild(svg);
+    var cols = document.createElement("div"); cols.className = "match-cols";
+    var lCol = document.createElement("div"); lCol.className = "match-col";
+    var rCol = document.createElement("div"); rCol.className = "match-col";
+    lCol.innerHTML = '<div class="match-col-label">' + (q.leftLabel || "項目一") + '</div>';
+    rCol.innerHTML = '<div class="match-col-label">' + (q.rightLabel || "項目二") + '</div>';
+
+    var pIds = Object.keys(q.pairs || {}).sort();
+    var rOrder = pIds.slice().sort();
+    var selL = null, selR = null;
+
+    pIds.forEach(function(pid){
+      var p = q.pairs[pid];
+      var btn = document.createElement("button"); btn.type="button"; 
+      var isMatched = isTest ? !!userPairs[pid] : !!matched[pid];
+      btn.className = "match-item zh" + (isMatched ? " matched" : "");
+      btn.textContent = p.left; btn.dataset.id = pid; btn.dataset.side = "left";
+
+      if(isTest && userPairs[pid]){
+        btn.style.borderColor = "var(--seal)";
+        btn.style.background = "var(--seal-soft)";
+        btn.style.color = "var(--seal)";
+      }
+
+      var userWhoSelectedL = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].left === pid; });
+      if(userWhoSelectedL && !isMatched && !isTest){
+        btn.classList.add("selected");
+        var uInfoL = selections[userWhoSelectedL]; var uColorL = getColorForStudent(uInfoL.name || "學生", uInfoL.role);
+        btn.style.borderColor = uColorL; btn.style.boxShadow = "0 0 0 3.5px " + uColorL + "44 inset";
+      } else if(!isMatched && !isTest){ btn.style.boxShadow = ""; }
+
+      if(!interactive || (matched[pid] && !isTest)) btn.disabled = true;
+
+      btn.onclick = function(){
+        if(!interactive || (matched[pid] && !isTest)) return;
+        selL = pid;
+        if(isTest){
+          // 測驗模式：允許點擊左邊再點右邊配對，可隨時更改
+          if(selL && selR){
+            userPairs[selL] = selR;
+            writeProgress(q.id, { userPairs: userPairs });
+            selL = null; selR = null;
+          }
+        } else {
+          var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
+          mySel.left = (mySel.left === pid) ? null : pid;
+          var newSelections = Object.assign({}, selections, { [myId]: mySel });
+          writeProgress(q.id, { selections: newSelections });
+          checkMatch(mySel);
+        }
+      };
+      lCol.appendChild(btn);
+    });
+
+    rOrder.forEach(function(pid){
+      var p = q.pairs[pid];
+      var btn = document.createElement("button"); btn.type="button"; 
+      var isMatched = isTest ? Object.values(userPairs).indexOf(pid) !== -1 : !!matched[pid];
+      btn.className = "match-item" + (isMatched ? " matched" : "");
+      btn.textContent = p.right; btn.dataset.id = pid; btn.dataset.side = "right";
+
+      if(isTest && Object.values(userPairs).indexOf(pid) !== -1){
+        btn.style.borderColor = "var(--seal)";
+        btn.style.background = "var(--seal-soft)";
+        btn.style.color = "var(--seal)";
+      }
+
+      var userWhoSelectedR = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].right === pid; });
+      if(userWhoSelectedR && !isMatched && !isTest){
+        btn.classList.add("selected");
+        var uInfoR = selections[userWhoSelectedR]; var uColorR = getColorForStudent(uInfoR.name || "學生", uInfoR.role);
+        btn.style.borderColor = uColorR; btn.style.boxShadow = "0 0 0 3.5px " + uColorR + "44 inset";
+      } else if(!isMatched && !isTest){ btn.style.boxShadow = ""; }
+
+      if(!interactive || (matched[pid] && !isTest)) btn.disabled = true;
+
+      btn.onclick = function(){
+        if(!interactive || (matched[pid] && !isTest)) return;
+        selR = pid;
+        if(isTest){
+          if(selL && selR){
+            userPairs[selL] = selR;
+            writeProgress(q.id, { userPairs: userPairs });
+            selL = null; selR = null;
+          }
+        } else {
+          var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
+          mySel.right = (mySel.right === pid) ? null : pid;
+          var newSelections = Object.assign({}, selections, { [myId]: mySel });
+          writeProgress(q.id, { selections: newSelections });
+          checkMatch(mySel);
+        }
+      };
+      rCol.appendChild(btn);
+    });
+
+    function checkMatch(currentMySel){
+      if(currentMySel && currentMySel.left && currentMySel.right){
+        var newSelections = Object.assign({}, getProgress(q.id).selections || {});
+        delete newSelections[myId];
+        if(currentMySel.left === currentMySel.right){
+          playCorrectSound(); matched[currentMySel.left] = true;
+          writeProgress(q.id, { matched: matched, lastWrong: null, selections: newSelections });
+          if(Object.keys(matched).length === pIds.length){ setTimeout(playVictorySound, 400); }
+        } else {
+          playWrongSound();
+          writeProgress(q.id, { lastWrong: { left: currentMySel.left, right: currentMySel.right, t: Date.now(), who: myName }, selections: newSelections });
+        }
+      }
+    }
+
+    cols.appendChild(lCol); cols.appendChild(rCol); wrap.appendChild(cols); container.appendChild(wrap);
+
+    if(!isTest){
+      var lastWrong = progress.lastWrong;
+      if(lastWrong && lastWrong.t && (Date.now() - lastWrong.t < 1200)){
+        var wLeft = lCol.querySelector(`.match-item[data-id="${lastWrong.left}"]`);
+        var wRight = rCol.querySelector(`.match-item[data-id="${lastWrong.right}"]`);
+        if(wLeft && wRight){
+          wLeft.classList.add("wrong"); wRight.classList.add("wrong");
+          setTimeout(function(){ if(wLeft) wLeft.classList.remove("wrong", "selected"); if(wRight) wRight.classList.remove("wrong", "selected"); }, 600);
+        }
+      }
+    }
+
+    function drawLines(){
+      var rect = wrap.getBoundingClientRect(); svg.setAttribute("viewBox","0 0 "+rect.width+" "+rect.height); svg.innerHTML = "";
+      var activeMatched = isTest ? userPairs : matched;
+      Object.keys(activeMatched).forEach(function(lId){
+        var rId = activeMatched[lId];
+        var l = lCol.querySelector(`.match-item[data-id="${lId}"]`);
+        var r = rCol.querySelector(`.match-item[data-id="${rId}"]`);
+        if(!l || !r) return;
+        var lr = l.getBoundingClientRect(), rr = r.getBoundingClientRect();
+        var x1 = lr.right - rect.left, y1 = lr.top + lr.height/2 - rect.top;
+        var x2 = rr.left - rect.left, y2 = rr.top + rr.height/2 - rect.top;
+        var mx = (x1+x2)/2;
+        var path = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d", "M"+x1+","+y1+" C "+mx+","+y1+" "+mx+","+y2+" "+x2+","+y2);
+        path.setAttribute("stroke", isTest ? "var(--seal)" : "#2D5A27"); path.setAttribute("stroke-width","3.5"); path.setAttribute("fill","none"); path.setAttribute("stroke-linecap","round");
+        svg.appendChild(path);
+      });
+    }
+    requestAnimationFrame(drawLines); window.addEventListener("resize", drawLines);
+  }
+
+  /* 選擇題（支援複選） */
   function renderChoiceBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
     var multiPicks = progress.multiPicks || {};
-    var isRevealed = (currentClassMode === 'test') ? !!progress.revealed : true; // 測驗模式下作答中不顯示正解
+    var isRevealed = (currentClassMode === 'test') ? !!progress.revealed : true;
     var correctIds = q.answerIds || (q.answerId ? [q.answerId] : []);
 
     var wrap = document.createElement("div");
@@ -1840,31 +2033,23 @@
       var isCorrect = correctIds.indexOf(cid) !== -1;
 
       if(isRevealed && currentClassMode !== 'test'){
-        if(isCorrect) btn.classList.add("correct");
-        else if(isPicked && !isCorrect) btn.classList.add("wrong");
+        if(isCorrect) btn.classList.add("correct"); else if(isPicked && !isCorrect) btn.classList.add("wrong");
         btn.disabled = true;
       } else if(progress.revealed && currentClassMode === 'test'){
-        // 結算後顯示
-        if(isCorrect) btn.classList.add("correct");
-        else if(isPicked && !isCorrect) btn.classList.add("wrong");
+        if(isCorrect) btn.classList.add("correct"); else if(isPicked && !isCorrect) btn.classList.add("wrong");
         btn.disabled = true;
       } else {
         if(isPicked) btn.classList.add("selected");
       }
       if(!interactive) btn.disabled = true;
 
-      btn.innerHTML = `
-        <span class="mc-opt-prefix">${letters[idx] || (idx+1)}</span>
-        <span>${c.text}</span>
-      `;
+      btn.innerHTML = `<span class="mc-opt-prefix">${letters[idx] || (idx+1)}</span><span>${c.text}</span>`;
 
       btn.onclick = function(){
         if(!interactive || (progress.revealed && currentClassMode === 'test')) return;
         multiPicks[cid] = !multiPicks[cid];
-        if(multiPicks[cid]){
-          if(currentClassMode !== 'test'){
-            if(isCorrect) playCorrectSound(); else playWrongSound();
-          }
+        if(multiPicks[cid] && currentClassMode !== 'test'){
+          if(isCorrect) playCorrectSound(); else playWrongSound();
         }
         writeProgress(q.id, { multiPicks: multiPicks });
       };
@@ -1872,7 +2057,6 @@
     });
 
     wrap.appendChild(cBox);
-
     if(progress.revealed && currentClassMode === 'test'){
       var note = document.createElement("p");
       note.style.fontSize = "13px"; note.style.color = "var(--bamboo)"; note.style.marginTop = "14px"; note.style.fontWeight = "700";
@@ -1882,11 +2066,11 @@
     container.appendChild(wrap);
   }
 
-  /* 排序題（句子重組） */
+  /* 排序題（句子重組 - 支援拖曳互換與排滿2秒自動判定） */
   function renderReorderBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
-    var isRevealed = !!progress.revealed;
+    var isRevealed = (currentClassMode === 'test') ? !!progress.revealed : true;
     var correctWords = q.words || [];
     
     if(!progress._shuffledWords || progress._qIdSaved !== q.id){
@@ -1906,10 +2090,7 @@
     var slotZone = document.createElement("div");
     slotZone.className = "reorder-slot-zone";
     
-    slotZone.ondragover = function(e){
-      if(!interactive || isRevealed) return;
-      e.preventDefault(); e.dataTransfer.dropEffect = "move"; slotZone.classList.add("drag-over-zone");
-    };
+    slotZone.ondragover = function(e){ if(!interactive || isRevealed) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; slotZone.classList.add("drag-over-zone"); };
     slotZone.ondragleave = function(){ slotZone.classList.remove("drag-over-zone"); };
     slotZone.ondrop = function(e){
       e.preventDefault(); slotZone.classList.remove("drag-over-zone");
@@ -1972,7 +2153,7 @@
     if(isRevealed){
       var note = document.createElement("p");
       note.style.fontSize = "13px"; note.style.color = "var(--bamboo)"; note.style.marginTop = "10px"; note.style.fontWeight = "700";
-      note.textContent = "🎉 句子重組正確！解答： " + correctWords.join(" ");
+      note.textContent = "🎉 句子重組解答： " + correctWords.join(" ");
       wrap.appendChild(note);
     }
     container.appendChild(wrap);
@@ -1987,10 +2168,8 @@
       reorderTimer = setTimeout(function(){
         var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
         if(currentClassMode === 'test'){
-          // 測驗模式下：排滿即默默記錄，不即時出音效或提示
-          writeProgress(q.id, { userWords: userWords, poolWords: poolWords, testSubmitted: true });
+          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
         } else {
-          // 練習模式：即時回饋
           if(isMatch){
             playCorrectSound();
             writeProgress(q.id, { revealed: true });
@@ -2206,7 +2385,7 @@
 
     window.onmousemove = function(e){
       if(!isDrawing) return; var p = getPos(e); currentPath.push(p); var scale = getScaleRatio(); ctx.save();
-      if(boardState.tool === "pixel-eraser"){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, boardState.size * 2.5 * scale); }
+      if(boardState.tool === "pixel-eraser"){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, st.size * 2.5 * scale); }
       else { ctx.globalCompositeOperation = "source-over"; ctx.strokeStyle = boardState.color; ctx.lineWidth = Math.max(1, boardState.size * scale); }
       ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath();
       var pts = currentPath;
@@ -2247,102 +2426,6 @@
 
     var clearBtn = vToolbar.querySelector("#btn-clear-draw");
     if(clearBtn){ clearBtn.onclick = function(){ if(confirm("確定清空畫布？")){ strokes = []; texts = []; writeProgress(q.id, { strokes: strokes, texts: texts }); } }; }
-  }
-
-  /* 連連看 */
-  function renderMatchBoard(q, container){
-    var progress = getProgress(q.id); var matched = progress.matched || {}; var selections = progress.selections || {}; var interactive = canInteract();
-    var wrap = document.createElement("div"); wrap.className = "match-board";
-    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","match-svg"); wrap.appendChild(svg);
-    var cols = document.createElement("div"); cols.className = "match-cols";
-    var lCol = document.createElement("div"); lCol.className = "match-col"; var rCol = document.createElement("div"); rCol.className = "match-col";
-    lCol.innerHTML = '<div class="match-col-label">' + (q.leftLabel || "項目一") + '</div>';
-    rCol.innerHTML = '<div class="match-col-label">' + (q.rightLabel || "項目二") + '</div>';
-
-    var pIds = Object.keys(q.pairs || {}).sort(); var rOrder = pIds.slice().sort();
-
-    pIds.forEach(function(pid){
-      var p = q.pairs[pid]; var btn = document.createElement("button"); btn.type="button"; var isMatched = !!matched[pid];
-      btn.className = "match-item zh" + (isMatched ? " matched" : ""); btn.textContent = p.left; btn.dataset.id = pid; btn.dataset.side = "left";
-      var userWhoSelectedL = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].left === pid; });
-      if(userWhoSelectedL && !isMatched){
-        btn.classList.add("selected"); var uInfoL = selections[userWhoSelectedL]; var uColorL = getColorForStudent(uInfoL.name || "學生", uInfoL.role);
-        btn.style.borderColor = uColorL; btn.style.boxShadow = "0 0 0 3.5px " + uColorL + "44 inset";
-      } else if(!isMatched) btn.style.boxShadow = "";
-      if(isMatched || !interactive) btn.disabled = true;
-
-      btn.onclick = function(){
-        if(matched[pid] || !interactive) return;
-        var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
-        mySel.left = (mySel.left === pid) ? null : pid;
-        var newSelections = Object.assign({}, selections, { [myId]: mySel });
-        writeProgress(q.id, { selections: newSelections }); checkMatch(mySel);
-      };
-      lCol.appendChild(btn);
-    });
-
-    rOrder.forEach(function(pid){
-      var p = q.pairs[pid]; var btn = document.createElement("button"); btn.type="button"; var isMatched = !!matched[pid];
-      btn.className = "match-item" + (isMatched ? " matched" : ""); btn.textContent = p.right; btn.dataset.id = pid; btn.dataset.side = "right";
-      var userWhoSelectedR = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].right === pid; });
-      if(userWhoSelectedR && !isMatched){
-        btn.classList.add("selected"); var uInfoR = selections[userWhoSelectedR]; var uColorR = getColorForStudent(uInfoR.name || "學生", uInfoR.role);
-        btn.style.borderColor = uColorR; btn.style.boxShadow = "0 0 0 3.5px " + uColorR + "44 inset";
-      } else if(!isMatched) btn.style.boxShadow = "";
-      if(isMatched || !interactive) btn.disabled = true;
-
-      btn.onclick = function(){
-        if(matched[pid] || !interactive) return;
-        var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
-        mySel.right = (mySel.right === pid) ? null : pid;
-        var newSelections = Object.assign({}, selections, { [myId]: mySel });
-        writeProgress(q.id, { selections: newSelections }); checkMatch(mySel);
-      };
-      rCol.appendChild(btn);
-    });
-
-    function checkMatch(currentMySel){
-      if(currentMySel && currentMySel.left && currentMySel.right){
-        var newSelections = Object.assign({}, getProgress(q.id).selections || {}); delete newSelections[myId];
-        if(currentMySel.left === currentMySel.right){
-          playCorrectSound(); matched[currentMySel.left] = true;
-          writeProgress(q.id, { matched: matched, lastWrong: null, selections: newSelections });
-          if(Object.keys(matched).length === pIds.length) setTimeout(playVictorySound, 400);
-        } else {
-          playWrongSound();
-          writeProgress(q.id, { lastWrong: { left: currentMySel.left, right: currentMySel.right, t: Date.now(), who: myName }, selections: newSelections });
-        }
-      }
-    }
-
-    cols.appendChild(lCol); cols.appendChild(rCol); wrap.appendChild(cols); container.appendChild(wrap);
-
-    var lastWrong = progress.lastWrong;
-    if(lastWrong && lastWrong.t && (Date.now() - lastWrong.t < 1200)){
-      var wLeft = lCol.querySelector(`.match-item[data-id="${lastWrong.left}"]`);
-      var wRight = rCol.querySelector(`.match-item[data-id="${lastWrong.right}"]`);
-      if(wLeft && wRight){
-        wLeft.classList.add("wrong"); wRight.classList.add("wrong");
-        setTimeout(function(){ if(wLeft) wLeft.classList.remove("wrong", "selected"); if(wRight) wRight.classList.remove("wrong", "selected"); }, 600);
-      }
-    }
-
-    function drawLines(){
-      var rect = wrap.getBoundingClientRect(); svg.setAttribute("viewBox","0 0 "+rect.width+" "+rect.height); svg.innerHTML = "";
-      Object.keys(matched).forEach(function(pid){
-        var l = lCol.querySelector(`.match-item[data-id="${pid}"]`); var r = rCol.querySelector(`.match-item[data-id="${pid}"]`);
-        if(!l || !r) return;
-        var lr = l.getBoundingClientRect(), rr = r.getBoundingClientRect();
-        var x1 = lr.right - rect.left, y1 = lr.top + lr.height/2 - rect.top;
-        var x2 = rr.left - rect.left, y2 = rr.top + rr.height/2 - rect.top;
-        var mx = (x1+x2)/2;
-        var path = document.createElementNS("http://www.w3.org/2000/svg","path");
-        path.setAttribute("d", "M"+x1+","+y1+" C "+mx+","+y1+" "+mx+","+y2+" "+x2+","+y2);
-        path.setAttribute("stroke", "#2D5A27"); path.setAttribute("stroke-width","3.5"); path.setAttribute("fill","none"); path.setAttribute("stroke-linecap","round");
-        svg.appendChild(path);
-      });
-    }
-    requestAnimationFrame(drawLines); window.addEventListener("resize", drawLines);
   }
 
   /* 遠端游標 */
@@ -2602,7 +2685,7 @@
     closeModalDialog(editorDialog);
   };
 
-  /* Excel 匯入 */
+  /* Excel 匯入／匯出 */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
   excelInput.onchange = function(e){
