@@ -1034,49 +1034,70 @@
   function playWrongSound(){ if(currentClassMode !== 'test') playTone(currentSoundStyle, false); }
   function playVictorySound(){ playTone(currentSoundStyle, true); }
 
-  /* ================== 資料庫載入與自動遷移 ================== */
-  var STORAGE_FS_KEY = "hanyu-mandamy-v10";
+  /* ================== 資料庫載入與自動遷移 (載入第一冊 L1~L4 複習卷範本) ================== */
+  var STORAGE_FS_KEY = "hanyu-mandamy-v11";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var DEFAULT_FS = {
     folders: {
-      "f_thai": {
-        id: "f_thai", parentId: null, title: "115-1 對泰華語轉銜線上華語課", desc: "泰國學生轉銜華語專案班級資料夾"
+      "f_review": {
+        id: "f_review", parentId: null, title: "《學華語向前走》第一冊 (L1~L4)", desc: "全範圍綜合測驗複習卷範本"
       }
     },
     projects: {
-      "proj_thai_l1": {
-        id: "proj_thai_l1", folderId: "f_thai", title: "第一課：見面問好", desc: "支援連連看、複選題與句子重組",
-        currentQId: "q_1_1",
+      "proj_review_1": {
+        id: "proj_review_1", folderId: "f_review", title: "第一冊 L1~L4 綜合複習卷", desc: "包含詞彙對應連連看、句型排列重組、短文閱讀選擇與漢字書寫",
+        currentQId: "q_m_1",
         sections: {
           "sec_1": {
-            id: "sec_1", title: "第一大題：生詞配對", type: "match", order: 0, collapsed: false,
+            id: "sec_1", title: "壹、詞彙與義涵對應 (連連看)", type: "match", order: 0, collapsed: false,
             questions: {
-              "q_1_1": {
-                id: "q_1_1", title: "第 1 題：禮貌用語", order: 0, leftLabel: "生詞", rightLabel: "拼音",
+              "q_m_1": {
+                id: "q_m_1", title: "第 1 題：第一冊核心生詞對應", order: 0, leftLabel: "華語詞彙", rightLabel: "英文意涵",
                 pairs: {
-                  p1: {id:"p1", left:"你好", right:"nǐ hǎo"},
-                  p2: {id:"p2", left:"謝謝", right:"xièxie"},
-                  p3: {id:"p3", left:"再見", right:"zàijiàn"}
+                  p1: {id:"p1", left:"三明治", right:"Sandwich"},
+                  p2: {id:"p2", left:"同學", right:"Classmates"},
+                  p3: {id:"p3", left:"早飯", right:"Breakfast"},
+                  p4: {id:"p4", left:"雞蛋", right:"Egg"},
+                  p5: {id:"p5", left:"牛奶", right:"Milk"}
                 }
               }
             }
           },
           "sec_2": {
-            id: "sec_2", title: "第二大題：語意多選題", type: "choice", order: 1, collapsed: false,
+            id: "sec_2", title: "貳、句型排列 (句子重組)", type: "reorder", order: 1, collapsed: false,
             questions: {
-              "q_2_1": {
-                id: "q_2_1", title: "第 1 題：身分稱謂(複選)", order: 0, prompt: "下列哪些是學校裡的成員？(可複選)",
-                choices: { c1: {id:"c1", text:"老師"}, c2: {id:"c2", text:"學生"}, c3: {id:"c3", text:"機長"} },
-                answerIds: ["c1", "c2"]
+              "q_r_1": {
+                id: "q_r_1", title: "第 1 題：你叫什麼名字？", order: 0, prompt: "請將下列詞語重組為正確句子", words: ["你", "叫", "什麼", "名字", "？"]
+              },
+              "q_r_2": {
+                id: "q_r_2", title: "第 2 題：我們班也有十個同學", order: 1, prompt: "請將下列詞語重組為正確句子", words: ["我們班", "也", "有", "十個", "同學"]
+              },
+              "q_r_3": {
+                id: "q_r_3", title: "第 3 題：早飯有麵包還有牛奶", order: 2, prompt: "請將下列詞語重組為正確句子", words: ["早飯", "有", "麵包", "，", "還有", "牛奶", "。"]
               }
             }
           },
           "sec_3": {
-            id: "sec_3", title: "第三大題：句子重組排序", type: "reorder", order: 2, collapsed: false,
+            id: "sec_3", title: "參、短文閱讀理解 (選擇題)", type: "choice", order: 2, collapsed: false,
             questions: {
-              "q_3_1": {
-                id: "q_3_1", title: "第 1 題：自我介紹", order: 0, prompt: "請將下列詞語拖曳重組為正確句子", words: ["我", "是", "泰國", "人"]
+              "q_c_1": {
+                id: "q_c_1", title: "第 1 題：心美的班級人數", order: 0, prompt: "根據短文：「你好！我是陳心美。我們班有九個同學，有五個女同學，四個男同學。」請問班上男同學多還是女同學多？",
+                choices: { c1: {id:"c1", text: "男同學比較多"}, c2: {id:"c2", text: "女同學比較多"}, c3: {id:"c3", text: "一樣多"} },
+                answerIds: ["c2"]
+              },
+              "q_c_2": {
+                id: "q_c_2", title: "第 2 題：媽媽準備的早餐", order: 1, prompt: "根據短文：「今天早飯媽媽做了麵包和雞蛋，還有蘋果。」請問今天早上媽媽準備了哪些食物？",
+                choices: { c1: {id:"c1", text: "三明治和果汁"}, c2: {id:"c2", text: "麵包、雞蛋和蘋果"}, c3: {id:"c3", text: "牛奶和香蕉"} },
+                answerIds: ["c2"]
+              }
+            }
+          },
+          "sec_4": {
+            id: "sec_4", title: "肆、漢字書寫與筆畫 (寫字板)", type: "board", order: 3, collapsed: false,
+            questions: {
+              "q_b_1": {
+                id: "q_b_1", title: "第 1 題：書寫『好』與『叫』", order: 0, desc: "請在田字格中練習書寫『好』與『叫』", bgImage: "", gridType: "tian"
               }
             }
           }
@@ -2178,7 +2199,7 @@
     }
   }
 
-  /* 寫字板功能 */
+  /* ================== 寫字板功能 (完整恢復) ================== */
   function renderDrawBoard(q, container){
     var progress = getProgress(q.id);
     var strokes = progress.strokes || [];
