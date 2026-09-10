@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>生詞練習台</title>
+<title>華語星球</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
 <!-- SheetJS: 支援 Excel 匯入與匯出 -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -180,7 +180,7 @@
   }
   
   .drag-handle-icon{
-    color:var(--ink-soft);opacity:0.35;font-size:12px;cursor:grab;margin-right:2px;user-select:none; pointer-events:none;
+    color:var(--ink-soft);opacity:0.45;font-size:12px;cursor:grab;margin-right:2px;user-select:none; pointer-events:none;
   }
   .section-head:hover .drag-handle-icon, .question-item-btn:hover .drag-handle-icon{ opacity:0.8; }
 
@@ -227,7 +227,7 @@
     transition:transform .15s ease-out;
   }
 
-  /* 句子重組專屬樣式：支援流暢拖曳與放上更正 */
+  /* 句子重組專屬樣式 */
   .reorder-container{display:flex;flex-direction:column;gap:24px;max-width:840px;margin:0 auto;}
   .reorder-slot-zone{
     display:flex;flex-wrap:wrap;gap:12px;min-height:76px;padding:16px;
@@ -433,7 +433,7 @@
     <div class="brand" id="brand-logo" title="點擊返回課程大廳">
       <div class="stamp">好</div>
       <div class="brand-text">
-        <h1 id="brand-title">生詞練習台</h1>
+        <h1 id="brand-title">華語星球</h1>
         <p id="brand-sub">專案課次大廳</p>
       </div>
     </div>
@@ -571,7 +571,7 @@
 <!-- 學生姓名輸入彈窗 -->
 <dialog class="dialog-modal" id="student-name-dialog" style="max-width:380px;">
   <div class="dialog-head" style="text-align:center;">
-    <h2>🎓 歡迎來到生詞練習台！</h2>
+    <h2>🎓 歡迎來到華語星球！</h2>
     <p style="font-size:13px;color:var(--ink-soft);">請輸入你的名字開始上課：</p>
   </div>
   <div class="dialog-body">
@@ -1740,7 +1740,6 @@
     var slotZone = document.createElement("div");
     slotZone.className = "reorder-slot-zone";
     
-    // 拖曳放置事件：支援從下方字庫或上方其他位置拖過來
     slotZone.ondragover = function(e){
       if(!interactive || isRevealed) return;
       e.preventDefault();
@@ -1767,11 +1766,6 @@
           userWords.push(word);
           evaluateReorderState(q, userWords, poolWords, correctWords);
         }
-      } else if(type === "user"){
-        // 在上方槽位內重新排序或維持
-        if(!isNaN(idx) && userWords[idx] !== undefined){
-          // 已在上方，不作移動或可微調
-        }
       }
     };
 
@@ -1788,7 +1782,6 @@
             e.dataTransfer.setData("text/plain", "user:" + w + ":" + idx);
             e.stopPropagation();
           };
-          // 點擊也可直接退回字庫
           chip.onclick = function(){
             userWords.splice(idx, 1);
             poolWords.push(w);
@@ -1841,7 +1834,23 @@
         chip.onclick = function(){
           poolWords.splice(idx, 1);
           userWords.push(w);
-          evaluateReorderState(q, userWords, poolWords, correctWords);
+          
+          if(userWords.length === correctWords.length){
+            var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
+            if(isMatch){
+              playCorrectSound();
+              writeProgress(q.id, { userWords: userWords, poolWords: poolWords, revealed: true });
+              return;
+            } else {
+              playWrongSound();
+              slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
+              setTimeout(function(){
+                writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
+              }, 500);
+              return;
+            }
+          }
+          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
         };
       }
       poolZone.appendChild(chip);
@@ -1864,10 +1873,8 @@
     if(reorderTimer) clearTimeout(reorderTimer);
 
     if(userWords.length === correctWords.length){
-      // 立即寫入當前排法
       writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
 
-      // 啟動 2 秒靜止後自動判定
       reorderTimer = setTimeout(function(){
         var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
         if(isMatch){
@@ -1878,7 +1885,6 @@
           var slotZone = document.querySelector(".reorder-slot-zone");
           if(slotZone) slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
           setTimeout(function(){
-            // 答錯自動重置回字庫
             writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
           }, 500);
         }
@@ -2126,7 +2132,7 @@
       if(!isDrawing) return;
       var p = getPos(e); currentPath.push(p);
       var scale = getScaleRatio(); ctx.save();
-      if(boardState.tool === "pixel-eraser"){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, boardState.size * 2.5 * scale); }
+      if(boardState.tool === "pixel-eraser"){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, st.size * 2.5 * scale); }
       else { ctx.globalCompositeOperation = "source-over"; ctx.strokeStyle = boardState.color; ctx.lineWidth = Math.max(1, boardState.size * scale); }
       ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath();
       var pts = currentPath;
@@ -2401,7 +2407,7 @@
     sectionDialog.close();
   };
 
-  /* 小題題目編輯彈窗（支援新增與編輯現有題目） */
+  /* 小題題目編輯彈窗 */
   var editorDialog = document.getElementById("editor-dialog");
   var matchFields = document.getElementById("match-fields");
   var choiceFields = document.getElementById("choice-fields");
@@ -2553,10 +2559,12 @@
     }
 
     if(!sec.questions) sec.questions = {};
-    sec.questions[qId] = newQ; writeSections(secs, qId); editorDialog.close();
+    sec.questions[qId] = newQ;
+    writeSections(secs, qId);
+    editorDialog.close();
   };
 
-  /* Excel 匯入 */
+  /* Excel 匯入／匯出 */
   var excelInput = document.getElementById("excel-file-input");
   document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
   excelInput.onchange = function(e){
@@ -2607,7 +2615,7 @@
       { "大題名稱": "第三大題：句子重組", "題型": "reorder", "小題名稱": "第1題", "正確句子": "我,愛,學,華語" }
     ];
     var ws = XLSX.utils.json_to_sheet(templateData); var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "範本"); XLSX.writeFile(wb, "生詞練習台_範本.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "範本"); XLSX.writeFile(wb, "華語星球_範本.xlsx");
   };
 
   document.getElementById("btn-export-excel").onclick = function(){
@@ -2627,7 +2635,7 @@
     });
     if(exportRows.length === 0){ alert("無題目可匯出"); return; }
     var ws = XLSX.utils.json_to_sheet(exportRows); var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "題庫"); XLSX.writeFile(wb, "題庫備份.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "題庫"); XLSX.writeFile(wb, "華語星球題庫備份.xlsx");
   };
 
   function handleStudentJoin(){
