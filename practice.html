@@ -1035,7 +1035,7 @@
   function playVictorySound(){ playTone(currentSoundStyle, true); }
 
   /* ================== 資料庫載入與自動遷移 ================== */
-  var STORAGE_FS_KEY = "hanyu-mandamy-v9";
+  var STORAGE_FS_KEY = "hanyu-mandamy-v10";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var DEFAULT_FS = {
@@ -2328,7 +2328,8 @@
     function resizeCanvas(){
       var r = cWrap.getBoundingClientRect();
       if(r.width > 0 && r.height > 0){
-        canvas.width = r.width; canvas.height = r.height;
+        canvas.width = r.width;
+        canvas.height = r.height;
         redrawStrokes();
         renderTexts();
       }
