@@ -929,18 +929,103 @@
       var ctx = getAudioContext();
       if(ctx.state === 'suspended') ctx.resume();
       var now = ctx.currentTime;
+
       if(isCorrect){
-        [1046.5, 1318.5, 1567.98, 1975.5, 2093].forEach(function(freq, idx){
-          var osc = ctx.createOscillator(), g = ctx.createGain();
-          osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + idx * 0.055);
-          g.gain.setValueAtTime(0.18, now + idx * 0.055); g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.35);
-          osc.connect(g); g.connect(ctx.destination); osc.start(now + idx * 0.055); osc.stop(now + idx * 0.055 + 0.35);
-        });
+        if(style === "magic"){
+          [1046.5, 1318.5, 1567.98, 1975.5, 2093].forEach(function(freq, idx){
+            var osc = ctx.createOscillator(), g = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, now + idx * 0.055);
+            g.gain.setValueAtTime(0.18, now + idx * 0.055);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.35);
+            osc.connect(g); g.connect(ctx.destination);
+            osc.start(now + idx * 0.055); osc.stop(now + idx * 0.055 + 0.35);
+          });
+        } else if(style === "arcade"){
+          var aOsc = ctx.createOscillator(), aG = ctx.createGain();
+          aOsc.type = "square";
+          aOsc.frequency.setValueAtTime(987.77, now);
+          aOsc.frequency.setValueAtTime(1318.51, now + 0.08);
+          aG.gain.setValueAtTime(0.12, now);
+          aG.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          aOsc.connect(aG); aG.connect(ctx.destination);
+          aOsc.start(now); aOsc.stop(now + 0.35);
+        } else if(style === "gameshow"){
+          [1046.5, 1567.98, 2093].forEach(function(freq, idx){
+            var gOsc = ctx.createOscillator(), gG = ctx.createGain();
+            gOsc.type = "triangle";
+            gOsc.frequency.setValueAtTime(freq, now + idx * 0.09);
+            gG.gain.setValueAtTime(0.25, now + idx * 0.09);
+            gG.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.4);
+            gOsc.connect(gG); gG.connect(ctx.destination);
+            gOsc.start(now + idx * 0.09); gOsc.stop(now + idx * 0.09 + 0.4);
+          });
+        } else if(style === "cartoon"){
+          [523.25, 659.25, 783.99, 1046.5].forEach(function(freq, idx){
+            var cOsc = ctx.createOscillator(), cG = ctx.createGain();
+            cOsc.type = "sine";
+            cOsc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            cG.gain.setValueAtTime(0.22, now + idx * 0.07);
+            cG.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
+            cOsc.connect(cG); cG.connect(ctx.destination);
+            cOsc.start(now + idx * 0.07); cOsc.stop(now + idx * 0.07 + 0.25);
+          });
+        } else {
+          var osc1 = ctx.createOscillator(), gain1 = ctx.createGain();
+          osc1.type = "sine"; osc1.frequency.setValueAtTime(1318.5, now);
+          gain1.gain.setValueAtTime(0.2, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc1.connect(gain1); gain1.connect(ctx.destination); osc1.start(now); osc1.stop(now + 0.4);
+
+          var osc2 = ctx.createOscillator(), gain2 = ctx.createGain();
+          osc2.type = "sine"; osc2.frequency.setValueAtTime(1567.9, now + 0.1);
+          gain2.gain.setValueAtTime(0.22, now + 0.1); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+          osc2.connect(gain2); gain2.connect(ctx.destination); osc2.start(now + 0.1); osc2.stop(now + 0.55);
+        }
       } else {
-        var osc = ctx.createOscillator(), g = ctx.createGain();
-        osc.type = "sine"; osc.frequency.setValueAtTime(320, now); osc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
-        g.gain.setValueAtTime(0.26, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-        osc.connect(g); g.connect(ctx.destination); osc.start(now); osc.stop(now + 0.35);
+        if(style === "magic"){
+          var mOsc = ctx.createOscillator(), mG = ctx.createGain();
+          mOsc.type = "sine";
+          mOsc.frequency.setValueAtTime(320, now);
+          mOsc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
+          mG.gain.setValueAtTime(0.26, now);
+          mG.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          mOsc.connect(mG); mG.connect(ctx.destination);
+          mOsc.start(now); mOsc.stop(now + 0.35);
+        } else if(style === "arcade"){
+          var rOsc = ctx.createOscillator(), rG = ctx.createGain();
+          rOsc.type = "sawtooth";
+          rOsc.frequency.setValueAtTime(260, now);
+          rOsc.frequency.setValueAtTime(190, now + 0.08);
+          rOsc.frequency.setValueAtTime(130, now + 0.16);
+          rG.gain.setValueAtTime(0.2, now);
+          rG.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+          rOsc.connect(rG); rG.connect(ctx.destination);
+          rOsc.start(now); rOsc.stop(now + 0.38);
+        } else if(style === "gameshow"){
+          [0, 0.15].forEach(function(delay){
+            var bOsc = ctx.createOscillator(), bG = ctx.createGain();
+            bOsc.type = "sawtooth";
+            bOsc.frequency.setValueAtTime(140, now + delay);
+            bG.gain.setValueAtTime(0.28, now + delay);
+            bG.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.11);
+            bOsc.connect(bG); bG.connect(ctx.destination);
+            bOsc.start(now + delay); bOsc.stop(now + delay + 0.11);
+          });
+        } else if(style === "cartoon"){
+          var cTOsc = ctx.createOscillator(), cTG = ctx.createGain();
+          cTOsc.type = "triangle";
+          cTOsc.frequency.setValueAtTime(240, now);
+          cTOsc.frequency.linearRampToValueAtTime(170, now + 0.38);
+          cTG.gain.setValueAtTime(0.28, now);
+          cTG.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+          cTOsc.connect(cTG); cTG.connect(ctx.destination);
+          cTOsc.start(now); cTOsc.stop(now + 0.38);
+        } else {
+          var osc = ctx.createOscillator(), g = ctx.createGain();
+          osc.type = "triangle"; osc.frequency.setValueAtTime(220, now); osc.frequency.setValueAtTime(185, now + 0.1);
+          g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+          osc.connect(g); g.connect(ctx.destination); osc.start(now); osc.stop(now + 0.32);
+        }
       }
     }catch(e){}
   }
@@ -950,7 +1035,7 @@
   function playVictorySound(){ playTone(currentSoundStyle, true); }
 
   /* ================== 資料庫載入與自動遷移 ================== */
-  var STORAGE_FS_KEY = "hanyu-mandamy-v8";
+  var STORAGE_FS_KEY = "hanyu-mandamy-v9";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var DEFAULT_FS = {
@@ -1853,162 +1938,6 @@
     applyStageZoom(currentZoomRatio);
   }
 
-  /* 連連看（支援測驗模式延遲判定與重選） */
-  function renderMatchBoard(q, container){
-    var progress = getProgress(q.id);
-    var interactive = canInteract();
-    var isTest = (currentClassMode === 'test');
-    var matched = isTest ? (progress.matched || {}) : (progress.matched || {});
-    var userPairs = progress.userPairs || {};
-    var selections = progress.selections || {};
-
-    var wrap = document.createElement("div"); wrap.className = "match-board";
-    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","match-svg");
-    wrap.appendChild(svg);
-    var cols = document.createElement("div"); cols.className = "match-cols";
-    var lCol = document.createElement("div"); lCol.className = "match-col";
-    var rCol = document.createElement("div"); rCol.className = "match-col";
-    lCol.innerHTML = '<div class="match-col-label">' + (q.leftLabel || "項目一") + '</div>';
-    rCol.innerHTML = '<div class="match-col-label">' + (q.rightLabel || "項目二") + '</div>';
-
-    var pIds = Object.keys(q.pairs || {}).sort();
-    var rOrder = pIds.slice().sort();
-    var selL = null, selR = null;
-
-    pIds.forEach(function(pid){
-      var p = q.pairs[pid];
-      var btn = document.createElement("button"); btn.type="button"; 
-      var isMatched = isTest ? !!userPairs[pid] : !!matched[pid];
-      btn.className = "match-item zh" + (isMatched ? " matched" : "");
-      btn.textContent = p.left; btn.dataset.id = pid; btn.dataset.side = "left";
-
-      if(isTest && userPairs[pid]){
-        btn.style.borderColor = "var(--seal)";
-        btn.style.background = "var(--seal-soft)";
-        btn.style.color = "var(--seal)";
-      }
-
-      var userWhoSelectedL = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].left === pid; });
-      if(userWhoSelectedL && !isMatched && !isTest){
-        btn.classList.add("selected");
-        var uInfoL = selections[userWhoSelectedL]; var uColorL = getColorForStudent(uInfoL.name || "學生", uInfoL.role);
-        btn.style.borderColor = uColorL; btn.style.boxShadow = "0 0 0 3.5px " + uColorL + "44 inset";
-      } else if(!isMatched && !isTest){ btn.style.boxShadow = ""; }
-
-      if(!interactive || (matched[pid] && !isTest)) btn.disabled = true;
-
-      btn.onclick = function(){
-        if(!interactive || (matched[pid] && !isTest)) return;
-        selL = pid;
-        if(isTest){
-          if(selL && selR){
-            userPairs[selL] = selR;
-            writeProgress(q.id, { userPairs: userPairs });
-            selL = null; selR = null;
-          }
-        } else {
-          var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
-          mySel.left = (mySel.left === pid) ? null : pid;
-          var newSelections = Object.assign({}, selections, { [myId]: mySel });
-          writeProgress(q.id, { selections: newSelections });
-          checkMatch(mySel);
-        }
-      };
-      lCol.appendChild(btn);
-    });
-
-    rOrder.forEach(function(pid){
-      var p = q.pairs[pid];
-      var btn = document.createElement("button"); btn.type="button"; 
-      var isMatched = isTest ? Object.values(userPairs).indexOf(pid) !== -1 : !!matched[pid];
-      btn.className = "match-item" + (isMatched ? " matched" : "");
-      btn.textContent = p.right; btn.dataset.id = pid; btn.dataset.side = "right";
-
-      if(isTest && Object.values(userPairs).indexOf(pid) !== -1){
-        btn.style.borderColor = "var(--seal)";
-        btn.style.background = "var(--seal-soft)";
-        btn.style.color = "var(--seal)";
-      }
-
-      var userWhoSelectedR = Object.keys(selections).find(function(uid){ return selections[uid] && selections[uid].right === pid; });
-      if(userWhoSelectedR && !isMatched && !isTest){
-        btn.classList.add("selected");
-        var uInfoR = selections[userWhoSelectedR]; var uColorR = getColorForStudent(uInfoR.name || "學生", uInfoR.role);
-        btn.style.borderColor = uColorR; btn.style.boxShadow = "0 0 0 3.5px " + uColorR + "44 inset";
-      } else if(!isMatched && !isTest){ btn.style.boxShadow = ""; }
-
-      if(!interactive || (matched[pid] && !isTest)) btn.disabled = true;
-
-      btn.onclick = function(){
-        if(!interactive || (matched[pid] && !isTest)) return;
-        selR = pid;
-        if(isTest){
-          if(selL && selR){
-            userPairs[selL] = selR;
-            writeProgress(q.id, { userPairs: userPairs });
-            selL = null; selR = null;
-          }
-        } else {
-          var mySel = Object.assign({}, selections[myId] || { name: myName, role: roomRole });
-          mySel.right = (mySel.right === pid) ? null : pid;
-          var newSelections = Object.assign({}, selections, { [myId]: mySel });
-          writeProgress(q.id, { selections: newSelections });
-          checkMatch(mySel);
-        }
-      };
-      rCol.appendChild(btn);
-    });
-
-    function checkMatch(currentMySel){
-      if(currentMySel && currentMySel.left && currentMySel.right){
-        var newSelections = Object.assign({}, getProgress(q.id).selections || {});
-        delete newSelections[myId];
-        if(currentMySel.left === currentMySel.right){
-          playCorrectSound(); matched[currentMySel.left] = true;
-          writeProgress(q.id, { matched: matched, lastWrong: null, selections: newSelections });
-          if(Object.keys(matched).length === pIds.length){ setTimeout(playVictorySound, 400); }
-        } else {
-          playWrongSound();
-          writeProgress(q.id, { lastWrong: { left: currentMySel.left, right: currentMySel.right, t: Date.now(), who: myName }, selections: newSelections });
-        }
-      }
-    }
-
-    cols.appendChild(lCol); cols.appendChild(rCol); wrap.appendChild(cols); container.appendChild(wrap);
-
-    if(!isTest){
-      var lastWrong = progress.lastWrong;
-      if(lastWrong && lastWrong.t && (Date.now() - lastWrong.t < 1200)){
-        var wLeft = lCol.querySelector(`.match-item[data-id="${lastWrong.left}"]`);
-        var wRight = rCol.querySelector(`.match-item[data-id="${lastWrong.right}"]`);
-        if(wLeft && wRight){
-          wLeft.classList.add("wrong"); wRight.classList.add("wrong");
-          setTimeout(function(){ if(wLeft) wLeft.classList.remove("wrong", "selected"); if(wRight) wRight.classList.remove("wrong", "selected"); }, 600);
-        }
-      }
-    }
-
-    function drawLines(){
-      var rect = wrap.getBoundingClientRect(); svg.setAttribute("viewBox","0 0 "+rect.width+" "+rect.height); svg.innerHTML = "";
-      var activeMatched = isTest ? userPairs : matched;
-      Object.keys(activeMatched).forEach(function(lId){
-        var rId = activeMatched[lId];
-        var l = lCol.querySelector(`.match-item[data-id="${lId}"]`);
-        var r = rCol.querySelector(`.match-item[data-id="${rId}"]`);
-        if(!l || !r) return;
-        var lr = l.getBoundingClientRect(), rr = r.getBoundingClientRect();
-        var x1 = lr.right - rect.left, y1 = lr.top + lr.height/2 - rect.top;
-        var x2 = rr.left - rect.left, y2 = rr.top + rr.height/2 - rect.top;
-        var mx = (x1+x2)/2;
-        var path = document.createElementNS("http://www.w3.org/2000/svg","path");
-        path.setAttribute("d", "M"+x1+","+y1+" C "+mx+","+y1+" "+mx+","+y2+" "+x2+","+y2);
-        path.setAttribute("stroke", isTest ? "var(--seal)" : "#2D5A27"); path.setAttribute("stroke-width","3.5"); path.setAttribute("fill","none"); path.setAttribute("stroke-linecap","round");
-        svg.appendChild(path);
-      });
-    }
-    requestAnimationFrame(drawLines); window.addEventListener("resize", drawLines);
-  }
-
   /* 選擇題（支援複選） */
   function renderChoiceBoard(q, container){
     var progress = getProgress(q.id);
@@ -2186,7 +2115,23 @@
         chip.onclick = function(){
           poolWords.splice(idx, 1);
           userWords.push(w);
-          evaluateReorderState(q, userWords, poolWords, correctWords);
+          
+          if(userWords.length === correctWords.length){
+            var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
+            if(isMatch){
+              playCorrectSound();
+              writeProgress(q.id, { userWords: userWords, poolWords: poolWords, revealed: true });
+              return;
+            } else {
+              playWrongSound();
+              slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
+              setTimeout(function(){
+                writeProgress(q.id, { userWords: [], poolWords: correctWords.slice().sort(function(){ return Math.random() - 0.5; }) });
+              }, 500);
+              return;
+            }
+          }
+          writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
         };
       }
       poolZone.appendChild(chip);
@@ -2196,7 +2141,7 @@
     if(isRevealed){
       var note = document.createElement("p");
       note.style.fontSize = "13px"; note.style.color = "var(--bamboo)"; note.style.marginTop = "10px"; note.style.fontWeight = "700";
-      note.textContent = "🎉 句子重組解答： " + correctWords.join(" ");
+      note.textContent = "🎉 答對了！正確解答： " + correctWords.join(" ");
       wrap.appendChild(note);
     }
 
@@ -2206,9 +2151,10 @@
   var reorderTimer = null;
   function evaluateReorderState(q, userWords, poolWords, correctWords){
     if(reorderTimer) clearTimeout(reorderTimer);
-    writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
 
     if(userWords.length === correctWords.length){
+      writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+
       reorderTimer = setTimeout(function(){
         var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
         if(currentClassMode === 'test'){
@@ -2227,6 +2173,8 @@
           }
         }
       }, 2000);
+    } else {
+      writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
     }
   }
 
@@ -2288,12 +2236,15 @@
     var cWrap = document.createElement("div"); 
     cWrap.className = "canvas-stage-wrap " + (currentGrid === 'tian' ? 'grid-tian' : (currentGrid === 'jiu' ? 'grid-jiu' : ''));
     if(currentBg){
-      var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg; cWrap.appendChild(img);
+      var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg;
+      cWrap.appendChild(img);
     }
     var canvas = document.createElement("canvas"); canvas.id = "paint-canvas";
     var textLayer = document.createElement("div"); textLayer.className = "text-layer";
-    cWrap.appendChild(canvas); cWrap.appendChild(textLayer);
-    layout.appendChild(cWrap); container.appendChild(layout);
+    cWrap.appendChild(canvas);
+    cWrap.appendChild(textLayer);
+    layout.appendChild(cWrap);
+    container.appendChild(layout);
 
     var ctx = canvas.getContext("2d");
     var isDrawing = false;
@@ -2644,493 +2595,6 @@
       };
     }
   }
-
-  /* 遠端游標 */
-  function renderMultiCursors(cursorData){
-    var container = document.getElementById("multi-cursor-box");
-    if(!container) return;
-    container.innerHTML = "";
-    if(!cursorData || !cursorOn) return;
-
-    Object.keys(cursorData).forEach(function(peerId){
-      if(peerId === myId) return;
-
-      var c = cursorData[peerId];
-      if(!c || c.x == null) return;
-
-      var isTeacherCursor = (c.role === "teacher" || peerId === "teacher");
-      var displayName = isTeacherCursor ? "👑 老師" : (c.name || "學生");
-      var color = isTeacherCursor ? "#B23B32" : getColorForStudent(displayName, "student");
-
-      var el = document.createElement("div");
-      el.className = "peer-cursor";
-      el.style.left = c.x + "%";
-      el.style.top = c.y + "%";
-
-      el.innerHTML = `
-        <span class="peer-cursor-dot" style="background:${color};"></span>
-        <span class="peer-cursor-label" style="background:${color};">${displayName}</span>
-      `;
-      container.appendChild(el);
-    });
-  }
-
-  var lastM = 0;
-  function handleCursorMove(clientX, clientY){
-    if(!inRoom() || !cursorOn) return;
-    var now = Date.now();
-    if(now - lastM < 40) return;
-    lastM = now;
-
-    var boardArea = document.getElementById("board-area");
-    if(!boardArea) return;
-    var r = boardArea.getBoundingClientRect();
-    if(r.width === 0 || r.height === 0) return;
-
-    var x = ((clientX - r.left) / r.width) * 100;
-    var y = ((clientY - r.top) / r.height) * 100;
-
-    if(x < -10 || x > 110 || y < -10 || y > 110){
-      update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: null, y: null });
-      return;
-    }
-
-    x = Math.max(0, Math.min(100, x));
-    y = Math.max(0, Math.min(100, y));
-
-    update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { 
-      x: x, 
-      y: y, 
-      name: myName,
-      role: roomRole 
-    });
-  }
-
-  window.addEventListener("mousemove", function(e){
-    handleCursorMove(e.clientX, e.clientY);
-  });
-
-  window.addEventListener("touchmove", function(e){
-    if(e.touches && e.touches[0]){
-      handleCursorMove(e.touches[0].clientX, e.touches[0].clientY);
-    }
-  }, { passive: true });
-
-  /* 畫面縮放按鈕監聽 */
-  var btnZoomIn = document.getElementById("btn-zoom-in");
-  var btnZoomOut = document.getElementById("btn-zoom-out");
-  var btnZoomReset = document.getElementById("zoom-percent-text");
-
-  if(btnZoomIn) btnZoomIn.onclick = function(){ applyStageZoom(currentZoomRatio + 0.1); };
-  if(btnZoomOut) btnZoomOut.onclick = function(){ applyStageZoom(currentZoomRatio - 0.1); };
-  if(btnZoomReset) btnZoomReset.onclick = function(){ applyStageZoom(1.0); };
-
-  /* 設定面板操作 */
-  var soundSelect = document.getElementById("setting-sound-style");
-  soundSelect.value = currentSoundStyle;
-
-  soundSelect.onchange = function(){
-    currentSoundStyle = soundSelect.value;
-    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
-  };
-
-  document.querySelectorAll(".btn-mode-toggle").forEach(function(b){
-    b.onclick = function(){
-      currentClassMode = b.dataset.mode;
-      localStorage.setItem("hanyu_class_mode", currentClassMode);
-      applyTheme(currentBgMode, currentAccentColor, true);
-    };
-  });
-
-  document.querySelectorAll(".btn-theme-bg").forEach(function(b){
-    b.onclick = function(){
-      applyTheme(b.dataset.bg, currentAccentColor, true);
-    };
-  });
-
-  document.querySelectorAll(".btn-theme-accent").forEach(function(b){
-    b.onclick = function(){
-      applyTheme(currentBgMode, b.dataset.accent, true);
-    };
-  });
-
-  var testSoundBtn = document.getElementById("btn-test-sound");
-  if(testSoundBtn){
-    testSoundBtn.onclick = function(e){
-      e.preventDefault();
-      var ctx = getAudioContext();
-      if(ctx.state === 'suspended'){
-        ctx.resume().then(runTest);
-      } else {
-        runTest();
-      }
-
-      function runTest(){
-        var previewStyle = soundSelect ? soundSelect.value : currentSoundStyle;
-        playTone(previewStyle, true);
-        setTimeout(function(){
-          playTone(previewStyle, false);
-        }, 600);
-      }
-    };
-  }
-
-  document.getElementById("btn-close-settings").onclick = function(){
-    currentSoundStyle = soundSelect.value;
-    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
-    closeModalDialog(document.getElementById("settings-dialog"));
-  };
-
-  /* 大題新增／編輯彈窗（含智慧自動命名） */
-  var sectionDialog = document.getElementById("section-dialog");
-  var sectionTypeToggle = document.getElementById("section-type-toggle");
-  var currentSectionType = "match";
-
-  sectionTypeToggle.querySelectorAll("button").forEach(function(b){
-    b.onclick = function(){
-      sectionTypeToggle.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); });
-      b.classList.add("active");
-      currentSectionType = b.dataset.type;
-    };
-  });
-
-  document.getElementById("btn-new-section").onclick = function(){
-    editingSectionId = null;
-    document.getElementById("f-sec-title").value = "";
-    document.getElementById("f-sec-desc").value = "";
-    document.getElementById("section-dialog-title").textContent = "新增試卷大題";
-    safeShowModal(sectionDialog);
-  };
-
-  document.getElementById("btn-cancel-section").onclick = function(){ closeModalDialog(sectionDialog); };
-
-  document.getElementById("section-form").onsubmit = function(e){
-    e.preventDefault();
-    var title = document.getElementById("f-sec-title").value.trim();
-    var desc = document.getElementById("f-sec-desc").value.trim();
-    
-    var secs = Object.assign({}, getSections());
-    if(editingSectionId){
-      if(!title){
-        var typeNamesEdit = { match: "生詞配對大題", choice: "語意選擇大題", reorder: "句子重組大題", board: "漢字書寫大題" };
-        title = typeNamesEdit[secs[editingSectionId].type] || "綜合練習大題";
-      }
-      secs[editingSectionId].title = title;
-      secs[editingSectionId].desc = desc;
-    } else {
-      if(!title){
-        var typeNames = { match: "生詞配對大題", choice: "語意選擇大題", reorder: "句子重組大題", board: "漢字書寫大題" };
-        var count = Object.keys(secs).length + 1;
-        title = (typeNames[currentSectionType] || "綜合練習大題") + " (" + count + ")";
-      }
-      var newSecId = uid("sec");
-      var defaultQId = uid("q");
-      var currentKeys = Object.keys(secs);
-
-      var defaultQ = { id: defaultQId, title: "第 1 題", order: 0 };
-      if(currentSectionType === "match"){
-        defaultQ.leftLabel = "生詞"; defaultQ.rightLabel = "拼音";
-        defaultQ.pairs = { p1: {id:"p1", left:"你好", right:"nǐ hǎo"} };
-      } else if(currentSectionType === "choice"){
-        defaultQ.prompt = "請選出正確答案(可複選)：";
-        defaultQ.choices = { c1: {id:"c1", text:"選項 A"}, c2: {id:"c2", text:"選項 B"} };
-        defaultQ.answerIds = ["c1"];
-      } else if(currentSectionType === "reorder"){
-        defaultQ.prompt = "請將下列詞語重組為正確句子";
-        defaultQ.words = ["我", "愛", "學", "華語"];
-      } else {
-        defaultQ.desc = "漢字臨摹與書寫練習";
-        defaultQ.bgImage = ""; defaultQ.gridType = "jiu";
-      }
-
-      secs[newSecId] = {
-        id: newSecId,
-        title: title,
-        desc: desc,
-        type: currentSectionType,
-        order: currentKeys.length,
-        collapsed: false,
-        questions: { [defaultQId]: defaultQ }
-      };
-
-      writeSections(secs, defaultQId);
-    }
-
-    closeModalDialog(sectionDialog);
-  };
-
-  /* 小題題目編輯彈窗（含自動編號） */
-  var editorDialog = document.getElementById("editor-dialog");
-  var matchFields = document.getElementById("match-fields");
-  var choiceFields = document.getElementById("choice-fields");
-  var reorderFields = document.getElementById("reorder-fields");
-  var boardFields = document.getElementById("board-fields");
-  var uploadedBase64 = "";
-
-  var choiceOptRows = document.getElementById("choice-opt-rows");
-  function addChoiceOptRow(text, isChecked){
-    var row = document.createElement("div"); row.className = "choice-row";
-    row.innerHTML = `
-      <input type="checkbox" class="mc-correct-chk" ${isChecked ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--bamboo);" title="勾選代表正確答案(可多選)">
-      <input type="text" class="mc-opt-text" placeholder="輸入選項內容" value="${text || ''}">
-      <button type="button" class="row-del">✕</button>
-    `;
-    row.querySelector(".row-del").onclick = function(){ if(choiceOptRows.children.length > 2) row.remove(); };
-    choiceOptRows.appendChild(row);
-  }
-  document.getElementById("add-mc-opt").onclick = function(){ addChoiceOptRow("", false); };
-
-  var pairRows = document.getElementById("pair-rows");
-  function addPairRow(l, r){
-    var row = document.createElement("div"); row.className = "pair-row";
-    row.innerHTML = `
-      <input type="text" class="pair-left" placeholder="生詞" value="${l || ''}">
-      <input type="text" class="pair-right" placeholder="拼音／意思" value="${r || ''}">
-      <button type="button" class="row-del">✕</button>
-    `;
-    row.querySelector(".row-del").onclick = function(){ if(pairRows.children.length > 2) row.remove(); };
-    pairRows.appendChild(row);
-  }
-  document.getElementById("add-pair").onclick = function(){ addPairRow("", ""); };
-
-  var fileInput = document.getElementById("f-board-img");
-  document.getElementById("upload-box").onclick = function(){ fileInput.click(); };
-  fileInput.onchange = function(e){
-    var f = e.target.files[0];
-    if(!f) return;
-    var reader = new FileReader();
-    reader.onload = function(evt){
-      var img = new Image();
-      img.onload = function(){
-        var c = document.createElement("canvas");
-        var scale = Math.min(1, 900 / img.width);
-        c.width = Math.round(img.width * scale);
-        c.height = Math.round(img.height * scale);
-        var cx = c.getContext("2d");
-        cx.drawImage(img, 0, 0, c.width, c.height);
-        uploadedBase64 = c.toDataURL("image/jpeg", 0.75);
-        document.getElementById("upload-tip").textContent = "✅ 已上傳圖片：" + f.name;
-      };
-      img.src = evt.target.result;
-    };
-    reader.readAsDataURL(f);
-  };
-
-  function openQuestionDialog(sectionId, editQuestionId){
-    activeSectionForAdd = sectionId;
-    editingQuestionId = editQuestionId || null;
-    var secs = getSections();
-    var sec = secs[sectionId];
-    if(!sec) return;
-
-    var secType = sec.type;
-    matchFields.style.display = secType === "match" ? "" : "none";
-    choiceFields.style.display = secType === "choice" ? "" : "none";
-    reorderFields.style.display = secType === "reorder" ? "" : "none";
-    boardFields.style.display = secType === "board" ? "" : "none";
-
-    uploadedBase64 = "";
-    document.getElementById("upload-tip").textContent = "📷 點擊上傳背景圖片（JPG/PNG）";
-    pairRows.innerHTML = ""; choiceOptRows.innerHTML = "";
-
-    if(editingQuestionId){
-      document.getElementById("editor-dialog-title").textContent = "編輯現有題目";
-      var q = sec.questions[editingQuestionId];
-      document.getElementById("f-title").value = q.title || "";
-
-      if(secType === "match"){
-        document.getElementById("f-left-label").value = q.leftLabel || "生詞";
-        document.getElementById("f-right-label").value = q.rightLabel || "拼音／意思";
-        var pKeys = Object.keys(q.pairs || {});
-        if(pKeys.length === 0) addPairRow("", "");
-        pKeys.forEach(function(pk){ addPairRow(q.pairs[pk].left, q.pairs[pk].right); });
-      } else if(secType === "choice"){
-        document.getElementById("f-choice-prompt").value = q.prompt || "";
-        var ansIds = q.answerIds || (q.answerId ? [q.answerId] : []);
-        var cKeys = Object.keys(q.choices || {});
-        if(cKeys.length === 0) addChoiceOptRow("", false);
-        cKeys.forEach(function(ck){
-          var isCorrect = ansIds.indexOf(ck) !== -1;
-          addChoiceOptRow(q.choices[ck].text, isCorrect);
-        });
-      } else if(secType === "reorder"){
-        document.getElementById("f-reorder-prompt").value = q.prompt || "";
-        document.getElementById("f-reorder-answer").value = q.words ? q.words.join(", ") : "";
-      } else if(secType === "board"){
-        document.getElementById("f-board-desc").value = q.desc || "";
-        if(q.bgImage){
-          uploadedBase64 = q.bgImage;
-          document.getElementById("upload-tip").textContent = "✅ 已載入現有底圖";
-        }
-      }
-    } else {
-      document.getElementById("editor-dialog-title").textContent = "新增小題題目";
-      var count = Object.keys(sec.questions || {}).length;
-      document.getElementById("f-title").value = `第 ${count + 1} 題`;
-      if(secType === "match"){ addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie"); }
-      else if(secType === "choice"){ addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false); }
-      else if(secType === "reorder"){
-        document.getElementById("f-reorder-prompt").value = "請將下列詞語重組為正確句子";
-        document.getElementById("f-reorder-answer").value = "我, 愛, 學, 華語";
-      }
-    }
-    safeShowModal(editorDialog);
-  }
-
-  document.getElementById("btn-cancel").onclick = function(){ closeModalDialog(editorDialog); };
-
-  document.getElementById("editor-form").onsubmit = function(e){
-    e.preventDefault();
-    var title = document.getElementById("f-title").value.trim();
-    if(!activeSectionForAdd) return;
-
-    var secs = Object.assign({}, getSections());
-    var sec = secs[activeSectionForAdd];
-    if(!sec) return;
-
-    var qKeys = Object.keys(sec.questions || {});
-    if(!title){
-      title = `第 ${editingQuestionId ? (qKeys.indexOf(editingQuestionId) + 1) : (qKeys.length + 1)} 題`;
-    }
-
-    var qId = editingQuestionId || uid("q");
-    var existingOrder = (editingQuestionId && sec.questions[editingQuestionId]) ? sec.questions[editingQuestionId].order : qKeys.length;
-    var newQ = { id: qId, title: title, order: existingOrder };
-
-    if(sec.type === "board"){
-      newQ.desc = document.getElementById("f-board-desc").value.trim();
-      newQ.bgImage = uploadedBase64 || (editingQuestionId && sec.questions[editingQuestionId] ? sec.questions[editingQuestionId].bgImage : "");
-      newQ.gridType = "jiu";
-    } else if(sec.type === "choice"){
-      var choices = {}; var answerIds = [];
-      choiceOptRows.querySelectorAll(".choice-row").forEach(function(r, idx){
-        var txt = r.querySelector(".mc-opt-text").value.trim();
-        var isChecked = r.querySelector(".mc-correct-chk").checked;
-        if(txt){
-          var cid = "c" + (idx + 1); choices[cid] = { id: cid, text: txt };
-          if(isChecked) answerIds.push(cid);
-        }
-      });
-      if(answerIds.length === 0 && Object.keys(choices).length > 0) answerIds.push(Object.keys(choices)[0]);
-      newQ.prompt = document.getElementById("f-choice-prompt").value.trim() || title;
-      newQ.choices = choices; newQ.answerIds = answerIds;
-    } else if(sec.type === "reorder"){
-      var rawStr = document.getElementById("f-reorder-answer").value.trim();
-      var words = rawStr ? rawStr.split(/[,，\s]+/).filter(Boolean) : ["我", "是", "學生"];
-      newQ.prompt = document.getElementById("f-reorder-prompt").value.trim() || title;
-      newQ.words = words;
-    } else if(sec.type === "match"){
-      var pairs = {};
-      pairRows.querySelectorAll(".pair-row").forEach(function(r, idx){
-        var l = r.querySelector(".pair-left").value.trim();
-        var rt = r.querySelector(".pair-right").value.trim();
-        if(l && rt) pairs["p" + (idx + 1)] = { id: "p" + (idx + 1), left: l, right: rt };
-      });
-      newQ.leftLabel = document.getElementById("f-left-label").value.trim() || "生詞";
-      newQ.rightLabel = document.getElementById("f-right-label").value.trim() || "拼音／意思";
-      newQ.pairs = pairs;
-    }
-
-    if(!sec.questions) sec.questions = {};
-    sec.questions[qId] = newQ;
-    writeSections(secs, qId);
-    closeModalDialog(editorDialog);
-  };
-
-  /* Excel 匯入／匯出 */
-  var excelInput = document.getElementById("excel-file-input");
-  document.getElementById("btn-import-excel").onclick = function(){ excelInput.click(); };
-  excelInput.onchange = function(e){
-    var file = e.target.files[0]; if(!file) return;
-    var reader = new FileReader();
-    reader.onload = function(evt){
-      try {
-        var data = new Uint8Array(evt.target.result); var wb = XLSX.read(data, { type: 'array' });
-        var ws = wb.Sheets[wb.SheetNames[0]]; var rows = XLSX.utils.sheet_to_json(ws);
-        if(!rows || rows.length === 0){ alert("Excel 檔案內沒有資料！"); return; }
-        var newSections = Object.assign({}, getSections()); var grouped = {};
-        rows.forEach(function(row){
-          var secTitle = row["大題名稱"] || row["Section"] || "第一大題";
-          var type = (row["題型"] || row["Type"] || "match").toLowerCase();
-          if(!grouped[secTitle]) grouped[secTitle] = { title: secTitle, type: type, questions: {} };
-          var qTitle = row["小題名稱"] || row["Question"] || "第 1 題";
-          if(!grouped[secTitle].questions[qTitle]) grouped[secTitle].questions[qTitle] = { title: qTitle, rows: [] };
-          grouped[secTitle].questions[qTitle].rows.push(row);
-        });
-        var firstNewQId = null; var secOrder = Object.keys(newSections).length;
-        Object.keys(grouped).forEach(function(secTitle){
-          var gSec = grouped[secTitle]; var newSecId = uid("sec"); var questionsObj = {}; var qOrder = 0;
-          Object.keys(gSec.questions).forEach(function(qTitle){
-            var gQ = gSec.questions[qTitle]; var newQId = uid("q"); if(!firstNewQId) firstNewQId = newQId;
-            if(gSec.type === "match"){
-              var pairs = {};
-              gQ.rows.forEach(function(it, idx){
-                var pid = "p" + (idx + 1); var l = it["左欄生詞"] || ""; var r = it["右欄拼音或意思"] || "";
-                if(l && r) pairs[pid] = { id: pid, left: String(l), right: String(r) };
-              });
-              questionsObj[newQId] = { id: newQId, title: qTitle, order: qOrder++, leftLabel: "生詞", rightLabel: "拼音", pairs: pairs };
-            } else if(gSec.type === "reorder"){
-              var it = gQ.rows[0]; var wStr = it["正確句子"] || it["Words"] || "我,是,學生";
-              questionsObj[newQId] = { id: newQId, title: qTitle, order: qOrder++, prompt: it["題目說明"] || qTitle, words: wStr.split(/[,，\s]+/) };
-            }
-          });
-          newSections[newSecId] = { id: newSecId, title: secTitle, type: gSec.type, order: secOrder++, collapsed: false, questions: questionsObj };
-        });
-        writeSections(newSections, firstNewQId); alert("🎉 成功由 Excel 匯入題庫！");
-      } catch(err){ alert("解析失敗。"); }
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  document.getElementById("btn-dl-template").onclick = function(){
-    var templateData = [
-      { "大題名稱": "第一大題：生詞配對", "題型": "match", "小題名稱": "第1題", "左欄生詞": "你好", "右欄拼音或意思": "nǐ hǎo" },
-      { "大題名稱": "第三大題：句子重組", "題型": "reorder", "小題名稱": "第1題", "正確句子": "我,愛,學,華語" }
-    ];
-    var ws = XLSX.utils.json_to_sheet(templateData); var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "範本"); XLSX.writeFile(wb, "曼米中文_範本.xlsx");
-  };
-
-  document.getElementById("btn-export-excel").onclick = function(){
-    var secs = getSections(); var secKeys = getSortedSectionKeys(); var exportRows = [];
-    secKeys.forEach(function(sid){
-      var sec = secs[sid]; var qKeys = getSortedQuestionKeys(sec);
-      qKeys.forEach(function(qid){
-        var q = sec.questions[qid];
-        if(sec.type === "match" && q.pairs){
-          Object.keys(q.pairs).forEach(function(pid){
-            exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "左欄生詞": q.pairs[pid].left, "右欄拼音或意思": q.pairs[pid].right });
-          });
-        } else if(sec.type === "reorder" && q.words){
-          exportRows.push({ "大題名稱": sec.title, "題型": sec.type, "小題名稱": q.title, "正確句子": q.words.join(",") });
-        }
-      });
-    });
-    if(exportRows.length === 0){ alert("無題目可匯出"); return; }
-    var ws = XLSX.utils.json_to_sheet(exportRows); var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "題庫"); XLSX.writeFile(wb, "曼米中文題庫備份.xlsx");
-  };
-
-  function handleStudentJoin(){
-    if(!urlRoom) return;
-    if(urlName){ myName = decodeURIComponent(urlName); attachPresence(urlRoom, myId, myName); startRoom(urlRoom, "student"); return; }
-    var nameDialog = document.getElementById("student-name-dialog");
-    safeShowModal(nameDialog);
-    var submitBtn = document.getElementById("btn-submit-student-name");
-    if(submitBtn){
-      submitBtn.onclick = function(){
-        var input = document.getElementById("input-student-name"); var entered = input ? input.value.trim() : "";
-        if(!entered) entered = "學生 " + Math.floor(10 + Math.random()*90);
-        myName = entered; closeModalDialog(nameDialog);
-        attachPresence(urlRoom, myId, myName); startRoom(urlRoom, "student");
-      };
-    }
-  }
-
-  function onFirebaseReady(cb){ if(window.__firebaseReady) cb(); else window.addEventListener("firebase-bridge-ready", cb); }
-  if(isStudent){ lobbyView.style.display = "none"; onFirebaseReady(handleStudentJoin); }
-  else if(urlRoom){ onFirebaseReady(function(){ attachPresence(urlRoom, "teacher", "老師"); startRoom(urlRoom, "teacher"); }); }
-  else { showLobby(); }
 })();
 </script>
 </body>
