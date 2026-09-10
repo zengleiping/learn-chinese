@@ -254,14 +254,16 @@
   }
 
   .stage{
-    width:100%; max-width:1080px;
+    width:100%; max-width:1240px;
     background:var(--surface);
     border:1px solid var(--grid-line);
     border-radius:20px;
     padding:clamp(16px, 2.5vw, 28px);
     box-shadow:var(--shadow); min-height:560px; position:relative;
-    transition:transform .15s ease-out;
+    transition:transform .15s ease-out, max-width .2s ease;
   }
+  /* 側欄收合後舞台區有更多可用寬度，讓題目（尤其是寫字板）可以放大使用，而不是維持原本固定寬度 */
+  .layout.sidebar-collapsed .stage{ max-width:1480px; }
 
   /* 句子重組專屬樣式 */
   .reorder-container{display:flex;flex-direction:column;gap:24px;max-width:840px;margin:0 auto;}
@@ -282,6 +284,7 @@
   .reorder-chip.placed{background:var(--seal-soft); border-color:var(--seal); color:var(--seal);}
   .reorder-chip.correct-done{background:var(--bamboo-soft); border-color:var(--bamboo); color:var(--bamboo); cursor:default;}
   .reorder-chip.wrong-shake{border-color:#E63946 !important; background:rgba(230,57,70,0.12) !important; color:#E63946 !important; animation:shakeWrong .45s ease;}
+  .reorder-chip.drag-over-insert{ border-color:var(--seal); box-shadow:-9px 0 0 -6px var(--seal), 0 2px 6px rgba(0,0,0,0.03); transform:translateX(4px); }
 
   /* 浮動畫面縮放調節控制器 */
   .zoom-floating-widget{
@@ -378,35 +381,65 @@
   /* 寫字板版面 */
   .draw-board-layout{ display:flex; align-items:flex-start; justify-content:center; gap:20px; width:100%; }
   .draw-toolbar-vertical{
-    display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px 8px;
-    background:var(--surface-2); border:1.5px solid var(--grid-line); border-radius:14px; box-shadow:var(--shadow); flex-shrink:0; width:64px;
+    display:flex; flex-direction:column; align-items:center; gap:9px; padding:14px 10px;
+    background:var(--surface-2); border:1.5px solid var(--ink-soft); border-color:rgba(28,33,30,0.16);
+    border-radius:16px; box-shadow:var(--shadow); flex-shrink:0; width:88px;
   }
+  :root:not([data-theme="light"]) .draw-toolbar-vertical{ border-color:rgba(255,255,255,0.16); }
+  .tool-btn-v-wrap{ position:relative; width:100%; }
   .tool-btn-v{
-    width:48px; height:42px; border-radius:10px; border:1.5px solid var(--grid-line);
-    background:var(--surface); font-size:11.5px; font-weight:700; cursor:pointer; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:2px; color:var(--ink); transition:all .12s ease;
+    width:100%; height:60px; border-radius:12px; border:1.5px solid rgba(28,33,30,0.14);
+    background:var(--surface); font-size:12.5px; font-weight:700; cursor:pointer; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:3px; color:var(--ink); transition:all .12s ease;
   }
-  .tool-btn-v:hover{border-color:var(--ink-soft); background:var(--surface-2);}
-  .tool-btn-v.active{border-color:var(--seal); background:var(--seal-soft); color:var(--seal);}
-  .tool-v-sep{width:36px; height:1px; background:var(--grid-line); margin:3px 0;}
+  :root:not([data-theme="light"]) .tool-btn-v{ border-color:rgba(255,255,255,0.14); }
+  .tool-btn-v:hover{border-color:var(--seal); background:var(--surface-2); transform:translateY(-1px);}
+  .tool-btn-v.active{border-color:var(--seal); background:var(--seal-soft); color:var(--seal); box-shadow:0 0 0 2px var(--seal-ring) inset;}
+  .tool-btn-v-icon{ font-size:21px; line-height:1; }
+  .tool-btn-v-label{ font-size:12px; font-weight:700; }
+  .tool-v-sep{width:100%; height:1px; background:rgba(28,33,30,0.14); margin:3px 0;}
+  :root:not([data-theme="light"]) .tool-v-sep{ background:rgba(255,255,255,0.14); }
 
-  .color-dot-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; padding:2px; }
-  .size-btn-group{ display:flex; flex-direction:column; gap:4px; width:100%; align-items:center; }
-  .size-btn-v{
-    width:44px; padding:3px 0; font-size:11px; font-weight:700; border-radius:6px; border:1px solid var(--grid-line); background:var(--surface); cursor:pointer; color:var(--ink);
+  /* 顏色選擇彈出面板：滑鼠移到「畫筆」或「打字」工具上才浮現，平常不佔版面 */
+  .color-popover{
+    position:absolute; left:100%; top:50%; margin-left:10px; transform:translateY(-50%) translateX(-6px);
+    background:var(--surface); border:1.5px solid var(--grid-line); border-radius:14px;
+    box-shadow:0 12px 28px rgba(0,0,0,0.18); padding:10px; z-index:60;
+    opacity:0; visibility:hidden; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
   }
+  .tool-btn-v-wrap:hover .color-popover, .tool-btn-v-wrap:focus-within .color-popover{
+    opacity:1; visibility:visible; pointer-events:auto; transform:translateY(-50%) translateX(0);
+  }
+  .color-popover-title{ font-size:11px; font-weight:700; color:var(--ink-soft); text-align:center; margin-bottom:7px; white-space:nowrap; }
+  .color-dot-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:9px; padding:2px; }
+  .color-dot{
+    width:26px; height:26px; border-radius:50%; cursor:pointer; border:2px solid var(--surface);
+    box-shadow:0 0 0 1.5px rgba(28,33,30,0.25); transition:all .12s ease;
+  }
+  .color-dot:hover{ transform:scale(1.14); }
+  .color-dot.active{ box-shadow:0 0 0 1.5px rgba(28,33,30,0.25), 0 0 0 3px var(--seal); }
+
+  .size-btn-group{ display:flex; flex-direction:column; gap:5px; width:100%; align-items:center; }
+  .size-btn-v{
+    width:100%; padding:6px 0; font-size:12.5px; font-weight:700; border-radius:8px; border:1.5px solid rgba(28,33,30,0.14); background:var(--surface); cursor:pointer; color:var(--ink);
+  }
+  :root:not([data-theme="light"]) .size-btn-v{ border-color:rgba(255,255,255,0.14); }
   .size-btn-v.active{background:var(--seal); color:#fff; border-color:var(--seal);}
 
-  .grid-btn-group{ display:flex; flex-direction:column; gap:4px; width:100%; align-items:center; }
+  .grid-btn-group{ display:flex; flex-direction:column; gap:5px; width:100%; align-items:center; }
   .grid-btn-v{
-    width:44px; padding:4px 0; font-size:11px; font-weight:700; border-radius:6px; border:1px solid var(--grid-line); background:var(--surface); cursor:pointer; color:var(--ink);
+    width:100%; padding:6px 0; font-size:12.5px; font-weight:700; border-radius:8px; border:1.5px solid rgba(28,33,30,0.14); background:var(--surface); cursor:pointer; color:var(--ink);
   }
+  :root:not([data-theme="light"]) .grid-btn-v{ border-color:rgba(255,255,255,0.14); }
   .grid-btn-v.active{background:var(--seal); color:#fff; border-color:var(--seal);}
 
   .canvas-stage-wrap{
-    position:relative; width:100%; max-width:min(680px, 72vh); aspect-ratio:1 / 1;
+    position:relative; width:100%; max-width:min(820px, 76vh); aspect-ratio:1 / 1;
     background:transparent; border:2.5px solid var(--seal-ring); border-radius:18px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); flex-grow:1;
+    transition:max-width .2s ease;
   }
+  /* 側欄收合後給寫字板更大的空間 */
+  .layout.sidebar-collapsed .canvas-stage-wrap{ max-width:min(980px, 78vh); }
   .canvas-stage-wrap.grid-tian{
     background-image: linear-gradient(to right, var(--seal-ring) 2px, transparent 2px), linear-gradient(to bottom, var(--seal-ring) 2px, transparent 2px); background-size:50% 50%;
   }
@@ -2530,7 +2563,63 @@
     var rightCol = document.createElement("div"); rightCol.className = "match-col";
     rightCol.innerHTML = `<div class="match-col-label">${q.rightLabel || "配對"}</div>`;
 
-    var selectedLeft = null;
+    // 選取狀態不限定一定要先點左欄：不論先點左邊還是右邊的項目，都會先顯示「已選取」的變色提示，
+    // 接著點另一側的項目才會嘗試配對；點同一側的另一個項目則是換成新的選取。
+    var selection = null; // { side: "left"|"right", pid: string }
+
+    function clearSelectedVisual(){
+      wrap.querySelectorAll(".match-item.selected").forEach(function(x){ x.classList.remove("selected"); });
+    }
+
+    function handleItemClick(side, pid, btn, locked){
+      if(!interactive || locked) return;
+
+      // 再點一次目前已選取的項目：取消選取
+      if(selection && selection.side === side && selection.pid === pid){
+        selection = null;
+        clearSelectedVisual();
+        return;
+      }
+
+      // 還沒選任何東西，或是點了同一側的另一個項目：更新為新的選取（兩側都可以是「第一次點擊」）
+      if(!selection || selection.side === side){
+        selection = { side: side, pid: pid };
+        clearSelectedVisual();
+        btn.classList.add("selected");
+        return;
+      }
+
+      // 已經選了另一側的項目，這次點的是不同側 → 嘗試配對
+      var leftPid = side === "left" ? pid : selection.pid;
+      var rightPid = side === "right" ? pid : selection.pid;
+      var leftBtn = leftCol.querySelector('[data-pid="' + leftPid + '"]');
+      var rightBtn = rightCol.querySelector('[data-pid="' + rightPid + '"]');
+
+      if(isTest){
+        userPairs[leftPid] = rightPid;
+        writeProgress(q.id, { userPairs: userPairs });
+        selection = null;
+        renderStage();
+        return;
+      }
+
+      if(leftPid === rightPid){
+        matched[leftPid] = true;
+        playCorrectSound();
+        writeProgress(q.id, { matched: matched });
+        selection = null;
+        renderStage();
+      } else {
+        if(leftBtn) leftBtn.classList.add("wrong");
+        if(rightBtn) rightBtn.classList.add("wrong");
+        playWrongSound();
+        selection = null;
+        setTimeout(function(){
+          if(leftBtn) leftBtn.classList.remove("wrong", "selected");
+          if(rightBtn) rightBtn.classList.remove("wrong", "selected");
+        }, 450);
+      }
+    }
 
     pairKeys.forEach(function(pid){
       var p = pairs[pid];
@@ -2540,12 +2629,7 @@
       var locked = !isTest && !!matched[pid];
       if(locked){ btn.classList.add("matched"); btn.disabled = true; }
       if(!interactive) btn.disabled = true;
-      btn.onclick = function(){
-        if(!interactive || locked) return;
-        leftCol.querySelectorAll(".match-item").forEach(function(x){ x.classList.remove("selected"); });
-        btn.classList.add("selected");
-        selectedLeft = pid;
-      };
+      btn.onclick = function(){ handleItemClick("left", pid, btn, locked); };
       leftCol.appendChild(btn);
     });
 
@@ -2554,37 +2638,10 @@
       var btn = document.createElement("button");
       btn.type = "button"; btn.className = "match-item"; btn.dataset.side = "right"; btn.dataset.pid = pid;
       btn.textContent = p.right;
+      var rLocked = !isTest && !!matched[pid];
+      if(rLocked){ btn.classList.add("matched"); btn.disabled = true; }
       if(!interactive) btn.disabled = true;
-      btn.onclick = function(){
-        if(!interactive || !selectedLeft) return;
-        var lpid = selectedLeft;
-
-        if(isTest){
-          userPairs[lpid] = pid;
-          writeProgress(q.id, { userPairs: userPairs });
-          selectedLeft = null;
-          renderStage();
-          return;
-        }
-
-        if(lpid === pid){
-          matched[lpid] = true;
-          playCorrectSound();
-          writeProgress(q.id, { matched: matched });
-          selectedLeft = null;
-          renderStage();
-        } else {
-          var leftBtn = leftCol.querySelector('[data-pid="' + lpid + '"]');
-          if(leftBtn) leftBtn.classList.add("wrong");
-          btn.classList.add("wrong");
-          playWrongSound();
-          selectedLeft = null;
-          setTimeout(function(){
-            if(leftBtn) leftBtn.classList.remove("wrong", "selected");
-            btn.classList.remove("wrong");
-          }, 450);
-        }
-      };
+      btn.onclick = function(){ handleItemClick("right", pid, btn, rLocked); };
       rightCol.appendChild(btn);
     });
 
@@ -2710,6 +2767,42 @@
     var slotZone = document.createElement("div");
     slotZone.className = "reorder-slot-zone";
 
+    // 依拖放資料類型與來源索引，把該詞語搬到已排列區的第 targetIdx 個位置（不傳 targetIdx 代表搬到最後面）
+    // 這個函式同時支援：從詞語池拖進來、以及在已排列區內拖曳既有的詞語方塊調整順序
+    // → 學生排錯順序時，不需要整個重新作答，只要把方塊拖曳到正確位置即可
+    function handleSlotDrop(e, targetIdx){
+      e.preventDefault();
+      e.stopPropagation();
+      slotZone.classList.remove("drag-over-zone");
+      var data = e.dataTransfer.getData("text/plain");
+      if(!data) return;
+      var parts = data.split(":");
+      var type = parts[0];
+      var srcIdx = parseInt(parts[parts.length - 1], 10);
+      if(isNaN(srcIdx)) return;
+
+      if(type === "pool"){
+        if(poolWords[srcIdx] === undefined) return;
+        var word = poolWords.splice(srcIdx, 1)[0];
+        var insertAt = (targetIdx === undefined || targetIdx === null) ? userWords.length : targetIdx;
+        userWords.splice(insertAt, 0, word);
+        evaluateReorderState(q, userWords, poolWords, correctWords);
+      } else if(type === "user"){
+        if(userWords[srcIdx] === undefined) return;
+        if(targetIdx === undefined || targetIdx === null){
+          if(srcIdx === userWords.length - 1) return; // 已經在最後面，不需異動
+          var wEnd = userWords.splice(srcIdx, 1)[0];
+          userWords.push(wEnd);
+        } else {
+          if(srcIdx === targetIdx) return;
+          var wMove = userWords.splice(srcIdx, 1)[0];
+          var insertAt2 = (srcIdx < targetIdx) ? targetIdx - 1 : targetIdx;
+          userWords.splice(insertAt2, 0, wMove);
+        }
+        evaluateReorderState(q, userWords, poolWords, correctWords);
+      }
+    }
+
     slotZone.ondragover = function(e){
       if(!interactive || isRevealed) return;
       e.preventDefault();
@@ -2720,22 +2813,8 @@
       slotZone.classList.remove("drag-over-zone");
     };
     slotZone.ondrop = function(e){
-      e.preventDefault();
-      slotZone.classList.remove("drag-over-zone");
-      var data = e.dataTransfer.getData("text/plain");
-      if(!data) return;
-
-      var parts = data.split(":");
-      var type = parts[0];
-      var idx = parseInt(parts[2], 10);
-
-      if(type === "pool"){
-        if(!isNaN(idx) && poolWords[idx] !== undefined){
-          var word = poolWords.splice(idx, 1)[0];
-          userWords.push(word);
-          evaluateReorderState(q, userWords, poolWords, correctWords);
-        }
-      }
+      if(!interactive || isRevealed) { e.preventDefault(); return; }
+      handleSlotDrop(e); // 拖放到已排列區的空白處（非特定方塊上）：搬到最後面
     };
 
     if(userWords.length === 0){
@@ -2750,6 +2829,17 @@
           chip.ondragstart = function(e){
             e.dataTransfer.setData("text/plain", "user:" + w + ":" + idx);
             e.stopPropagation();
+          };
+          chip.ondragover = function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = "move";
+            chip.classList.add("drag-over-insert");
+          };
+          chip.ondragleave = function(){ chip.classList.remove("drag-over-insert"); };
+          chip.ondrop = function(e){
+            chip.classList.remove("drag-over-insert");
+            handleSlotDrop(e, idx); // 拖放到某個已排列的方塊上：插入到它前面（可用來調整順序）
           };
           chip.onclick = function(){
             userWords.splice(idx, 1);
@@ -2835,11 +2925,16 @@
             writeProgress(q.id, { revealed: true });
           } else {
             playWrongSound();
+            // 答錯不清空已排列的詞語：只做搖晃提示，讓學生可以直接拖曳方塊調整順序，
+            // 不需要整個重新作答（把詞語一個個點回詞語池再重排）
             var slotZone = document.querySelector(".reorder-slot-zone");
-            if(slotZone) slotZone.querySelectorAll(".reorder-chip").forEach(function(el){ el.classList.add("wrong-shake"); });
-            setTimeout(function(){
-              writeProgress(q.id, { userWords: [], poolWords: seededShuffle(correctWords, q.id + "|reorder-pool") });
-            }, 500);
+            if(slotZone){
+              var wrongChips = slotZone.querySelectorAll(".reorder-chip");
+              wrongChips.forEach(function(el){ el.classList.add("wrong-shake"); });
+              setTimeout(function(){
+                wrongChips.forEach(function(el){ el.classList.remove("wrong-shake"); });
+              }, 550);
+            }
           }
         }
       }, 2000);
@@ -2862,24 +2957,30 @@
     var layout = document.createElement("div"); layout.className = "draw-board-layout";
 
     var vToolbar = document.createElement("div"); vToolbar.className = "draw-toolbar-vertical";
+    // 顏色選項共用內容：畫筆／打字兩個工具各自 hover 才浮現一份，選色會同步套用到 boardState.color
+    var colorDotsHtml = `
+        <div class="color-dot ${boardState.color==='#B23B32'?'active':''}" data-color="#B23B32" style="background:#B23B32;" title="紅色"></div>
+        <div class="color-dot dark-color-dot ${(boardState.color==='#2A333C'||boardState.color==='#E5EAE6'||boardState.color==='#FFFFFF')?'active':''}" data-color="#2A333C" style="background:#2A333C;" title="黑/白"></div>
+        <div class="color-dot ${boardState.color==='#1E88E5'?'active':''}" data-color="#1E88E5" style="background:#1E88E5;" title="藍色"></div>
+        <div class="color-dot ${boardState.color==='#4C7A5E'?'active':''}" data-color="#4C7A5E" style="background:#4C7A5E;" title="綠色"></div>
+        <div class="color-dot ${boardState.color==='#FB8C00'?'active':''}" data-color="#FB8C00" style="background:#FB8C00;" title="橘色"></div>`;
+
     vToolbar.innerHTML = `
-      <button type="button" class="tool-btn-v ${boardState.tool==='pen'?'active':''}" data-tool="pen" title="畫筆"><span>✏️</span><span style="font-size:10px;">畫筆</span></button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='text'?'active':''}" data-tool="text" title="打字"><span>🔤</span><span style="font-size:10px;">打字</span></button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='stroke-eraser'?'active':''}" data-tool="stroke-eraser" title="筆畫整條擦除"><span>🪄</span><span style="font-size:10px;">筆畫擦</span></button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部橡皮擦"><span>🧽</span><span style="font-size:10px;">局部擦</span></button>
+      <div class="tool-btn-v-wrap">
+        <button type="button" class="tool-btn-v ${boardState.tool==='pen'?'active':''}" data-tool="pen" title="畫筆（滑鼠移入可選顏色）"><span class="tool-btn-v-icon">✏️</span><span class="tool-btn-v-label">畫筆</span></button>
+        <div class="color-popover"><div class="color-popover-title">筆刷顏色</div><div class="color-dot-grid">${colorDotsHtml}</div></div>
+      </div>
+      <div class="tool-btn-v-wrap">
+        <button type="button" class="tool-btn-v ${boardState.tool==='text'?'active':''}" data-tool="text" title="打字（滑鼠移入可選顏色）"><span class="tool-btn-v-icon">🔤</span><span class="tool-btn-v-label">打字</span></button>
+        <div class="color-popover"><div class="color-popover-title">文字顏色</div><div class="color-dot-grid">${colorDotsHtml}</div></div>
+      </div>
+      <button type="button" class="tool-btn-v ${boardState.tool==='stroke-eraser'?'active':''}" data-tool="stroke-eraser" title="筆畫整條擦除"><span class="tool-btn-v-icon">🪄</span><span class="tool-btn-v-label">筆畫擦</span></button>
+      <button type="button" class="tool-btn-v ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部橡皮擦"><span class="tool-btn-v-icon">🧽</span><span class="tool-btn-v-label">局部擦</span></button>
       <div class="tool-v-sep"></div>
       <div class="grid-btn-group">
         <button type="button" class="grid-btn-v ${currentGrid==='none'?'active':''}" data-grid="none">無格</button>
         <button type="button" class="grid-btn-v ${currentGrid==='tian'?'active':''}" data-grid="tian">田字</button>
         <button type="button" class="grid-btn-v ${currentGrid==='jiu'?'active':''}" data-grid="jiu">九宮</button>
-      </div>
-      <div class="tool-v-sep"></div>
-      <div class="color-dot-grid">
-        <div class="color-dot ${boardState.color==='#B23B32'?'active':''}" data-color="#B23B32" style="background:#B23B32;" title="紅色"></div>
-        <div class="color-dot ${(boardState.color==='#2A333C'||boardState.color==='#E5EAE6'||boardState.color==='#FFFFFF')?'active':''}" id="btn-theme-dark-color" data-color="#2A333C" style="background:#2A333C;" title="黑/白"></div>
-        <div class="color-dot ${boardState.color==='#1E88E5'?'active':''}" data-color="#1E88E5" style="background:#1E88E5;" title="藍色"></div>
-        <div class="color-dot ${boardState.color==='#4C7A5E'?'active':''}" data-color="#4C7A5E" style="background:#4C7A5E;" title="綠色"></div>
-        <div class="color-dot ${boardState.color==='#FB8C00'?'active':''}" data-color="#FB8C00" style="background:#FB8C00;" title="橘色"></div>
       </div>
       <div class="tool-v-sep"></div>
       <div class="size-btn-group">
@@ -2888,7 +2989,7 @@
         <button type="button" class="size-btn-v ${boardState.size===12?'active':''}" data-size="12">粗</button>
       </div>
       <div class="tool-v-sep"></div>
-      <select class="board-font-select" style="width:48px; padding:2px; font-size:11px; text-align:center; background:var(--surface); border-radius:6px; border:1px solid var(--grid-line);">
+      <select class="board-font-select" style="width:100%; padding:6px 0; font-size:12.5px; font-weight:700; text-align:center; background:var(--surface); border-radius:8px; border:1.5px solid rgba(28,33,30,0.14);">
         <option value="24" ${boardState.fontSize===24?'selected':''}>24</option>
         <option value="32" ${boardState.fontSize===32?'selected':''}>32</option>
         <option value="40" ${boardState.fontSize===40?'selected':''}>40</option>
@@ -2897,11 +2998,11 @@
         <option value="84" ${boardState.fontSize===84?'selected':''}>84</option>
       </select>
       <div class="tool-v-sep"></div>
-      <button type="button" class="tool-btn-v" id="btn-upload-bg" title="上傳底圖"><span>📷</span><span style="font-size:9.5px;">底圖</span></button>
-      <button type="button" class="tool-btn-v" id="btn-remove-bg" style="display:${currentBg ? 'flex' : 'none'}; color:#E63946;" title="清除底圖"><span>✕</span><span style="font-size:9.5px;">清底圖</span></button>
+      <button type="button" class="tool-btn-v" id="btn-upload-bg" title="上傳底圖"><span class="tool-btn-v-icon">📷</span><span class="tool-btn-v-label">底圖</span></button>
+      <button type="button" class="tool-btn-v" id="btn-remove-bg" style="display:${currentBg ? 'flex' : 'none'}; color:#E63946;" title="清除底圖"><span class="tool-btn-v-icon">✕</span><span class="tool-btn-v-label">清底圖</span></button>
       <input type="file" id="board-bg-file" accept="image/*" style="display:none;">
       <div class="tool-v-sep"></div>
-      <button type="button" class="tool-btn-v" id="btn-clear-draw" style="color:var(--seal);" title="清空畫布"><span>🗑️</span><span style="font-size:9.5px;">清空</span></button>
+      <button type="button" class="tool-btn-v" id="btn-clear-draw" style="color:var(--seal);" title="清空畫布"><span class="tool-btn-v-icon">🗑️</span><span class="tool-btn-v-label">清空</span></button>
     `;
 
     layout.appendChild(vToolbar);
@@ -2980,16 +3081,15 @@
       };
     }
 
-    var darkColorDot = vToolbar.querySelector("#btn-theme-dark-color");
-    if(darkColorDot){
+    // 畫筆／打字兩個顏色面板各有一份「黑/白」色點，兩邊都要一起依主題更新，不能只更新第一個
+    var darkColorDots = vToolbar.querySelectorAll(".dark-color-dot");
+    if(darkColorDots.length){
       if(currentBgMode === "dark"){
-        darkColorDot.style.background = "#E5EAE6";
-        darkColorDot.dataset.color = "#FFFFFF";
         if(boardState.color === "#2A333C") boardState.color = "#FFFFFF";
+        darkColorDots.forEach(function(d){ d.style.background = "#E5EAE6"; d.dataset.color = "#FFFFFF"; });
       } else {
-        darkColorDot.style.background = "#2A333C";
-        darkColorDot.dataset.color = "#2A333C";
         if(boardState.color === "#FFFFFF") boardState.color = "#2A333C";
+        darkColorDots.forEach(function(d){ d.style.background = "#2A333C"; d.dataset.color = "#2A333C"; });
       }
     }
 
@@ -3247,9 +3347,12 @@
 
     vToolbar.querySelectorAll(".color-dot").forEach(function(d){
       d.onclick = function(){
-        vToolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
-        d.classList.add("active");
-        boardState.color = d.dataset.color;
+        var newColor = d.dataset.color;
+        boardState.color = newColor;
+        // 畫筆／打字兩個顏色面板各有一份色點，用顏色值同步兩邊的選取狀態，而不是只標記被點的那一顆
+        vToolbar.querySelectorAll(".color-dot").forEach(function(x){
+          x.classList.toggle("active", x.dataset.color === newColor);
+        });
       };
     });
 
