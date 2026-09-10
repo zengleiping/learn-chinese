@@ -88,7 +88,7 @@
   .room-code b{color:var(--seal);}
   .presence-dot{width:8px;height:8px;border-radius:50%;background:var(--ink-soft);flex:none;}
   .presence-dot.online{background:var(--bamboo); box-shadow: 0 0 8px rgba(45,90,39,0.4);}
-  
+
   .toggle{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;color:var(--ink-soft);cursor:pointer;user-select:none;}
   .toggle-track{width:34px;height:18px;border-radius:99px;background:var(--surface-2);border:1px solid var(--grid-line);position:relative;transition:background .2s ease;}
   .toggle-track::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--surface);transition:transform .2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
@@ -125,7 +125,7 @@
   .project-grid{
     display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:24px;
   }
-  
+
   .item-card{
     background:var(--surface);border:1.5px solid var(--grid-line);border-radius:16px;
     padding:24px;display:flex;flex-direction:column;justify-content:space-between;
@@ -163,7 +163,7 @@
   }
   .btn-new{width:100%;justify-content:center;padding:11px 16px; font-weight:700;}
   .sidebar-excel-group{display:flex;flex-direction:column;gap:6px;margin-bottom:4px;}
-  
+
   /* 試卷考題清單 */
   .section-list{display:flex;flex-direction:column;gap:10px;}
   .section-block{
@@ -197,7 +197,7 @@
   .section-body{
     padding:6px 8px;display:flex;flex-direction:column;gap:4px;background:var(--surface);
   }
-  
+
   .drag-handle-icon{
     color:var(--ink-soft);opacity:0.45;font-size:12px;cursor:grab;margin-right:2px;user-select:none; pointer-events:none;
   }
@@ -214,7 +214,7 @@
     background:var(--seal-soft);color:var(--seal);font-weight:700;border-color:var(--seal-ring);
   }
   .question-item-btn.is-dragging{ opacity:0.35;border:1px dashed var(--seal);background:var(--seal-soft); }
-  
+
   .question-item-btn.drag-indicator-top::before {
     content: ""; position: absolute; top: -2.5px; left: 4px; right: 4px; height: 3px;
     background: var(--seal); border-radius: 99px; box-shadow: 0 0 6px var(--seal-ring); z-index: 100; pointer-events: none;
@@ -235,7 +235,7 @@
     display:flex; justify-content:center;
     position:relative;
   }
-  
+
   .stage{
     width:100%; max-width:1080px;
     background:var(--surface);
@@ -254,7 +254,7 @@
     transition:background .15s ease;
   }
   .reorder-slot-zone.drag-over-zone{ background:var(--seal-soft); border-color:var(--seal); }
-  
+
   .reorder-chip{
     font-family:"LXGW WenKai TC",serif;font-size:18px;font-weight:700;padding:10px 20px;
     background:var(--surface);border:2px solid var(--grid-line);color:var(--ink);border-radius:10px;cursor:grab;
@@ -400,7 +400,7 @@
   .bg-img-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:1;}
   canvas#paint-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;touch-action:none;cursor:crosshair;}
   .text-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
-  
+
   .movable-text{
     position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif; font-weight:700;line-height:1;color:var(--ink);user-select:none; padding:0 !important;border:1.5px dashed transparent;border-radius:4px;white-space:nowrap; cursor:grab;transform:translate(-50%, -50%); background: transparent !important; width: max-content; max-width: max-content; transition:border-color .15s ease;
   }
@@ -463,7 +463,7 @@
   .dialog-head h2{margin:0 0 4px;font-size:20px;color:var(--ink);}
   .dialog-body{padding:16px 28px;overflow-y:auto;max-height:58vh;}
   .dialog-foot{padding:16px 28px 24px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--grid-line);margin-top:8px;}
-  
+
   .type-toggle{display:flex;gap:8px;margin-bottom:16px;}
   .type-toggle button{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--grid-line);background:var(--surface-2);color:var(--ink);font-weight:600;font-size:13.5px;cursor:pointer;}
   .type-toggle button.active{border-color:var(--seal);color:var(--seal);background:var(--seal-soft);}
@@ -533,7 +533,7 @@
 
       <div class="section-list" id="section-tree-list"></div>
     </aside>
-    
+
     <main class="stage-wrap">
       <div class="stage" id="stage"></div>
 
@@ -1482,6 +1482,50 @@
   var btnCloseScore = document.getElementById("btn-close-score");
   if(btnCloseScore) btnCloseScore.onclick = function(){ closeModalDialog(document.getElementById("score-dialog")); };
 
+  /* ================== 畫面縮放按鈕 ================== */
+  var btnZoomIn = document.getElementById("btn-zoom-in");
+  var btnZoomOut = document.getElementById("btn-zoom-out");
+  var zoomPercentText = document.getElementById("zoom-percent-text");
+  if(btnZoomIn) btnZoomIn.onclick = function(){ applyStageZoom(currentZoomRatio + 0.1); };
+  if(btnZoomOut) btnZoomOut.onclick = function(){ applyStageZoom(currentZoomRatio - 0.1); };
+  if(zoomPercentText) zoomPercentText.onclick = function(){ applyStageZoom(1.0); };
+
+  /* ================== 設定彈窗按鈕 ================== */
+  var settingsDialog = document.getElementById("settings-dialog");
+  var btnCloseSettings = document.getElementById("btn-close-settings");
+  if(btnCloseSettings) btnCloseSettings.onclick = function(){ closeModalDialog(settingsDialog); };
+
+  document.querySelectorAll(".btn-mode-toggle").forEach(function(b){
+    b.onclick = function(){
+      currentClassMode = b.dataset.mode;
+      localStorage.setItem("hanyu_class_mode", currentClassMode);
+      applyTheme(currentBgMode, currentAccentColor, true);
+      if(activeProjectId || inRoom()) renderStage();
+    };
+  });
+  document.querySelectorAll(".btn-theme-bg").forEach(function(b){
+    b.onclick = function(){ applyTheme(b.dataset.bg, currentAccentColor, true); };
+  });
+  document.querySelectorAll(".btn-theme-accent").forEach(function(b){
+    b.onclick = function(){ applyTheme(currentBgMode, b.dataset.accent, true); };
+  });
+
+  var soundStyleSelect = document.getElementById("setting-sound-style");
+  if(soundStyleSelect){
+    soundStyleSelect.value = currentSoundStyle;
+    soundStyleSelect.onchange = function(){
+      currentSoundStyle = soundStyleSelect.value;
+      localStorage.setItem("hanyu_sound_style", currentSoundStyle);
+    };
+  }
+  var btnTestSound = document.getElementById("btn-test-sound");
+  if(btnTestSound){
+    btnTestSound.onclick = function(){
+      playTone(currentSoundStyle, true);
+      setTimeout(function(){ playTone(currentSoundStyle, false); }, 700);
+    };
+  }
+
   /* 大廳切換 */
   var lobbyView = document.getElementById("lobby-view");
   var classroomView = document.getElementById("classroom-view");
@@ -1587,6 +1631,31 @@
     delete fsData.folders[folderId];
   }
 
+  /* ================== 資料夾下拉選單產生器 ================== */
+  function populateFolderSelect(selectEl, selectedId, excludeId){
+    if(!selectEl) return;
+    selectEl.innerHTML = "";
+    var rootOpt = document.createElement("option");
+    rootOpt.value = ""; rootOpt.textContent = "🏠 全部專案大廳（不放入資料夾）";
+    selectEl.appendChild(rootOpt);
+
+    function walk(parentId, depth){
+      Object.keys(fsData.folders || {})
+        .filter(function(fid){ return (fsData.folders[fid].parentId || null) === parentId; })
+        .forEach(function(fid){
+          if(excludeId && (fid === excludeId || isDescendantOf(fid, excludeId))) return;
+          var f = fsData.folders[fid];
+          var opt = document.createElement("option");
+          opt.value = fid;
+          opt.textContent = "　".repeat(depth) + "📁 " + f.title;
+          selectEl.appendChild(opt);
+          walk(fid, depth + 1);
+        });
+    }
+    walk(null, 0);
+    selectEl.value = selectedId || "";
+  }
+
   var folderDialog = document.getElementById("folder-dialog");
   function openFolderDialog(folderId){
     editingFolderId = folderId || null;
@@ -1642,7 +1711,7 @@
     if(editingProjectId && fsData.projects[editingProjectId]){
       fsData.projects[editingProjectId].title = title; fsData.projects[editingProjectId].desc = desc; fsData.projects[editingProjectId].folderId = folderId;
     } else {
-      var newPId = uid("proj"); fsData.projects[newPId] = createDefaultProjectData(title, desc, folderId);
+      var newProj = createDefaultProjectData(title, desc, folderId); fsData.projects[newProj.id] = newProj;
     }
     saveFS(); closeModalDialog(projectDialog); renderLobbyGrid();
   };
@@ -1734,6 +1803,43 @@
     });
     onValue(ref(db, "roomCursors/" + rId), function(snap){ renderMultiCursors(snap.val()); });
   }
+
+  /* ================== 多人游標顯示與廣播 ================== */
+  function renderMultiCursors(cursorsData){
+    var box = document.getElementById("multi-cursor-box");
+    if(!box) return;
+    box.innerHTML = "";
+    if(!cursorsData || !cursorOn) return;
+    var curInfo = getCurrentQInfo();
+    var curQId = curInfo ? curInfo.question.id : null;
+    Object.keys(cursorsData).forEach(function(pid){
+      if(pid === myId) return;
+      var c = cursorsData[pid];
+      if(!c || c.qId !== curQId) return;
+      var color = getColorForStudent(pid, c.role);
+      var el = document.createElement("div"); el.className = "peer-cursor";
+      el.style.left = c.x + "%"; el.style.top = c.y + "%";
+      el.innerHTML = '<span class="peer-cursor-dot" style="background:' + color + ';"></span>' +
+        '<span class="peer-cursor-label" style="background:' + color + ';">' + escapeHtml(c.name || "訪客") + '</span>';
+      box.appendChild(el);
+    });
+  }
+
+  var lastCursorSendAt = 0;
+  document.addEventListener("mousemove", function(e){
+    if(!inRoom() || !cursorOn) return;
+    var now = Date.now();
+    if(now - lastCursorSendAt < 80) return;
+    lastCursorSendAt = now;
+    var boardArea = document.getElementById("board-area");
+    if(!boardArea) return;
+    var rect = boardArea.getBoundingClientRect();
+    if(e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) return;
+    var qInfo = getCurrentQInfo(); if(!qInfo) return;
+    var x = (e.clientX - rect.left) / rect.width * 100;
+    var y = (e.clientY - rect.top) / rect.height * 100;
+    set(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: x, y: y, name: myName, role: roomRole, qId: qInfo.question.id });
+  });
 
   /* ================== 側欄渲染 ================== */
   var sectionTreeListEl = document.getElementById("section-tree-list");
@@ -1898,6 +2004,359 @@
     });
   }
 
+  /* ================== 新增／編輯大題彈窗 ================== */
+  var sectionDialog = document.getElementById("section-dialog");
+  var sectionTypeToggle = document.getElementById("section-type-toggle");
+  var currentSectionTypeChoice = "match";
+
+  sectionTypeToggle.querySelectorAll("button").forEach(function(b){
+    b.onclick = function(){
+      if(b.disabled) return;
+      sectionTypeToggle.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); });
+      b.classList.add("active");
+      currentSectionTypeChoice = b.dataset.type;
+    };
+  });
+
+  function openSectionDialog(secId){
+    editingSectionId = secId || null;
+    var secs = getSections();
+    var sec = secId ? secs[secId] : null;
+    document.getElementById("section-dialog-title").textContent = secId ? "編輯試卷大題" : "新增試卷大題";
+    currentSectionTypeChoice = sec ? sec.type : "match";
+    sectionTypeToggle.querySelectorAll("button").forEach(function(b){
+      b.classList.toggle("active", b.dataset.type === currentSectionTypeChoice);
+      b.disabled = !!secId;
+      b.style.opacity = secId ? 0.5 : 1;
+    });
+    document.getElementById("f-sec-title").value = sec ? (sec.title || "") : "";
+    document.getElementById("f-sec-desc").value = sec ? (sec.desc || "") : "";
+    safeShowModal(sectionDialog);
+  }
+
+  var btnNewSection = document.getElementById("btn-new-section");
+  if(btnNewSection) btnNewSection.onclick = function(){ openSectionDialog(null); };
+  var btnCancelSection = document.getElementById("btn-cancel-section");
+  if(btnCancelSection) btnCancelSection.onclick = function(){ closeModalDialog(sectionDialog); };
+
+  document.getElementById("section-form").onsubmit = function(e){
+    e.preventDefault();
+    var secs = getSections();
+    var title = document.getElementById("f-sec-title").value.trim();
+    var desc = document.getElementById("f-sec-desc").value.trim();
+    var typeNames = { match: "連連看", choice: "選擇題", reorder: "句子重組", board: "寫字板" };
+    if(editingSectionId && secs[editingSectionId]){
+      secs[editingSectionId].title = title || secs[editingSectionId].title;
+      secs[editingSectionId].desc = desc;
+      writeSections(secs);
+    } else {
+      var newSecId = uid("sec");
+      var order = Object.keys(secs).length;
+      secs[newSecId] = {
+        id: newSecId,
+        title: title || ("第 " + (order + 1) + " 大題：" + typeNames[currentSectionTypeChoice]),
+        desc: desc, type: currentSectionTypeChoice, order: order, collapsed: false, questions: {}
+      };
+      writeSections(secs);
+    }
+    closeModalDialog(sectionDialog);
+  };
+
+  /* ================== 新增／編輯小題彈窗 ================== */
+  function escapeHtml(s){
+    return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  var editorDialog = document.getElementById("editor-dialog");
+  var pairRowsEl = document.getElementById("pair-rows");
+  var choiceOptRowsEl = document.getElementById("choice-opt-rows");
+  var editorBoardImgData = "";
+
+  function makePairRow(left, right){
+    var row = document.createElement("div"); row.className = "pair-row";
+    row.innerHTML = '<input type="text" class="f-pair-left" placeholder="生詞" value="' + escapeHtml(left) + '">' +
+      '<input type="text" class="f-pair-right" placeholder="拼音／意思" value="' + escapeHtml(right) + '">' +
+      '<button type="button" class="row-del">✕</button>';
+    row.querySelector(".row-del").onclick = function(){ row.remove(); };
+    return row;
+  }
+
+  function makeChoiceRow(text, checked){
+    var row = document.createElement("div"); row.className = "choice-row";
+    row.innerHTML = '<input type="checkbox" class="f-choice-correct" ' + (checked ? "checked" : "") + '>' +
+      '<input type="text" class="f-choice-text" placeholder="選項內容" value="' + escapeHtml(text) + '">' +
+      '<button type="button" class="row-del">✕</button>';
+    row.querySelector(".row-del").onclick = function(){ row.remove(); };
+    return row;
+  }
+
+  function openQuestionDialog(secId, qId){
+    var secs = getSections(); var sec = secs[secId];
+    if(!sec) return;
+    activeSectionForAdd = secId; editingQuestionId = qId || null;
+    var type = sec.type;
+    var q = qId ? sec.questions[qId] : null;
+
+    document.getElementById("editor-dialog-title").textContent = qId ? "編輯題目" : "新增題目";
+    document.getElementById("f-title").value = q ? (q.title || "") : "";
+
+    document.getElementById("match-fields").style.display = type === "match" ? "block" : "none";
+    document.getElementById("choice-fields").style.display = type === "choice" ? "block" : "none";
+    document.getElementById("reorder-fields").style.display = type === "reorder" ? "block" : "none";
+    document.getElementById("board-fields").style.display = type === "board" ? "block" : "none";
+
+    if(type === "match"){
+      document.getElementById("f-left-label").value = (q && q.leftLabel) || "生詞";
+      document.getElementById("f-right-label").value = (q && q.rightLabel) || "拼音／意思";
+      pairRowsEl.innerHTML = "";
+      var pairs = (q && q.pairs) ? Object.keys(q.pairs).map(function(k){ return q.pairs[k]; }) : [{left:"",right:""}];
+      pairs.forEach(function(p){ pairRowsEl.appendChild(makePairRow(p.left, p.right)); });
+    } else if(type === "choice"){
+      document.getElementById("f-choice-prompt").value = q ? (q.prompt || "") : "";
+      choiceOptRowsEl.innerHTML = "";
+      var answerIds = (q && q.answerIds) || [];
+      var choices = (q && q.choices)
+        ? Object.keys(q.choices).map(function(k){ return { text: q.choices[k].text, correct: answerIds.indexOf(k) !== -1 }; })
+        : [{text:"",correct:false},{text:"",correct:false}];
+      choices.forEach(function(c){ choiceOptRowsEl.appendChild(makeChoiceRow(c.text, c.correct)); });
+    } else if(type === "reorder"){
+      document.getElementById("f-reorder-prompt").value = q ? (q.prompt || "") : "";
+      document.getElementById("f-reorder-answer").value = q && q.words ? q.words.join(" ") : "";
+    } else if(type === "board"){
+      editorBoardImgData = q ? (q.bgImage || "") : "";
+      document.getElementById("upload-tip").textContent = editorBoardImgData ? "✅ 已上傳底圖（點擊可更換）" : "📷 點擊上傳背景圖片（JPG/PNG）";
+      document.getElementById("f-board-desc").value = q ? (q.desc || "") : "";
+    }
+
+    safeShowModal(editorDialog);
+  }
+
+  document.getElementById("add-pair").onclick = function(){ pairRowsEl.appendChild(makePairRow("", "")); };
+  document.getElementById("add-mc-opt").onclick = function(){ choiceOptRowsEl.appendChild(makeChoiceRow("", false)); };
+
+  document.getElementById("upload-box").onclick = function(){ document.getElementById("f-board-img").click(); };
+  document.getElementById("f-board-img").onchange = function(e){
+    var file = e.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      var img = new Image();
+      img.onload = function(){
+        var c = document.createElement("canvas");
+        var scale = Math.min(1, 1000 / img.width);
+        c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        editorBoardImgData = c.toDataURL("image/jpeg", 0.85);
+        document.getElementById("upload-tip").textContent = "✅ 已上傳底圖（點擊可更換）";
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  document.getElementById("btn-cancel").onclick = function(){ closeModalDialog(editorDialog); };
+
+  document.getElementById("editor-form").onsubmit = function(e){
+    e.preventDefault();
+    var secs = getSections(); var sec = secs[activeSectionForAdd];
+    if(!sec) return;
+    var titleInput = document.getElementById("f-title").value.trim();
+    var qId = editingQuestionId || uid("q");
+    var existing = sec.questions[qId];
+    var order = existing ? existing.order : Object.keys(sec.questions).length;
+    var qObj = { id: qId, order: order };
+
+    if(sec.type === "match"){
+      var leftLabel = document.getElementById("f-left-label").value.trim() || "生詞";
+      var rightLabel = document.getElementById("f-right-label").value.trim() || "意思";
+      var pairs = {}; var pairCount = 0;
+      pairRowsEl.querySelectorAll(".pair-row").forEach(function(row){
+        var l = row.querySelector(".f-pair-left").value.trim();
+        var r = row.querySelector(".f-pair-right").value.trim();
+        if(l && r){ pairCount++; var pid = "p" + pairCount; pairs[pid] = { id: pid, left: l, right: r }; }
+      });
+      if(pairCount === 0){ alert("請至少輸入一組配對內容！"); return; }
+      qObj.title = titleInput || ("第 " + (order + 1) + " 題");
+      qObj.leftLabel = leftLabel; qObj.rightLabel = rightLabel; qObj.pairs = pairs;
+    } else if(sec.type === "choice"){
+      var promptText = document.getElementById("f-choice-prompt").value.trim();
+      var choices = {}; var answerIds = []; var cCount = 0;
+      choiceOptRowsEl.querySelectorAll(".choice-row").forEach(function(row){
+        var txt = row.querySelector(".f-choice-text").value.trim();
+        var correct = row.querySelector(".f-choice-correct").checked;
+        if(txt){ cCount++; var cid = "c" + cCount; choices[cid] = { id: cid, text: txt }; if(correct) answerIds.push(cid); }
+      });
+      if(cCount < 2){ alert("請至少輸入兩個選項！"); return; }
+      if(answerIds.length === 0){ alert("請至少勾選一個正確答案！"); return; }
+      qObj.title = titleInput || ("第 " + (order + 1) + " 題");
+      qObj.prompt = promptText; qObj.choices = choices; qObj.answerIds = answerIds;
+    } else if(sec.type === "reorder"){
+      var rPrompt = document.getElementById("f-reorder-prompt").value.trim();
+      var rawAnswer = document.getElementById("f-reorder-answer").value.trim();
+      var words = rawAnswer.split(/[,，\s]+/).filter(function(w){ return w.length > 0; });
+      if(words.length < 2){ alert("請輸入至少兩個詞語組成句子！"); return; }
+      qObj.title = titleInput || ("第 " + (order + 1) + " 題");
+      qObj.prompt = rPrompt || "請將下列詞語重組為正確句子"; qObj.words = words;
+    } else if(sec.type === "board"){
+      qObj.title = titleInput || ("第 " + (order + 1) + " 題");
+      qObj.desc = document.getElementById("f-board-desc").value.trim();
+      qObj.bgImage = editorBoardImgData || "";
+      qObj.gridType = (existing && existing.gridType) || "tian";
+    }
+
+    sec.questions[qId] = qObj;
+    writeSections(secs, qId);
+    closeModalDialog(editorDialog);
+  };
+
+  /* ================== Excel 題庫匯入匯出 ================== */
+  var TYPE_LABEL_MAP = { match: "連連看", choice: "選擇題", reorder: "句子重組", board: "寫字板" };
+  var TYPE_LABEL_TO_KEY = { "連連看": "match", "選擇題": "choice", "句子重組": "reorder", "寫字板": "board" };
+
+  function downloadWorkbook(wb, filename){
+    XLSX.writeFile(wb, filename);
+  }
+
+  var btnDlTemplate = document.getElementById("btn-dl-template");
+  if(btnDlTemplate) btnDlTemplate.onclick = function(){
+    var data = [
+      ["大題名稱", "大題類型", "小題標題", "題目說明(選填)", "內容1", "內容2"],
+      ["第一大題：生詞配對", "連連看", "第 1 題：基礎問候", "", "你好", "nǐ hǎo"],
+      ["第一大題：生詞配對", "連連看", "第 1 題：基礎問候", "", "謝謝", "xiè xie"],
+      ["第二大題：閱讀理解", "選擇題", "第 1 題", "下列哪一個是正確的？(可複選)", "選項 A 內容", "是"],
+      ["第二大題：閱讀理解", "選擇題", "第 1 題", "下列哪一個是正確的？(可複選)", "選項 B 內容", "否"],
+      ["第三大題：句型排列", "句子重組", "我喜歡喝咖啡", "請將下列詞語重組為正確句子", "我", 1],
+      ["第三大題：句型排列", "句子重組", "我喜歡喝咖啡", "請將下列詞語重組為正確句子", "喜歡", 2],
+      ["第三大題：句型排列", "句子重組", "我喜歡喝咖啡", "請將下列詞語重組為正確句子", "喝", 3],
+      ["第三大題：句型排列", "句子重組", "我喜歡喝咖啡", "請將下列詞語重組為正確句子", "咖啡", 4],
+      ["第四大題：漢字書寫", "寫字板", "第 1 題：書寫『好』", "請在格線中寫出『好』", "", ""]
+    ];
+    var ws = XLSX.utils.aoa_to_sheet(data);
+    ws["!cols"] = [{wch:18},{wch:10},{wch:20},{wch:26},{wch:16},{wch:10}];
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "題庫範本");
+    downloadWorkbook(wb, "曼米中文_題庫匯入範本.xlsx");
+  };
+
+  var btnExportExcel = document.getElementById("btn-export-excel");
+  if(btnExportExcel) btnExportExcel.onclick = function(){
+    var secs = getSections();
+    if(!Object.keys(secs).length){ alert("目前沒有題目可以匯出！"); return; }
+    var rows = [["大題名稱", "大題類型", "小題標題", "題目說明(選填)", "內容1", "內容2"]];
+    getSortedSectionKeys().forEach(function(secId){
+      var sec = secs[secId];
+      getSortedQuestionKeys(sec).forEach(function(qId){
+        var q = sec.questions[qId];
+        if(sec.type === "match"){
+          var pairs = q.pairs || {}; var pKeys = Object.keys(pairs);
+          if(!pKeys.length){ rows.push([sec.title, TYPE_LABEL_MAP.match, q.title, "", "", ""]); }
+          pKeys.forEach(function(pid){ rows.push([sec.title, TYPE_LABEL_MAP.match, q.title, "", pairs[pid].left, pairs[pid].right]); });
+        } else if(sec.type === "choice"){
+          var choices = q.choices || {}; var answerIds = q.answerIds || [];
+          Object.keys(choices).forEach(function(cid){
+            rows.push([sec.title, TYPE_LABEL_MAP.choice, q.title, q.prompt || "", choices[cid].text, answerIds.indexOf(cid) !== -1 ? "是" : "否"]);
+          });
+        } else if(sec.type === "reorder"){
+          (q.words || []).forEach(function(w, idx){ rows.push([sec.title, TYPE_LABEL_MAP.reorder, q.title, q.prompt || "", w, idx + 1]); });
+        } else if(sec.type === "board"){
+          rows.push([sec.title, TYPE_LABEL_MAP.board, q.title, q.desc || "", "", ""]);
+        }
+      });
+    });
+    var ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"] = [{wch:18},{wch:10},{wch:20},{wch:26},{wch:16},{wch:10}];
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "題庫");
+    downloadWorkbook(wb, ((getActiveProject() && getActiveProject().title) || "曼米中文題庫") + ".xlsx");
+  };
+
+  function importQuestionsFromRows(rows){
+    if(!rows || rows.length < 2){ alert("匯入的檔案沒有資料內容！"); return; }
+    var secs = getSections();
+    var body = rows.slice(1).filter(function(r){ return r && r[0]; });
+    if(!body.length){ alert("匯入的檔案沒有資料內容！"); return; }
+
+    var secByTitle = {};
+    Object.keys(secs).forEach(function(sid){ secByTitle[secs[sid].title] = sid; });
+    var qByKey = {};
+    var secOrderBase = Object.keys(secs).length;
+    var newSecCount = 0;
+
+    body.forEach(function(row){
+      var secTitle = String(row[0] || "").trim();
+      var typeLabel = String(row[1] || "").trim();
+      var qTitle = String(row[2] || "").trim();
+      var qPrompt = String(row[3] || "").trim();
+      var c1 = row[4] !== undefined ? row[4] : "";
+      var c2 = row[5] !== undefined ? row[5] : "";
+      if(!secTitle || !typeLabel || !qTitle) return;
+      var type = TYPE_LABEL_TO_KEY[typeLabel];
+      if(!type) return;
+
+      var secId = secByTitle[secTitle];
+      if(!secId){
+        secId = uid("sec");
+        secs[secId] = { id: secId, title: secTitle, type: type, order: secOrderBase + newSecCount, collapsed: false, questions: {} };
+        secByTitle[secTitle] = secId;
+        newSecCount++;
+      }
+      var sec = secs[secId];
+      if(sec.type !== type) return;
+
+      var qKey = secId + "|" + qTitle;
+      var qId = qByKey[qKey];
+      if(!qId){
+        qId = uid("q");
+        qByKey[qKey] = qId;
+        var order = Object.keys(sec.questions).length;
+        if(type === "match") sec.questions[qId] = { id: qId, title: qTitle, order: order, leftLabel: "生詞", rightLabel: "意思", pairs: {} };
+        else if(type === "choice") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt, choices: {}, answerIds: [] };
+        else if(type === "reorder") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt || "請將下列詞語重組為正確句子", words: [] };
+        else if(type === "board") sec.questions[qId] = { id: qId, title: qTitle, order: order, desc: qPrompt || String(c1 || ""), bgImage: "", gridType: "tian" };
+      }
+      var q = sec.questions[qId];
+
+      if(type === "match"){
+        if(String(c1).trim() || String(c2).trim()){
+          var pid = "p" + (Object.keys(q.pairs).length + 1);
+          q.pairs[pid] = { id: pid, left: String(c1), right: String(c2) };
+        }
+      } else if(type === "choice"){
+        if(String(c1).trim()){
+          var cid = "c" + (Object.keys(q.choices).length + 1);
+          q.choices[cid] = { id: cid, text: String(c1) };
+          if(String(c2).trim() === "是") q.answerIds.push(cid);
+        }
+      } else if(type === "reorder"){
+        if(String(c1).trim()) q.words.push(String(c1));
+      }
+    });
+
+    writeSections(secs);
+    alert("✅ 題庫匯入成功！");
+  }
+
+  var btnImportExcel = document.getElementById("btn-import-excel");
+  var excelFileInput = document.getElementById("excel-file-input");
+  if(btnImportExcel && excelFileInput){
+    btnImportExcel.onclick = function(){ excelFileInput.click(); };
+    excelFileInput.onchange = function(e){
+      var file = e.target.files[0]; if(!file) return;
+      var reader = new FileReader();
+      reader.onload = function(evt){
+        try{
+          var wb = XLSX.read(evt.target.result, { type: "binary" });
+          var ws = wb.Sheets[wb.SheetNames[0]];
+          var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+          importQuestionsFromRows(rows);
+        }catch(err){
+          alert("匯入失敗，請確認檔案格式是否正確。");
+        }
+        e.target.value = "";
+      };
+      reader.readAsBinaryString(file);
+    };
+  }
+
   /* 主舞台渲染 */
   var stageEl = document.getElementById("stage");
   function renderStage(){
@@ -1926,9 +2385,9 @@
 
     var head = document.createElement("div"); head.className = "stage-head";
     head.innerHTML = `<div><h2 class="stage-title zh">${q.title}</h2><p class="stage-sub">${q.desc || sec.desc || "即時互動練習"}</p></div>`;
-    
+
     var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
-    
+
     var scoreBtn = document.createElement("button");
     scoreBtn.className = "btn btn-sm btn-primary";
     scoreBtn.textContent = "📊 結算成績與檢討";
@@ -1957,6 +2416,136 @@
     else if(sec.type === "board") renderDrawBoard(q, boardArea);
 
     applyStageZoom(currentZoomRatio);
+  }
+
+  /* 連連看 */
+  function renderMatchBoard(q, container){
+    var progress = getProgress(q.id);
+    var interactive = canInteract();
+    var pairs = q.pairs || {};
+    var pairKeys = Object.keys(pairs);
+    var isTest = currentClassMode === 'test';
+
+    if(!progress._shuffledRight || progress._matchQId !== q.id){
+      progress._shuffledRight = pairKeys.slice().sort(function(){ return Math.random() - 0.5; });
+      progress._matchQId = q.id;
+    }
+    var rightOrder = (progress._shuffledRight || []).filter(function(pid){ return pairs[pid]; });
+    pairKeys.forEach(function(pid){ if(rightOrder.indexOf(pid) === -1) rightOrder.push(pid); });
+
+    var matched = progress.matched || {};
+    var userPairs = progress.userPairs || {};
+
+    var wrap = document.createElement("div"); wrap.className = "match-board";
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "match-svg");
+    wrap.appendChild(svg);
+
+    var cols = document.createElement("div"); cols.className = "match-cols";
+    var leftCol = document.createElement("div"); leftCol.className = "match-col";
+    leftCol.innerHTML = `<div class="match-col-label">${q.leftLabel || "項目"}</div>`;
+    var rightCol = document.createElement("div"); rightCol.className = "match-col";
+    rightCol.innerHTML = `<div class="match-col-label">${q.rightLabel || "配對"}</div>`;
+
+    var selectedLeft = null;
+
+    pairKeys.forEach(function(pid){
+      var p = pairs[pid];
+      var btn = document.createElement("button");
+      btn.type = "button"; btn.className = "match-item"; btn.dataset.side = "left"; btn.dataset.pid = pid;
+      btn.textContent = p.left;
+      var locked = !isTest && !!matched[pid];
+      if(locked){ btn.classList.add("matched"); btn.disabled = true; }
+      if(!interactive) btn.disabled = true;
+      btn.onclick = function(){
+        if(!interactive || locked) return;
+        leftCol.querySelectorAll(".match-item").forEach(function(x){ x.classList.remove("selected"); });
+        btn.classList.add("selected");
+        selectedLeft = pid;
+      };
+      leftCol.appendChild(btn);
+    });
+
+    rightOrder.forEach(function(pid){
+      var p = pairs[pid]; if(!p) return;
+      var btn = document.createElement("button");
+      btn.type = "button"; btn.className = "match-item"; btn.dataset.side = "right"; btn.dataset.pid = pid;
+      btn.textContent = p.right;
+      if(!interactive) btn.disabled = true;
+      btn.onclick = function(){
+        if(!interactive || !selectedLeft) return;
+        var lpid = selectedLeft;
+
+        if(isTest){
+          userPairs[lpid] = pid;
+          writeProgress(q.id, { userPairs: userPairs });
+          selectedLeft = null;
+          renderStage();
+          return;
+        }
+
+        if(lpid === pid){
+          matched[lpid] = true;
+          playCorrectSound();
+          writeProgress(q.id, { matched: matched });
+          selectedLeft = null;
+          renderStage();
+        } else {
+          var leftBtn = leftCol.querySelector('[data-pid="' + lpid + '"]');
+          if(leftBtn) leftBtn.classList.add("wrong");
+          btn.classList.add("wrong");
+          playWrongSound();
+          selectedLeft = null;
+          setTimeout(function(){
+            if(leftBtn) leftBtn.classList.remove("wrong", "selected");
+            btn.classList.remove("wrong");
+          }, 450);
+        }
+      };
+      rightCol.appendChild(btn);
+    });
+
+    cols.appendChild(leftCol); cols.appendChild(rightCol);
+    wrap.appendChild(cols);
+    container.appendChild(wrap);
+
+    var doneCount = isTest
+      ? Object.keys(userPairs).filter(function(k){ return userPairs[k]; }).length
+      : Object.keys(matched).filter(function(k){ return matched[k]; }).length;
+    if(pairKeys.length > 0 && doneCount === pairKeys.length){
+      var note = document.createElement("p");
+      note.style.cssText = "font-size:13px;color:var(--bamboo);margin-top:14px;font-weight:700;text-align:center;";
+      note.textContent = isTest ? "✅ 已完成全部配對，可點擊「結算成績」查看結果。" : "🎉 太棒了！全部配對完成！";
+      wrap.appendChild(note);
+    }
+
+    function drawLines(){
+      svg.innerHTML = "";
+      var wrapRect = wrap.getBoundingClientRect();
+      var w = wrapRect.width, h = wrapRect.height;
+      if(!w || !h) return;
+      svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+      var sourceMap = isTest ? userPairs : matched;
+      Object.keys(sourceMap).forEach(function(lpid){
+        if(!sourceMap[lpid]) return;
+        var rpid = isTest ? sourceMap[lpid] : lpid;
+        var leftEl = leftCol.querySelector('[data-pid="' + lpid + '"]');
+        var rightEl = rightCol.querySelector('[data-pid="' + rpid + '"]');
+        if(!leftEl || !rightEl) return;
+        var lr = leftEl.getBoundingClientRect(), rr = rightEl.getBoundingClientRect();
+        var x1 = lr.right - wrapRect.left, y1 = lr.top - wrapRect.top + lr.height / 2;
+        var x2 = rr.left - wrapRect.left, y2 = rr.top - wrapRect.top + rr.height / 2;
+        var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+        line.setAttribute("stroke", isTest ? "var(--seal)" : "var(--bamboo)");
+        line.setAttribute("stroke-width", "2.5");
+        line.setAttribute("stroke-linecap", "round");
+        svg.appendChild(line);
+      });
+    }
+    requestAnimationFrame(drawLines);
+    window.addEventListener("resize", drawLines);
   }
 
   /* 選擇題（支援複選） */
@@ -2027,7 +2616,7 @@
     var interactive = canInteract();
     var isRevealed = (currentClassMode === 'test') ? !!progress.revealed : true;
     var correctWords = q.words || [];
-    
+
     if(!progress._shuffledWords || progress._qIdSaved !== q.id){
       progress.userWords = [];
       progress.poolWords = correctWords.slice().sort(function(){ return Math.random() - 0.5; });
@@ -2044,7 +2633,7 @@
 
     var slotZone = document.createElement("div");
     slotZone.className = "reorder-slot-zone";
-    
+
     slotZone.ondragover = function(e){
       if(!interactive || isRevealed) return;
       e.preventDefault();
@@ -2136,7 +2725,7 @@
         chip.onclick = function(){
           poolWords.splice(idx, 1);
           userWords.push(w);
-          
+
           if(userWords.length === correctWords.length){
             var isMatch = userWords.every(function(val, i){ return val === correctWords[i]; });
             if(isMatch){
@@ -2199,6 +2788,9 @@
     }
   }
 
+  /* ================== 寫字板工具狀態 ================== */
+  var boardState = { tool: "pen", color: "#B23B32", size: 6, fontSize: 36 };
+
   /* ================== 寫字板功能 (完整恢復) ================== */
   function renderDrawBoard(q, container){
     var progress = getProgress(q.id);
@@ -2254,7 +2846,7 @@
 
     layout.appendChild(vToolbar);
 
-    var cWrap = document.createElement("div"); 
+    var cWrap = document.createElement("div");
     cWrap.className = "canvas-stage-wrap " + (currentGrid === 'tian' ? 'grid-tian' : (currentGrid === 'jiu' ? 'grid-jiu' : ''));
     if(currentBg){
       var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg;
@@ -2393,7 +2985,7 @@
         div.style.left = t.x + "%";
         div.style.top = t.y + "%";
         div.style.color = t.color || "var(--ink)";
-        
+
         var baseSize = t.fontSize || 36;
         div.style.fontSize = Math.round(baseSize * scale) + "px";
 
@@ -2508,13 +3100,13 @@
       if(boardState.tool === "text"){
         var txt = prompt("請輸入文字內容（漢字或拼音）：");
         if(txt && txt.trim()){
-          texts.push({ 
-            id: uid("t"), 
-            text: txt.trim(), 
-            x: p.x, 
-            y: p.y, 
-            color: boardState.color, 
-            fontSize: boardState.fontSize || 36 
+          texts.push({
+            id: uid("t"),
+            text: txt.trim(),
+            x: p.x,
+            y: p.y,
+            color: boardState.color,
+            fontSize: boardState.fontSize || 36
           });
           writeProgress(q.id, { texts: texts });
         }
@@ -2616,6 +3208,38 @@
         }
       };
     }
+  }
+
+  /* ================== 啟動流程（大廳 / 學生加入房間） ================== */
+  function joinAsStudent(){
+    attachPresence(urlRoom, myId, myName);
+    startRoom(urlRoom, "student");
+  }
+
+  if(urlRoom){
+    if(isStudent){
+      if(!myName){
+        safeShowModal(document.getElementById("student-name-dialog"));
+        var submitNameBtn = document.getElementById("btn-submit-student-name");
+        var nameInput = document.getElementById("input-student-name");
+        submitNameBtn.onclick = function(){
+          var val = nameInput.value.trim();
+          if(!val){ alert("請輸入你的名字！"); return; }
+          myName = val;
+          closeModalDialog(document.getElementById("student-name-dialog"));
+          joinAsStudent();
+        };
+        nameInput.addEventListener("keydown", function(ev){
+          if(ev.key === "Enter"){ ev.preventDefault(); submitNameBtn.click(); }
+        });
+      } else {
+        joinAsStudent();
+      }
+    } else {
+      startRoom(urlRoom, "teacher");
+    }
+  } else {
+    showLobby();
   }
 })();
 </script>
