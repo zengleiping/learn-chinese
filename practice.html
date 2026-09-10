@@ -38,7 +38,7 @@
   button, input, textarea, select{font-family:inherit; color:var(--ink);}
   button:focus-visible{outline:2px solid var(--seal); outline-offset:2px;}
 
-  /* topbar：曼米中文在上方、Mandamy在下方，課次大廳於中英文名字旁垂直置中 */
+  /* topbar */
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
     padding:12px 28px;background:var(--surface);
@@ -418,6 +418,43 @@
   }
   .peer-cursor-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 2px 8px rgba(0,0,0,0.35);}
   .peer-cursor-label{color:#fff;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
+
+  /* 成績結算彈窗專用樣式 */
+  .score-header-box{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--surface-2); padding:20px; border-radius:14px; margin-bottom:18px; border:1px solid var(--grid-line);
+  }
+  .score-circle{
+    font-size:38px; font-weight:800; font-family:"Plus Jakarta Sans",sans-serif;
+    color:var(--seal); line-height:1; font-variant-numeric:tabular-nums;
+  }
+  .score-rank-badge{
+    display:inline-block; font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px;
+    background:var(--seal-soft); color:var(--seal); margin-top:4px;
+  }
+  .score-stats-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; text-align:center;
+  }
+  .score-stat-cell{
+    background:var(--surface); border:1px solid var(--grid-line); border-radius:10px; padding:10px 8px;
+  }
+  .score-stat-cell b{ font-size:17px; display:block; margin-top:2px; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .score-stat-cell span{ font-size:11.5px; color:var(--ink-soft); }
+
+  .score-details-list{
+    display:flex; flex-direction:column; gap:12px; margin-top:14px;
+  }
+  .score-sec-item{
+    border:1px solid var(--grid-line); border-radius:10px; padding:12px; background:var(--surface);
+  }
+  .score-sec-title{
+    font-size:13.5px; font-weight:700; margin-bottom:8px; color:var(--ink); display:flex; justify-content:space-between;
+  }
+  .score-q-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-size:12.5px; padding:6px 0; border-bottom:1px dashed var(--grid-line);
+  }
+  .score-q-row:last-child{ border-bottom:none; }
 
   /* 彈窗設計 */
   .dialog-modal{border:none;border-radius:20px;padding:0;background:var(--surface);color:var(--ink);box-shadow: 0 20px 40px rgba(0,0,0,0.15);width:min(580px,92vw);max-height:88vh;}
@@ -1028,7 +1065,7 @@
   };
 
   /* ================== 資料庫載入與自動遷移 (Data Migration) ================== */
-  var STORAGE_FS_KEY = "hanyu-mandamy-v5";
+  var STORAGE_FS_KEY = "hanyu-mandamy-v6";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var DEFAULT_FS = {
@@ -1116,17 +1153,11 @@
     if(!data || !data.projects) return data;
     Object.keys(data.projects).forEach(function(pid){
       var p = data.projects[pid];
-      // 如果專案缺少 sections，但有舊版 sets，自動轉換
       if(!p.sections && p.sets){
         p.sections = {};
         var secId = uid("sec");
         p.sections[secId] = {
-          id: secId,
-          title: "匯入練習大題",
-          type: "match",
-          order: 0,
-          collapsed: false,
-          questions: {}
+          id: secId, title: "匯入練習大題", type: "match", order: 0, collapsed: false, questions: {}
         };
         var qOrder = 0;
         Object.keys(p.sets).forEach(function(setId){
@@ -1135,7 +1166,6 @@
         });
         delete p.sets;
       }
-      // 確保每個 section 與 question 都有正確的 order
       if(p.sections){
         var secKeys = Object.keys(p.sections);
         secKeys.forEach(function(sId, sIdx){
@@ -2431,7 +2461,7 @@
 
     vToolbar.querySelectorAll(".color-dot").forEach(function(d){
       d.onclick = function(){
-        vToolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
+        toolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
         d.classList.add("active"); boardState.color = d.dataset.color;
       };
     });
