@@ -678,10 +678,10 @@
         <button type="button" data-type="board">✍️ 寫字板</button>
       </div>
 
-      <label for="f-sec-title">大題名稱</label>
-      <input type="text" id="f-sec-title" placeholder="例如：第一大題：句子重組" required>
+      <label for="f-sec-title">大題名稱（留空將自動命名）</label>
+      <input type="text" id="f-sec-title" placeholder="例如：第一大題：生詞配對">
       <label for="f-sec-desc">大題作答說明（選填）</label>
-      <textarea id="f-sec-desc" rows="2" placeholder="例如：請將詞語排序"></textarea>
+      <textarea id="f-sec-desc" rows="2" placeholder="說明文字"></textarea>
     </div>
     <div class="dialog-foot">
       <button type="button" class="btn btn-ghost" id="btn-cancel-section">取消</button>
@@ -690,15 +690,15 @@
   </form>
 </dialog>
 
-<!-- 小題題目編輯／編輯現有題目彈窗 -->
+<!-- 小題題目編輯彈窗 -->
 <dialog class="dialog-modal" id="editor-dialog">
   <form id="editor-form">
     <div class="dialog-head">
       <h2 id="editor-dialog-title">編輯題目</h2>
     </div>
     <div class="dialog-body">
-      <label for="f-title">小題名稱／標題</label>
-      <input type="text" id="f-title" placeholder="例如：第 1 題" required>
+      <label for="f-title">小題名稱／標題（留空將自動編號）</label>
+      <input type="text" id="f-title" placeholder="例如：第 1 題">
 
       <div id="match-fields">
         <div class="row-two">
@@ -949,8 +949,8 @@
   function playWrongSound(){ if(currentClassMode !== 'test') playTone(currentSoundStyle, false); }
   function playVictorySound(){ playTone(currentSoundStyle, true); }
 
-  /* ================== 資料庫載入與自動遷移 (Data Migration) ================== */
-  var STORAGE_FS_KEY = "hanyu-mandamy-v7";
+  /* ================== 資料庫載入與自動遷移 ================== */
+  var STORAGE_FS_KEY = "hanyu-mandamy-v8";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
   var DEFAULT_FS = {
@@ -1438,8 +1438,8 @@
         <div class="item-card-foot">
           <span class="item-badge" style="background:var(--bamboo-soft); color:var(--bamboo);">${childF ? childF + ' 個子目錄 · ' : ''}${childP} 個課次</span>
           <div class="item-actions-btns">
-            <button type="button" class="btn btn-sm btn-ghost btn-edit-f">✏️</button>
-            <button type="button" class="btn btn-sm btn-ghost btn-del-f" style="color:var(--seal);">🗑️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-edit-f" title="編輯資料夾">✏️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-del-f" title="刪除資料夾" style="color:var(--seal);">🗑️</button>
             <button type="button" class="btn btn-sm btn-open-f" style="border:1px solid var(--bamboo); color:var(--bamboo); font-weight:700;">開啟 ➔</button>
           </div>
         </div>
@@ -1460,8 +1460,8 @@
         <div class="item-card-foot">
           <span class="item-badge">📄 ${Object.keys(proj.sections||{}).length} 大題 · ${totalQ} 小題</span>
           <div class="item-actions-btns">
-            <button type="button" class="btn btn-sm btn-ghost btn-edit-p">✏️</button>
-            <button type="button" class="btn btn-sm btn-ghost btn-del-p" style="color:var(--seal);">🗑️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-edit-p" title="編輯課次">✏️</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-del-p" title="刪除課次" style="color:var(--seal);">🗑️</button>
             <button type="button" class="btn btn-sm btn-primary btn-enter-p">進入上課 →</button>
           </div>
         </div>
@@ -1901,7 +1901,6 @@
         if(!interactive || (matched[pid] && !isTest)) return;
         selL = pid;
         if(isTest){
-          // 測驗模式：允許點擊左邊再點右邊配對，可隨時更改
           if(selL && selR){
             userPairs[selL] = selR;
             writeProgress(q.id, { userPairs: userPairs });
@@ -2033,17 +2032,22 @@
       var isCorrect = correctIds.indexOf(cid) !== -1;
 
       if(isRevealed && currentClassMode !== 'test'){
-        if(isCorrect) btn.classList.add("correct"); else if(isPicked && !isCorrect) btn.classList.add("wrong");
+        if(isCorrect) btn.classList.add("correct");
+        else if(isPicked && !isCorrect) btn.classList.add("wrong");
         btn.disabled = true;
       } else if(progress.revealed && currentClassMode === 'test'){
-        if(isCorrect) btn.classList.add("correct"); else if(isPicked && !isCorrect) btn.classList.add("wrong");
+        if(isCorrect) btn.classList.add("correct");
+        else if(isPicked && !isCorrect) btn.classList.add("wrong");
         btn.disabled = true;
       } else {
         if(isPicked) btn.classList.add("selected");
       }
       if(!interactive) btn.disabled = true;
 
-      btn.innerHTML = `<span class="mc-opt-prefix">${letters[idx] || (idx+1)}</span><span>${c.text}</span>`;
+      btn.innerHTML = `
+        <span class="mc-opt-prefix">${letters[idx] || (idx+1)}</span>
+        <span>${c.text}</span>
+      `;
 
       btn.onclick = function(){
         if(!interactive || (progress.revealed && currentClassMode === 'test')) return;
@@ -2057,6 +2061,7 @@
     });
 
     wrap.appendChild(cBox);
+
     if(progress.revealed && currentClassMode === 'test'){
       var note = document.createElement("p");
       note.style.fontSize = "13px"; note.style.color = "var(--bamboo)"; note.style.marginTop = "14px"; note.style.fontWeight = "700";
@@ -2066,7 +2071,7 @@
     container.appendChild(wrap);
   }
 
-  /* 排序題（句子重組 - 支援拖曳互換與排滿2秒自動判定） */
+  /* 排序題（句子重組 - 全拖曳、放上可更正、排滿兩秒自動判定） */
   function renderReorderBoard(q, container){
     var progress = getProgress(q.id);
     var interactive = canInteract();
@@ -2090,15 +2095,29 @@
     var slotZone = document.createElement("div");
     slotZone.className = "reorder-slot-zone";
     
-    slotZone.ondragover = function(e){ if(!interactive || isRevealed) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; slotZone.classList.add("drag-over-zone"); };
-    slotZone.ondragleave = function(){ slotZone.classList.remove("drag-over-zone"); };
+    slotZone.ondragover = function(e){
+      if(!interactive || isRevealed) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      slotZone.classList.add("drag-over-zone");
+    };
+    slotZone.ondragleave = function(){
+      slotZone.classList.remove("drag-over-zone");
+    };
     slotZone.ondrop = function(e){
-      e.preventDefault(); slotZone.classList.remove("drag-over-zone");
-      var data = e.dataTransfer.getData("text/plain"); if(!data) return;
-      var parts = data.split(":"); var type = parts[0]; var idx = parseInt(parts[2], 10);
+      e.preventDefault();
+      slotZone.classList.remove("drag-over-zone");
+      var data = e.dataTransfer.getData("text/plain");
+      if(!data) return;
+
+      var parts = data.split(":");
+      var type = parts[0];
+      var idx = parseInt(parts[2], 10);
+
       if(type === "pool"){
         if(!isNaN(idx) && poolWords[idx] !== undefined){
-          var word = poolWords.splice(idx, 1)[0]; userWords.push(word);
+          var word = poolWords.splice(idx, 1)[0];
+          userWords.push(word);
           evaluateReorderState(q, userWords, poolWords, correctWords);
         }
       }
@@ -2113,8 +2132,15 @@
         chip.textContent = w;
         if(!isRevealed && interactive){
           chip.setAttribute("draggable", "true");
-          chip.ondragstart = function(e){ e.dataTransfer.setData("text/plain", "user:" + w + ":" + idx); e.stopPropagation(); };
-          chip.onclick = function(){ userWords.splice(idx, 1); poolWords.push(w); writeProgress(q.id, { userWords: userWords, poolWords: poolWords }); };
+          chip.ondragstart = function(e){
+            e.dataTransfer.setData("text/plain", "user:" + w + ":" + idx);
+            e.stopPropagation();
+          };
+          chip.onclick = function(){
+            userWords.splice(idx, 1);
+            poolWords.push(w);
+            writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
+          };
         }
         slotZone.appendChild(chip);
       });
@@ -2123,26 +2149,43 @@
 
     var poolZone = document.createElement("div");
     poolZone.style.cssText = "display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; min-height:64px; align-items:center;";
-    poolZone.ondragover = function(e){ if(!interactive || isRevealed) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; };
+    poolZone.ondragover = function(e){
+      if(!interactive || isRevealed) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    };
     poolZone.ondrop = function(e){
-      e.preventDefault(); var data = e.dataTransfer.getData("text/plain"); if(!data) return;
-      var parts = data.split(":"); var type = parts[0]; var idx = parseInt(parts[2], 10);
+      e.preventDefault();
+      var data = e.dataTransfer.getData("text/plain");
+      if(!data) return;
+      var parts = data.split(":");
+      var type = parts[0];
+      var idx = parseInt(parts[2], 10);
+
       if(type === "user"){
         if(!isNaN(idx) && userWords[idx] !== undefined){
-          var word = userWords.splice(idx, 1)[0]; poolWords.push(word);
+          var word = userWords.splice(idx, 1)[0];
+          poolWords.push(word);
           writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
         }
       }
     };
 
     poolWords.forEach(function(w, idx){
-      var chip = document.createElement("div"); chip.className = "reorder-chip"; chip.textContent = w;
-      if(isRevealed){ chip.classList.add("correct-done"); }
-      else if(interactive){
+      var chip = document.createElement("div");
+      chip.className = "reorder-chip";
+      chip.textContent = w;
+      if(isRevealed){
+        chip.classList.add("correct-done");
+      } else if(interactive){
         chip.setAttribute("draggable", "true");
-        chip.ondragstart = function(e){ e.dataTransfer.setData("text/plain", "pool:" + w + ":" + idx); e.stopPropagation(); };
+        chip.ondragstart = function(e){
+          e.dataTransfer.setData("text/plain", "pool:" + w + ":" + idx);
+          e.stopPropagation();
+        };
         chip.onclick = function(){
-          poolWords.splice(idx, 1); userWords.push(w);
+          poolWords.splice(idx, 1);
+          userWords.push(w);
           evaluateReorderState(q, userWords, poolWords, correctWords);
         };
       }
@@ -2156,6 +2199,7 @@
       note.textContent = "🎉 句子重組解答： " + correctWords.join(" ");
       wrap.appendChild(note);
     }
+
     container.appendChild(wrap);
   }
 
@@ -2189,17 +2233,19 @@
   /* 寫字板功能 */
   function renderDrawBoard(q, container){
     var progress = getProgress(q.id);
-    var strokes = progress.strokes || []; var texts = progress.texts || [];
+    var strokes = progress.strokes || [];
+    var texts = progress.texts || [];
     var currentGrid = progress.gridType || q.gridType || "jiu";
     var currentBg = progress.bgImage || q.bgImage || "";
 
     var layout = document.createElement("div"); layout.className = "draw-board-layout";
+
     var vToolbar = document.createElement("div"); vToolbar.className = "draw-toolbar-vertical";
     vToolbar.innerHTML = `
       <button type="button" class="tool-btn-v ${boardState.tool==='pen'?'active':''}" data-tool="pen" title="畫筆"><span>✏️</span><span style="font-size:10px;">畫筆</span></button>
       <button type="button" class="tool-btn-v ${boardState.tool==='text'?'active':''}" data-tool="text" title="打字"><span>🔤</span><span style="font-size:10px;">打字</span></button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='stroke-eraser'?'active':''}" data-tool="stroke-eraser" title="筆畫擦"><span>🪄</span><span style="font-size:10px;">筆畫擦</span></button>
-      <button type="button" class="tool-btn-v ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部擦"><span>🧽</span><span style="font-size:10px;">局部擦</span></button>
+      <button type="button" class="tool-btn-v ${boardState.tool==='stroke-eraser'?'active':''}" data-tool="stroke-eraser" title="筆畫整條擦除"><span>🪄</span><span style="font-size:10px;">筆畫擦</span></button>
+      <button type="button" class="tool-btn-v ${boardState.tool==='pixel-eraser'?'active':''}" data-tool="pixel-eraser" title="局部橡皮擦"><span>🧽</span><span style="font-size:10px;">局部擦</span></button>
       <div class="tool-v-sep"></div>
       <div class="grid-btn-group">
         <button type="button" class="grid-btn-v ${currentGrid==='none'?'active':''}" data-grid="none">無格</button>
@@ -2208,11 +2254,11 @@
       </div>
       <div class="tool-v-sep"></div>
       <div class="color-dot-grid">
-        <div class="color-dot ${boardState.color==='#B23B32'?'active':''}" data-color="#B23B32" style="background:#B23B32;" title="紅"></div>
+        <div class="color-dot ${boardState.color==='#B23B32'?'active':''}" data-color="#B23B32" style="background:#B23B32;" title="紅色"></div>
         <div class="color-dot ${(boardState.color==='#2A333C'||boardState.color==='#E5EAE6'||boardState.color==='#FFFFFF')?'active':''}" id="btn-theme-dark-color" data-color="#2A333C" style="background:#2A333C;" title="黑/白"></div>
-        <div class="color-dot ${boardState.color==='#1E88E5'?'active':''}" data-color="#1E88E5" style="background:#1E88E5;" title="藍"></div>
-        <div class="color-dot ${boardState.color==='#4C7A5E'?'active':''}" data-color="#4C7A5E" style="background:#4C7A5E;" title="綠"></div>
-        <div class="color-dot ${boardState.color==='#FB8C00'?'active':''}" data-color="#FB8C00" style="background:#FB8C00;" title="橘"></div>
+        <div class="color-dot ${boardState.color==='#1E88E5'?'active':''}" data-color="#1E88E5" style="background:#1E88E5;" title="藍色"></div>
+        <div class="color-dot ${boardState.color==='#4C7A5E'?'active':''}" data-color="#4C7A5E" style="background:#4C7A5E;" title="綠色"></div>
+        <div class="color-dot ${boardState.color==='#FB8C00'?'active':''}" data-color="#FB8C00" style="background:#FB8C00;" title="橘色"></div>
       </div>
       <div class="tool-v-sep"></div>
       <div class="size-btn-group">
@@ -2234,19 +2280,25 @@
       <button type="button" class="tool-btn-v" id="btn-remove-bg" style="display:${currentBg ? 'flex' : 'none'}; color:#E63946;" title="清除底圖"><span>✕</span><span style="font-size:9.5px;">清底圖</span></button>
       <input type="file" id="board-bg-file" accept="image/*" style="display:none;">
       <div class="tool-v-sep"></div>
-      <button type="button" class="tool-btn-v" id="btn-clear-draw" style="color:var(--seal);" title="清空"><span>🗑️</span><span style="font-size:9.5px;">清空</span></button>
+      <button type="button" class="tool-btn-v" id="btn-clear-draw" style="color:var(--seal);" title="清空畫布"><span>🗑️</span><span style="font-size:9.5px;">清空</span></button>
     `;
+
     layout.appendChild(vToolbar);
 
     var cWrap = document.createElement("div"); 
     cWrap.className = "canvas-stage-wrap " + (currentGrid === 'tian' ? 'grid-tian' : (currentGrid === 'jiu' ? 'grid-jiu' : ''));
-    if(currentBg){ var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg; cWrap.appendChild(img); }
+    if(currentBg){
+      var img = document.createElement("img"); img.className = "bg-img-layer"; img.src = currentBg; cWrap.appendChild(img);
+    }
     var canvas = document.createElement("canvas"); canvas.id = "paint-canvas";
     var textLayer = document.createElement("div"); textLayer.className = "text-layer";
     cWrap.appendChild(canvas); cWrap.appendChild(textLayer);
     layout.appendChild(cWrap); container.appendChild(layout);
 
-    var ctx = canvas.getContext("2d"); var isDrawing = false; var currentPath = []; var activeSelectedTextId = null;
+    var ctx = canvas.getContext("2d");
+    var isDrawing = false;
+    var currentPath = [];
+    var activeSelectedTextId = null;
 
     vToolbar.querySelectorAll(".tool-btn-v").forEach(function(b){
       b.onclick = function(){
@@ -2254,7 +2306,8 @@
         vToolbar.querySelectorAll(".tool-btn-v").forEach(function(x){
           if(x.id !== "btn-upload-bg" && x.id !== "btn-remove-bg" && x.id !== "btn-clear-draw") x.classList.remove("active");
         });
-        b.classList.add("active"); boardState.tool = b.dataset.tool;
+        b.classList.add("active");
+        boardState.tool = b.dataset.tool;
         canvas.style.cursor = (boardState.tool === "text" ? "text" : (boardState.tool.includes("eraser") ? "cell" : "crosshair"));
       };
     });
@@ -2264,18 +2317,28 @@
     var bgFileInput = vToolbar.querySelector("#board-bg-file");
 
     if(btnUploadBg && bgFileInput){
-      btnUploadBg.onclick = function(e){ e.preventDefault(); e.stopPropagation(); bgFileInput.click(); };
+      btnUploadBg.onclick = function(e){
+        e.preventDefault(); e.stopPropagation();
+        bgFileInput.click();
+      };
       bgFileInput.onchange = function(e){
-        var file = e.target.files[0]; if(!file) return;
+        var file = e.target.files[0];
+        if(!file) return;
         var reader = new FileReader();
         reader.onload = function(evt){
           var img = new Image();
           img.onload = function(){
-            var c = document.createElement("canvas"); var scale = Math.min(1, 1000 / img.width);
-            c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
-            var cx = c.getContext("2d"); cx.drawImage(img, 0, 0, c.width, c.height);
+            var c = document.createElement("canvas");
+            var scale = Math.min(1, 1000 / img.width);
+            c.width = Math.round(img.width * scale);
+            c.height = Math.round(img.height * scale);
+            var cx = c.getContext("2d");
+            cx.drawImage(img, 0, 0, c.width, c.height);
             var b64 = c.toDataURL("image/jpeg", 0.8);
-            q.bgImage = b64; writeProgress(q.id, { bgImage: b64 }); writeSections(getSections()); renderStage();
+            q.bgImage = b64;
+            writeProgress(q.id, { bgImage: b64 });
+            writeSections(getSections());
+            renderStage();
           };
           img.src = evt.target.result;
         };
@@ -2284,20 +2347,43 @@
     }
 
     if(btnRemoveBg){
-      btnRemoveBg.onclick = function(e){ e.preventDefault(); e.stopPropagation(); q.bgImage = ""; writeProgress(q.id, { bgImage: "" }); writeSections(getSections()); renderStage(); };
+      btnRemoveBg.onclick = function(e){
+        e.preventDefault(); e.stopPropagation();
+        q.bgImage = "";
+        writeProgress(q.id, { bgImage: "" });
+        writeSections(getSections());
+        renderStage();
+      };
     }
 
     var darkColorDot = vToolbar.querySelector("#btn-theme-dark-color");
     if(darkColorDot){
-      if(currentBgMode === "dark"){ darkColorDot.style.background = "#E5EAE6"; darkColorDot.dataset.color = "#FFFFFF"; if(boardState.color === "#2A333C") boardState.color = "#FFFFFF"; }
-      else { darkColorDot.style.background = "#2A333C"; darkColorDot.dataset.color = "#2A333C"; if(boardState.color === "#FFFFFF") boardState.color = "#2A333C"; }
+      if(currentBgMode === "dark"){
+        darkColorDot.style.background = "#E5EAE6";
+        darkColorDot.dataset.color = "#FFFFFF";
+        if(boardState.color === "#2A333C") boardState.color = "#FFFFFF";
+      } else {
+        darkColorDot.style.background = "#2A333C";
+        darkColorDot.dataset.color = "#2A333C";
+        if(boardState.color === "#FFFFFF") boardState.color = "#2A333C";
+      }
     }
 
-    function getScaleRatio(){ var w = cWrap.clientWidth || canvas.width || 640; return Math.max(0.4, w / 640); }
-    function resizeCanvas(){
-      var r = cWrap.getBoundingClientRect(); if(r.width > 0 && r.height > 0){ canvas.width = r.width; canvas.height = r.height; redrawStrokes(); renderTexts(); }
+    function getScaleRatio(){
+      var w = cWrap.clientWidth || canvas.width || 640;
+      return Math.max(0.4, w / 640);
     }
-    requestAnimationFrame(resizeCanvas); window.addEventListener("resize", resizeCanvas);
+
+    function resizeCanvas(){
+      var r = cWrap.getBoundingClientRect();
+      if(r.width > 0 && r.height > 0){
+        canvas.width = r.width; canvas.height = r.height;
+        redrawStrokes();
+        renderTexts();
+      }
+    }
+    requestAnimationFrame(resizeCanvas);
+    window.addEventListener("resize", resizeCanvas);
 
     function redrawStrokes(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -2305,97 +2391,206 @@
       strokes.forEach(function(st){
         if(!st.points || st.points.length < 2) return;
         ctx.save();
-        if(st.isEraser){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, st.size * 2.5 * scale); }
-        else { ctx.globalCompositeOperation = "source-over"; ctx.strokeStyle = st.color; ctx.lineWidth = Math.max(1, st.size * scale); }
-        ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath();
+        if(st.isEraser){
+          ctx.globalCompositeOperation = "destination-out";
+          ctx.lineWidth = Math.max(2, st.size * 2.5 * scale);
+        } else {
+          ctx.globalCompositeOperation = "source-over";
+          ctx.strokeStyle = st.color;
+          ctx.lineWidth = Math.max(1, st.size * scale);
+        }
+        ctx.lineCap = "round"; ctx.lineJoin = "round";
+        ctx.beginPath();
         ctx.moveTo(st.points[0].x * canvas.width / 100, st.points[0].y * canvas.height / 100);
-        for(var i=1; i<st.points.length; i++){ ctx.lineTo(st.points[i].x * canvas.width / 100, st.points[i].y * canvas.height / 100); }
-        ctx.stroke(); ctx.restore();
+        for(var i=1; i<st.points.length; i++){
+          ctx.lineTo(st.points[i].x * canvas.width / 100, st.points[i].y * canvas.height / 100);
+        }
+        ctx.stroke();
+        ctx.restore();
       });
     }
 
     function renderTexts(){
-      textLayer.innerHTML = ""; var scale = getScaleRatio();
+      textLayer.innerHTML = "";
+      var scale = getScaleRatio();
+
       texts.forEach(function(t, idx){
         var div = document.createElement("div");
         div.className = "movable-text" + (t.id === activeSelectedTextId ? " active" : "");
-        div.style.left = t.x + "%"; div.style.top = t.y + "%"; div.style.color = t.color || "var(--ink)";
-        var baseSize = t.fontSize || 36; div.style.fontSize = Math.round(baseSize * scale) + "px";
-        div.innerHTML = `<span class="text-content">${t.text}</span><div class="resize-handle"></div>`;
+        div.style.left = t.x + "%";
+        div.style.top = t.y + "%";
+        div.style.color = t.color || "var(--ink)";
+        
+        var baseSize = t.fontSize || 36;
+        div.style.fontSize = Math.round(baseSize * scale) + "px";
+
+        div.innerHTML = `
+          <span class="text-content">${t.text}</span>
+          <div class="resize-handle" title="按住拖動縮放字體"></div>
+        `;
 
         var handle = div.querySelector(".resize-handle");
         handle.onmousedown = function(e){
           e.stopPropagation(); e.preventDefault();
-          var startSize = t.fontSize || 36; var centerRect = div.getBoundingClientRect();
-          var centerX = centerRect.left + centerRect.width / 2; var centerY = centerRect.top + centerRect.height / 2;
+          var startSize = t.fontSize || 36;
+          var centerRect = div.getBoundingClientRect();
+          var centerX = centerRect.left + centerRect.width / 2;
+          var centerY = centerRect.top + centerRect.height / 2;
           var startDist = Math.hypot(e.clientX - centerX, e.clientY - centerY) || 1;
+
           function onResizeMove(ev){
             var currentDist = Math.hypot(ev.clientX - centerX, ev.clientY - centerY);
-            var ratio = currentDist / startDist; var newSize = Math.max(16, Math.min(120, Math.round(startSize * ratio)));
-            t.fontSize = newSize; div.style.fontSize = Math.round(newSize * scale) + "px";
-            var fontSelect = vToolbar.querySelector(".board-font-select"); if(fontSelect) fontSelect.value = String(newSize);
+            var ratio = currentDist / startDist;
+            var newSize = Math.max(16, Math.min(120, Math.round(startSize * ratio)));
+            t.fontSize = newSize;
+            div.style.fontSize = Math.round(newSize * scale) + "px";
+            if(fontSelect) fontSelect.value = String(newSize);
           }
-          function onResizeUp(){ window.removeEventListener("mousemove", onResizeMove); window.removeEventListener("mouseup", onResizeUp); writeProgress(q.id, { texts: texts }); }
-          window.addEventListener("mousemove", onResizeMove); window.addEventListener("mouseup", onResizeUp);
+
+          function onResizeUp(){
+            window.removeEventListener("mousemove", onResizeMove);
+            window.removeEventListener("mouseup", onResizeUp);
+            writeProgress(q.id, { texts: texts });
+          }
+
+          window.addEventListener("mousemove", onResizeMove);
+          window.addEventListener("mouseup", onResizeUp);
         };
 
         div.onmousedown = function(e){
           e.stopPropagation();
-          if(boardState.tool === "stroke-eraser"){ texts.splice(idx, 1); writeProgress(q.id, { texts: texts }); return; }
-          activeSelectedTextId = t.id; div.classList.add("active");
-          var fontSelect = vToolbar.querySelector(".board-font-select"); if(fontSelect) fontSelect.value = String(t.fontSize || 36);
-          var startX = e.clientX, startY = e.clientY; var origX = t.x, origY = t.y; var rect = cWrap.getBoundingClientRect();
-          function onMove(ev){
-            var dx = (ev.clientX - startX) / rect.width * 100; var dy = (ev.clientY - startY) / rect.height * 100;
-            t.x = Math.max(5, Math.min(95, origX + dx)); t.y = Math.max(5, Math.min(95, origY + dy));
-            div.style.left = t.x + "%"; div.style.top = t.y + "%";
+
+          if(boardState.tool === "stroke-eraser"){
+            texts.splice(idx, 1);
+            writeProgress(q.id, { texts: texts });
+            return;
           }
-          function onUp(){ div.classList.remove("active"); window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); writeProgress(q.id, { texts: texts }); }
-          window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", onUp);
+
+          activeSelectedTextId = t.id;
+          div.classList.add("active");
+          if(fontSelect) fontSelect.value = String(t.fontSize || 36);
+
+          var startX = e.clientX, startY = e.clientY;
+          var origX = t.x, origY = t.y;
+          var rect = cWrap.getBoundingClientRect();
+
+          function onMove(ev){
+            var dx = (ev.clientX - startX) / rect.width * 100;
+            var dy = (ev.clientY - startY) / rect.height * 100;
+            t.x = Math.max(5, Math.min(95, origX + dx));
+            t.y = Math.max(5, Math.min(95, origY + dy));
+            div.style.left = t.x + "%";
+            div.style.top = t.y + "%";
+          }
+
+          function onUp(){
+            div.classList.remove("active");
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+            writeProgress(q.id, { texts: texts });
+          }
+
+          window.addEventListener("mousemove", onMove);
+          window.addEventListener("mouseup", onUp);
         };
+
         textLayer.appendChild(div);
       });
     }
 
     function getPos(e){
       var r = cWrap.getBoundingClientRect();
-      var cx = e.touches ? e.touches[0].clientX : e.clientX; var cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: (cx - r.left) / r.width * 100, y: (cy - r.top) / r.height * 100 };
+      var cx = e.touches ? e.touches[0].clientX : e.clientX;
+      var cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (cx - r.left) / r.width * 100,
+        y: (cy - r.top) / r.height * 100
+      };
+    }
+
+    function checkStrokeHit(p){
+      for(var i = strokes.length - 1; i >= 0; i--){
+        var pts = strokes[i].points;
+        for(var j=0; j<pts.length; j++){
+          var dist = Math.hypot(pts[j].x - p.x, pts[j].y - p.y);
+          if(dist < 3.5){
+            strokes.splice(i, 1);
+            writeProgress(q.id, { strokes: strokes });
+            return true;
+          }
+        }
+      }
+      return false;
     }
 
     canvas.onmousedown = function(e){
       if(!canInteract()) return;
-      var p = getPos(e); activeSelectedTextId = null;
+      var p = getPos(e);
+      activeSelectedTextId = null;
+
       if(boardState.tool === "stroke-eraser"){
-        for(var i = strokes.length - 1; i >= 0; i--){
-          var pts = strokes[i].points;
-          for(var j=0; j<pts.length; j++){
-            if(Math.hypot(pts[j].x - p.x, pts[j].y - p.y) < 3.5){ strokes.splice(i, 1); writeProgress(q.id, { strokes: strokes }); return; }
-          }
-        }
+        checkStrokeHit(p);
         return;
       }
       if(boardState.tool === "text"){
-        var txt = prompt("請輸入文字內容：");
-        if(txt && txt.trim()){ texts.push({ id: uid("t"), text: txt.trim(), x: p.x, y: p.y, color: boardState.color, fontSize: boardState.fontSize || 36 }); writeProgress(q.id, { texts: texts }); }
+        var txt = prompt("請輸入文字內容（漢字或拼音）：");
+        if(txt && txt.trim()){
+          texts.push({ 
+            id: uid("t"), 
+            text: txt.trim(), 
+            x: p.x, 
+            y: p.y, 
+            color: boardState.color, 
+            fontSize: boardState.fontSize || 36 
+          });
+          writeProgress(q.id, { texts: texts });
+        }
         return;
       }
-      isDrawing = true; currentPath = [p];
+
+      isDrawing = true;
+      currentPath = [p];
     };
 
     window.onmousemove = function(e){
-      if(!isDrawing) return; var p = getPos(e); currentPath.push(p); var scale = getScaleRatio(); ctx.save();
-      if(boardState.tool === "pixel-eraser"){ ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = Math.max(2, st.size * 2.5 * scale); }
-      else { ctx.globalCompositeOperation = "source-over"; ctx.strokeStyle = boardState.color; ctx.lineWidth = Math.max(1, boardState.size * scale); }
-      ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath();
+      if(!isDrawing) return;
+      var p = getPos(e);
+      currentPath.push(p);
+
+      var scale = getScaleRatio();
+      ctx.save();
+      if(boardState.tool === "pixel-eraser"){
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.lineWidth = Math.max(2, boardState.size * 2.5 * scale);
+      } else {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.strokeStyle = boardState.color;
+        ctx.lineWidth = Math.max(1, boardState.size * scale);
+      }
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.beginPath();
       var pts = currentPath;
-      if(pts.length >= 2){ ctx.moveTo(pts[pts.length-2].x * canvas.width / 100, pts[pts.length-2].y * canvas.height / 100); ctx.lineTo(p.x * canvas.width / 100, p.y * canvas.height / 100); ctx.stroke(); }
+      if(pts.length >= 2){
+        ctx.moveTo(pts[pts.length-2].x * canvas.width / 100, pts[pts.length-2].y * canvas.height / 100);
+        ctx.lineTo(p.x * canvas.width / 100, p.y * canvas.height / 100);
+        ctx.stroke();
+      }
       ctx.restore();
     };
 
     window.onmouseup = function(){
-      if(!isDrawing) return; isDrawing = false;
-      if(currentPath.length >= 2){ strokes.push({ id: uid("st"), points: currentPath, color: boardState.color, size: boardState.size, isEraser: boardState.tool === "pixel-eraser" }); writeProgress(q.id, { strokes: strokes }); }
+      if(!isDrawing) return;
+      isDrawing = false;
+      if(currentPath.length >= 2){
+        strokes.push({
+          id: uid("st"),
+          points: currentPath,
+          color: boardState.color,
+          size: boardState.size,
+          isEraser: boardState.tool === "pixel-eraser"
+        });
+        writeProgress(q.id, { strokes: strokes });
+      }
       currentPath = [];
     };
 
@@ -2403,44 +2598,79 @@
     if(fontSelect){
       fontSelect.onchange = function(){
         boardState.fontSize = Number(fontSelect.value);
-        if(activeSelectedTextId){ var selObj = texts.find(function(item){ return item.id === activeSelectedTextId; }); if(selObj){ selObj.fontSize = boardState.fontSize; writeProgress(q.id, { texts: texts }); } }
+        if(activeSelectedTextId){
+          var selObj = texts.find(function(item){ return item.id === activeSelectedTextId; });
+          if(selObj){
+            selObj.fontSize = boardState.fontSize;
+            writeProgress(q.id, { texts: texts });
+          }
+        }
       };
     }
 
     vToolbar.querySelectorAll(".grid-btn-v").forEach(function(gb){
       gb.onclick = function(){
         vToolbar.querySelectorAll(".grid-btn-v").forEach(function(x){ x.classList.remove("active"); });
-        gb.classList.add("active"); var gType = gb.dataset.grid;
+        gb.classList.add("active");
+        var gType = gb.dataset.grid;
         cWrap.className = "canvas-stage-wrap " + (gType === 'tian' ? 'grid-tian' : (gType === 'jiu' ? 'grid-jiu' : ''));
         writeProgress(q.id, { gridType: gType });
       };
     });
 
     vToolbar.querySelectorAll(".color-dot").forEach(function(d){
-      d.onclick = function(){ vToolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); }); d.classList.add("active"); boardState.color = d.dataset.color; };
+      d.onclick = function(){
+        vToolbar.querySelectorAll(".color-dot").forEach(function(x){ x.classList.remove("active"); });
+        d.classList.add("active");
+        boardState.color = d.dataset.color;
+      };
     });
 
     vToolbar.querySelectorAll(".size-btn-v").forEach(function(sBtn){
-      sBtn.onclick = function(){ vToolbar.querySelectorAll(".size-btn-v").forEach(function(x){ x.classList.remove("active"); }); sBtn.classList.add("active"); boardState.size = Number(sBtn.dataset.size); };
+      sBtn.onclick = function(){
+        vToolbar.querySelectorAll(".size-btn-v").forEach(function(x){ x.classList.remove("active"); });
+        sBtn.classList.add("active");
+        boardState.size = Number(sBtn.dataset.size);
+      };
     });
 
     var clearBtn = vToolbar.querySelector("#btn-clear-draw");
-    if(clearBtn){ clearBtn.onclick = function(){ if(confirm("確定清空畫布？")){ strokes = []; texts = []; writeProgress(q.id, { strokes: strokes, texts: texts }); } }; }
+    if(clearBtn){
+      clearBtn.onclick = function(){
+        if(confirm("確定要清空畫布上的所有內容嗎？")){
+          strokes = []; texts = [];
+          writeProgress(q.id, { strokes: strokes, texts: texts });
+        }
+      };
+    }
   }
 
   /* 遠端游標 */
   function renderMultiCursors(cursorData){
-    var container = document.getElementById("multi-cursor-box"); if(!container) return; container.innerHTML = "";
+    var container = document.getElementById("multi-cursor-box");
+    if(!container) return;
+    container.innerHTML = "";
     if(!cursorData || !cursorOn) return;
+
     Object.keys(cursorData).forEach(function(peerId){
       if(peerId === myId) return;
-      var c = cursorData[peerId]; if(!c || c.x == null) return;
+
+      var c = cursorData[peerId];
+      if(!c || c.x == null) return;
+
       var isTeacherCursor = (c.role === "teacher" || peerId === "teacher");
       var displayName = isTeacherCursor ? "👑 老師" : (c.name || "學生");
       var color = isTeacherCursor ? "#B23B32" : getColorForStudent(displayName, "student");
-      var el = document.createElement("div"); el.className = "peer-cursor";
-      el.style.left = c.x + "%"; el.style.top = c.y + "%";
-      el.innerHTML = `<span class="peer-cursor-dot" style="background:${color};"></span><span class="peer-cursor-label" style="background:${color};">${displayName}</span>`;
+
+      var el = document.createElement("div");
+      el.className = "peer-cursor";
+      el.style.left = c.x + "%";
+      el.style.top = c.y + "%";
+
+      el.innerHTML = `
+        <span class="peer-cursor-dot" style="background:${color};"></span>
+        <span class="peer-cursor-label" style="background:${color};">${displayName}</span>
+      `;
       container.appendChild(el);
     });
   }
@@ -2448,29 +2678,62 @@
   var lastM = 0;
   function handleCursorMove(clientX, clientY){
     if(!inRoom() || !cursorOn) return;
-    var now = Date.now(); if(now - lastM < 40) return; lastM = now;
-    var boardArea = document.getElementById("board-area"); if(!boardArea) return;
-    var r = boardArea.getBoundingClientRect(); if(r.width === 0 || r.height === 0) return;
-    var x = ((clientX - r.left) / r.width) * 100; var y = ((clientY - r.top) / r.height) * 100;
-    if(x < -10 || x > 110 || y < -10 || y > 110){ update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: null, y: null }); return; }
-    x = Math.max(0, Math.min(100, x)); y = Math.max(0, Math.min(100, y));
-    update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: x, y: y, name: myName, role: roomRole });
-  }
-  window.addEventListener("mousemove", function(e){ handleCursorMove(e.clientX, e.clientY); });
-  window.addEventListener("touchmove", function(e){ if(e.touches && e.touches[0]){ handleCursorMove(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: true });
+    var now = Date.now();
+    if(now - lastM < 40) return;
+    lastM = now;
 
-  /* 縮放按鈕 */
+    var boardArea = document.getElementById("board-area");
+    if(!boardArea) return;
+    var r = boardArea.getBoundingClientRect();
+    if(r.width === 0 || r.height === 0) return;
+
+    var x = ((clientX - r.left) / r.width) * 100;
+    var y = ((clientY - r.top) / r.height) * 100;
+
+    if(x < -10 || x > 110 || y < -10 || y > 110){
+      update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { x: null, y: null });
+      return;
+    }
+
+    x = Math.max(0, Math.min(100, x));
+    y = Math.max(0, Math.min(100, y));
+
+    update(ref(db, "roomCursors/" + activeRoomId + "/" + myId), { 
+      x: x, 
+      y: y, 
+      name: myName,
+      role: roomRole 
+    });
+  }
+
+  window.addEventListener("mousemove", function(e){
+    handleCursorMove(e.clientX, e.clientY);
+  });
+
+  window.addEventListener("touchmove", function(e){
+    if(e.touches && e.touches[0]){
+      handleCursorMove(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
+
+  /* 畫面縮放按鈕監聽 */
   var btnZoomIn = document.getElementById("btn-zoom-in");
   var btnZoomOut = document.getElementById("btn-zoom-out");
   var btnZoomReset = document.getElementById("zoom-percent-text");
+
   if(btnZoomIn) btnZoomIn.onclick = function(){ applyStageZoom(currentZoomRatio + 0.1); };
   if(btnZoomOut) btnZoomOut.onclick = function(){ applyStageZoom(currentZoomRatio - 0.1); };
   if(btnZoomReset) btnZoomReset.onclick = function(){ applyStageZoom(1.0); };
 
-  /* 設定面板與模式切換 */
-  var soundSelect = document.getElementById("setting-sound-style"); soundSelect.value = currentSoundStyle;
-  soundSelect.onchange = function(){ currentSoundStyle = soundSelect.value; localStorage.setItem("hanyu_sound_style", currentSoundStyle); };
-  
+  /* 設定面板操作 */
+  var soundSelect = document.getElementById("setting-sound-style");
+  soundSelect.value = currentSoundStyle;
+
+  soundSelect.onchange = function(){
+    currentSoundStyle = soundSelect.value;
+    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
+  };
+
   document.querySelectorAll(".btn-mode-toggle").forEach(function(b){
     b.onclick = function(){
       currentClassMode = b.dataset.mode;
@@ -2479,56 +2742,124 @@
     };
   });
 
-  document.querySelectorAll(".btn-theme-bg").forEach(function(b){ b.onclick = function(){ applyTheme(b.dataset.bg, currentAccentColor, true); }; });
-  document.querySelectorAll(".btn-theme-accent").forEach(function(b){ b.onclick = function(){ applyTheme(currentBgMode, b.dataset.accent, true); }; });
-  
+  document.querySelectorAll(".btn-theme-bg").forEach(function(b){
+    b.onclick = function(){
+      applyTheme(b.dataset.bg, currentAccentColor, true);
+    };
+  });
+
+  document.querySelectorAll(".btn-theme-accent").forEach(function(b){
+    b.onclick = function(){
+      applyTheme(currentBgMode, b.dataset.accent, true);
+    };
+  });
+
   var testSoundBtn = document.getElementById("btn-test-sound");
   if(testSoundBtn){
     testSoundBtn.onclick = function(e){
-      e.preventDefault(); var ctx = getAudioContext();
-      if(ctx.state === 'suspended') ctx.resume().then(runTest); else runTest();
-      function runTest(){ var prev = soundSelect ? soundSelect.value : currentSoundStyle; playTone(prev, true); setTimeout(function(){ playTone(prev, false); }, 600); }
+      e.preventDefault();
+      var ctx = getAudioContext();
+      if(ctx.state === 'suspended'){
+        ctx.resume().then(runTest);
+      } else {
+        runTest();
+      }
+
+      function runTest(){
+        var previewStyle = soundSelect ? soundSelect.value : currentSoundStyle;
+        playTone(previewStyle, true);
+        setTimeout(function(){
+          playTone(previewStyle, false);
+        }, 600);
+      }
     };
   }
-  document.getElementById("btn-close-settings").onclick = function(){ currentSoundStyle = soundSelect.value; localStorage.setItem("hanyu_sound_style", currentSoundStyle); closeModalDialog(document.getElementById("settings-dialog")); };
 
-  /* 大題新增彈窗 */
+  document.getElementById("btn-close-settings").onclick = function(){
+    currentSoundStyle = soundSelect.value;
+    localStorage.setItem("hanyu_sound_style", currentSoundStyle);
+    closeModalDialog(document.getElementById("settings-dialog"));
+  };
+
+  /* 大題新增／編輯彈窗（含智慧自動命名） */
   var sectionDialog = document.getElementById("section-dialog");
   var sectionTypeToggle = document.getElementById("section-type-toggle");
   var currentSectionType = "match";
+
   sectionTypeToggle.querySelectorAll("button").forEach(function(b){
-    b.onclick = function(){ sectionTypeToggle.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); }); b.classList.add("active"); currentSectionType = b.dataset.type; };
+    b.onclick = function(){
+      sectionTypeToggle.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); });
+      b.classList.add("active");
+      currentSectionType = b.dataset.type;
+    };
   });
+
   document.getElementById("btn-new-section").onclick = function(){
-    editingSectionId = null; document.getElementById("f-sec-title").value = ""; document.getElementById("f-sec-desc").value = "";
-    document.getElementById("section-dialog-title").textContent = "新增試卷大題"; safeShowModal(sectionDialog);
+    editingSectionId = null;
+    document.getElementById("f-sec-title").value = "";
+    document.getElementById("f-sec-desc").value = "";
+    document.getElementById("section-dialog-title").textContent = "新增試卷大題";
+    safeShowModal(sectionDialog);
   };
+
   document.getElementById("btn-cancel-section").onclick = function(){ closeModalDialog(sectionDialog); };
+
   document.getElementById("section-form").onsubmit = function(e){
     e.preventDefault();
-    var title = document.getElementById("f-sec-title").value.trim(); var desc = document.getElementById("f-sec-desc").value.trim();
-    if(!title) return;
+    var title = document.getElementById("f-sec-title").value.trim();
+    var desc = document.getElementById("f-sec-desc").value.trim();
+    
     var secs = Object.assign({}, getSections());
-    if(editingSectionId){ secs[editingSectionId].title = title; secs[editingSectionId].desc = desc; }
-    else {
-      var newSecId = uid("sec"); var defaultQId = uid("q"); var currentKeys = Object.keys(secs);
+    if(editingSectionId){
+      if(!title){
+        var typeNamesEdit = { match: "生詞配對大題", choice: "語意選擇大題", reorder: "句子重組大題", board: "漢字書寫大題" };
+        title = typeNamesEdit[secs[editingSectionId].type] || "綜合練習大題";
+      }
+      secs[editingSectionId].title = title;
+      secs[editingSectionId].desc = desc;
+    } else {
+      if(!title){
+        var typeNames = { match: "生詞配對大題", choice: "語意選擇大題", reorder: "句子重組大題", board: "漢字書寫大題" };
+        var count = Object.keys(secs).length + 1;
+        title = (typeNames[currentSectionType] || "綜合練習大題") + " (" + count + ")";
+      }
+      var newSecId = uid("sec");
+      var defaultQId = uid("q");
+      var currentKeys = Object.keys(secs);
+
       var defaultQ = { id: defaultQId, title: "第 1 題", order: 0 };
       if(currentSectionType === "match"){
-        defaultQ.leftLabel = "生詞"; defaultQ.rightLabel = "拼音"; defaultQ.pairs = { p1: {id:"p1", left:"你好", right:"nǐ hǎo"} };
+        defaultQ.leftLabel = "生詞"; defaultQ.rightLabel = "拼音";
+        defaultQ.pairs = { p1: {id:"p1", left:"你好", right:"nǐ hǎo"} };
       } else if(currentSectionType === "choice"){
-        defaultQ.prompt = "請選出正確答案(可複選)："; defaultQ.choices = { c1: {id:"c1", text:"選項 A"}, c2: {id:"c2", text:"選項 B"} }; defaultQ.answerIds = ["c1"];
+        defaultQ.prompt = "請選出正確答案(可複選)：";
+        defaultQ.choices = { c1: {id:"c1", text:"選項 A"}, c2: {id:"c2", text:"選項 B"} };
+        defaultQ.answerIds = ["c1"];
       } else if(currentSectionType === "reorder"){
-        defaultQ.prompt = "請將下列詞語重組為正確句子"; defaultQ.words = ["我", "愛", "學", "華語"];
+        defaultQ.prompt = "請將下列詞語重組為正確句子";
+        defaultQ.words = ["我", "愛", "學", "華語"];
       } else {
-        defaultQ.desc = "漢字臨摹與書寫練習"; defaultQ.bgImage = ""; defaultQ.gridType = "jiu";
+        defaultQ.desc = "漢字臨摹與書寫練習";
+        defaultQ.bgImage = ""; defaultQ.gridType = "jiu";
       }
-      secs[newSecId] = { id: newSecId, title: title, desc: desc, type: currentSectionType, order: currentKeys.length, collapsed: false, questions: { [defaultQId]: defaultQ } };
+
+      secs[newSecId] = {
+        id: newSecId,
+        title: title,
+        desc: desc,
+        type: currentSectionType,
+        order: currentKeys.length,
+        collapsed: false,
+        questions: { [defaultQId]: defaultQ }
+      };
+
       writeSections(secs, defaultQId);
     }
+
     closeModalDialog(sectionDialog);
   };
 
-  /* 小題題目編輯彈窗 */
+  /* 小題題目編輯彈窗（含自動編號） */
   var editorDialog = document.getElementById("editor-dialog");
   var matchFields = document.getElementById("match-fields");
   var choiceFields = document.getElementById("choice-fields");
@@ -2565,34 +2896,41 @@
   var fileInput = document.getElementById("f-board-img");
   document.getElementById("upload-box").onclick = function(){ fileInput.click(); };
   fileInput.onchange = function(e){
-    var f = e.target.files[0]; if(!f) return;
+    var f = e.target.files[0];
+    if(!f) return;
     var reader = new FileReader();
     reader.onload = function(evt){
       var img = new Image();
       img.onload = function(){
-        var c = document.createElement("canvas"); var scale = Math.min(1, 900 / img.width);
-        c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
-        var cx = c.getContext("2d"); cx.drawImage(img, 0, 0, c.width, c.height);
+        var c = document.createElement("canvas");
+        var scale = Math.min(1, 900 / img.width);
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
+        var cx = c.getContext("2d");
+        cx.drawImage(img, 0, 0, c.width, c.height);
         uploadedBase64 = c.toDataURL("image/jpeg", 0.75);
         document.getElementById("upload-tip").textContent = "✅ 已上傳圖片：" + f.name;
       };
       img.src = evt.target.result;
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(f);
   };
 
   function openQuestionDialog(sectionId, editQuestionId){
     activeSectionForAdd = sectionId;
     editingQuestionId = editQuestionId || null;
-    var secs = getSections(); var sec = secs[sectionId]; if(!sec) return;
-    var secType = sec.type;
+    var secs = getSections();
+    var sec = secs[sectionId];
+    if(!sec) return;
 
+    var secType = sec.type;
     matchFields.style.display = secType === "match" ? "" : "none";
     choiceFields.style.display = secType === "choice" ? "" : "none";
     reorderFields.style.display = secType === "reorder" ? "" : "none";
     boardFields.style.display = secType === "board" ? "" : "none";
 
-    uploadedBase64 = ""; document.getElementById("upload-tip").textContent = "📷 點擊上傳背景圖片（JPG/PNG）";
+    uploadedBase64 = "";
+    document.getElementById("upload-tip").textContent = "📷 點擊上傳背景圖片（JPG/PNG）";
     pairRows.innerHTML = ""; choiceOptRows.innerHTML = "";
 
     if(editingQuestionId){
@@ -2620,7 +2958,10 @@
         document.getElementById("f-reorder-answer").value = q.words ? q.words.join(", ") : "";
       } else if(secType === "board"){
         document.getElementById("f-board-desc").value = q.desc || "";
-        if(q.bgImage){ uploadedBase64 = q.bgImage; document.getElementById("upload-tip").textContent = "✅ 已載入現有底圖"; }
+        if(q.bgImage){
+          uploadedBase64 = q.bgImage;
+          document.getElementById("upload-tip").textContent = "✅ 已載入現有底圖";
+        }
       }
     } else {
       document.getElementById("editor-dialog-title").textContent = "新增小題題目";
@@ -2628,7 +2969,10 @@
       document.getElementById("f-title").value = `第 ${count + 1} 題`;
       if(secType === "match"){ addPairRow("你好", "nǐ hǎo"); addPairRow("謝謝", "xièxie"); }
       else if(secType === "choice"){ addChoiceOptRow("選項 A", true); addChoiceOptRow("選項 B", false); }
-      else if(secType === "reorder"){ document.getElementById("f-reorder-prompt").value = "請將下列詞語重組為正確句子"; document.getElementById("f-reorder-answer").value = "我, 愛, 學, 華語"; }
+      else if(secType === "reorder"){
+        document.getElementById("f-reorder-prompt").value = "請將下列詞語重組為正確句子";
+        document.getElementById("f-reorder-answer").value = "我, 愛, 學, 華語";
+      }
     }
     safeShowModal(editorDialog);
   }
@@ -2638,11 +2982,18 @@
   document.getElementById("editor-form").onsubmit = function(e){
     e.preventDefault();
     var title = document.getElementById("f-title").value.trim();
-    if(!title || !activeSectionForAdd) return;
+    if(!activeSectionForAdd) return;
 
-    var secs = Object.assign({}, getSections()); var sec = secs[activeSectionForAdd]; if(!sec) return;
-    var qId = editingQuestionId || uid("q");
+    var secs = Object.assign({}, getSections());
+    var sec = secs[activeSectionForAdd];
+    if(!sec) return;
+
     var qKeys = Object.keys(sec.questions || {});
+    if(!title){
+      title = `第 ${editingQuestionId ? (qKeys.indexOf(editingQuestionId) + 1) : (qKeys.length + 1)} 題`;
+    }
+
+    var qId = editingQuestionId || uid("q");
     var existingOrder = (editingQuestionId && sec.questions[editingQuestionId]) ? sec.questions[editingQuestionId].order : qKeys.length;
     var newQ = { id: qId, title: title, order: existingOrder };
 
@@ -2671,7 +3022,8 @@
     } else if(sec.type === "match"){
       var pairs = {};
       pairRows.querySelectorAll(".pair-row").forEach(function(r, idx){
-        var l = r.querySelector(".pair-left").value.trim(); var rt = r.querySelector(".pair-right").value.trim();
+        var l = r.querySelector(".pair-left").value.trim();
+        var rt = r.querySelector(".pair-right").value.trim();
         if(l && rt) pairs["p" + (idx + 1)] = { id: "p" + (idx + 1), left: l, right: rt };
       });
       newQ.leftLabel = document.getElementById("f-left-label").value.trim() || "生詞";
