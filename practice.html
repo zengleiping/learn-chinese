@@ -677,13 +677,10 @@
   .teacher-note-field label{color:var(--seal);}
   .teacher-note-field textarea{background:var(--surface);}
   .teacher-note-hint{font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.5;}
-  /* 配分總覽——內嵌在左側欄最下方的可編輯大表，取代原本一題一題填的模式 */
-  .weight-panel{ margin-top:2px; flex:none; padding:12px 12px 13px; border:1.5px solid var(--bamboo); border-radius:12px; background:rgba(76,122,94,0.06); }
-  .weight-panel-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  .weight-panel-head-title{ font-size:12.5px; font-weight:700; color:var(--bamboo); }
-  .weight-panel-head-total{ font-size:13px; font-weight:700; color:var(--seal); flex:none; white-space:nowrap; }
-  .weight-panel-hint{ font-size:11px; color:var(--ink-soft); margin:5px 0 10px; line-height:1.5; }
-  .weight-panel-table{ width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+  /* 配分表彈窗——點「編輯題庫」選單裡的「📊 配分表」才會打開，平常不佔側欄版面，預設依題數平均分配 */
+  .weight-panel-table{ width:100%; border-collapse:collapse; font-size:12.5px; table-layout:fixed; }
+  .weight-panel-total-row td{ padding-top:10px; border-top:1.5px solid var(--grid-line); font-weight:700; font-size:13.5px; color:var(--ink); }
+  .weight-panel-total-row td:last-child{ color:var(--seal); text-align:right; }
   .weight-panel-table th{ text-align:left; font-size:10px; font-weight:700; color:var(--ink-soft); padding:0 4px 5px; border-bottom:1px solid var(--grid-line); }
   .weight-panel-table th:nth-child(2), .weight-panel-table th:nth-child(3){ text-align:center; }
   .weight-panel-sec-row td{ padding:9px 4px 3px; font-size:11px; font-weight:700; color:var(--ink-soft); border-bottom:none; }
@@ -796,6 +793,7 @@
         <div class="bank-menu-wrap" id="bank-menu-wrap">
           <button type="button" class="btn btn-sm" id="btn-bank-menu" style="width:100%; justify-content:center; margin-top:8px; border:1.5px solid var(--bamboo); color:var(--bamboo); font-weight:700;">編輯題庫 Edit Questions</button>
           <div class="bank-menu-pop" id="bank-menu-pop">
+            <button type="button" class="bank-menu-item" id="btn-weight-table">📊 配分表 Score Table</button>
             <button type="button" class="bank-menu-item" id="btn-table-editor">表格編輯題庫 Edit as Table</button>
             <button type="button" class="bank-menu-item" id="btn-import-excel">匯入 Excel 題庫 Import Excel</button>
             <button type="button" class="bank-menu-item" id="btn-export-excel">匯出 Excel 題庫 Export to Excel</button>
@@ -805,20 +803,6 @@
         </div>
 
         <div class="section-list" id="section-tree-list"></div>
-
-        <!-- 配分總覽：可直接編輯的大表，固定在左側欄最下方，取代原本要開彈窗的模式 -->
-        <div class="weight-panel" id="weight-panel">
-          <div class="weight-panel-head">
-            <span class="weight-panel-head-title">📊 配分總覽 Score Breakdown</span>
-            <span class="weight-panel-head-total" id="weight-panel-head-total"></span>
-          </div>
-          <p class="weight-panel-hint">填「比重」就好，不用自己湊到剛好 100——系統會自動按比例換算成滿分 100 分。寫字板類型不計分，不列在下表。Weights auto-scale to 100 points total; board-type questions aren't scored.</p>
-          <table class="weight-panel-table">
-            <colgroup><col><col style="width:56px"><col style="width:50px"></colgroup>
-            <thead><tr><th>小題 Question</th><th>比重</th><th>分數</th></tr></thead>
-            <tbody id="weight-panel-tbody"></tbody>
-          </table>
-        </div>
       </div>
     </aside>
 
@@ -1120,6 +1104,24 @@
   <div class="dialog-foot">
     <button type="button" class="btn btn-ghost" id="btn-cancel-table-editor">取消 Cancel</button>
     <button type="button" class="btn btn-primary" id="btn-apply-table-editor">✅ 套用變更 Apply Changes</button>
+  </div>
+</dialog>
+
+<!-- 配分表彈窗：預設整份測驗依題數平均分配，老師有特殊需求才需要打開這裡調整比重 -->
+<dialog class="dialog-modal" id="weight-table-dialog" style="width:min(480px,94vw);">
+  <div class="dialog-head">
+    <h2>📊 配分表 Score Table</h2>
+  </div>
+  <div class="dialog-body">
+    <table class="weight-panel-table">
+      <colgroup><col><col style="width:56px"><col style="width:50px"></colgroup>
+      <thead><tr><th>小題 Question</th><th>比重</th><th>分數</th></tr></thead>
+      <tbody id="weight-panel-tbody"></tbody>
+      <tfoot><tr class="weight-panel-total-row"><td>總分 Total</td><td></td><td id="weight-panel-head-total"></td></tr></tfoot>
+    </table>
+  </div>
+  <div class="dialog-foot">
+    <button type="button" class="btn btn-primary" id="btn-close-weight-table">完成 Done</button>
   </div>
 </dialog>
 
@@ -2643,8 +2645,6 @@
       }
       sectionTreeListEl.appendChild(block);
     });
-
-    renderWeightPanel();
   }
 
   /* ================== 新增／編輯大題彈窗 ================== */
@@ -3161,11 +3161,13 @@
   var btnTableEditor = document.getElementById("btn-table-editor");
   if(btnTableEditor) btnTableEditor.onclick = openTableEditor;
 
-  /* ---- 配分總覽：固定在左側欄最下方的可編輯大表 ----
-     直接把整份測驗目前所有大題／小題攤開成一個表格，比重欄位可以直接在表格裡改，
-     不用再一題一題打開編輯彈窗。打字時只在畫面上即時換算分數（不會每個按鍵都寫回資料/雲端），
+  /* ---- 📊 配分表彈窗 ----
+     預設不用理它：每題比重都是 1，系統自動依題目數量平均分配到 100 分。只有老師想要
+     特殊配分時才點「編輯題庫」選單裡的「📊 配分表」打開這裡調整，改完關掉彈窗就好，
+     不會佔用側欄版面。打字時只在畫面上即時換算分數（不會每個按鍵都寫回資料/雲端），
      真正存檔（並同步給雲端房間裡的學生）是在欄位失焦（change）的時候才發生。 */
-  function renderWeightPanel(){
+  var weightTableDialog = document.getElementById("weight-table-dialog");
+  function openWeightTableDialog(){
     var tbody = document.getElementById("weight-panel-tbody");
     var totalEl = document.getElementById("weight-panel-head-total");
     if(!tbody) return;
@@ -3223,9 +3225,14 @@
 
     var sumPoints = breakdown.items.reduce(function(s, it){ return s + it.points; }, 0);
     if(totalEl) totalEl.textContent = sumPoints.toFixed(1) + " 分";
+    safeShowModal(weightTableDialog);
   }
+  var btnWeightTable = document.getElementById("btn-weight-table");
+  if(btnWeightTable) btnWeightTable.onclick = openWeightTableDialog;
+  var btnCloseWeightTable = document.getElementById("btn-close-weight-table");
+  if(btnCloseWeightTable) btnCloseWeightTable.onclick = function(){ closeModalDialog(weightTableDialog); };
 
-  // 「編輯題庫」選單：把表格編輯／匯入／匯出／範本 3 個入口收進一個按鈕點開的選單，平常不佔側欄版面。
+  // 「編輯題庫」選單：把配分表／表格編輯／匯入／匯出／範本 5 個入口收進一個按鈕點開的選單，平常不佔側欄版面。
   var btnBankMenu = document.getElementById("btn-bank-menu");
   var bankMenuPop = document.getElementById("bank-menu-pop");
   function closeBankMenu(){ if(bankMenuPop) bankMenuPop.classList.remove("open"); }
