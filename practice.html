@@ -98,6 +98,31 @@
   .toggle.on .toggle-track{background:var(--bamboo);border-color:var(--bamboo);}
   .toggle.on .toggle-track::after{transform:translateX(16px);}
 
+  /* 教師登入／帳號設定畫面 */
+  .auth-wrap{ flex:1; min-height:0; overflow-y:auto; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
+  .auth-card{ width:min(400px, 100%); background:var(--surface); border:1.5px solid var(--grid-line); border-radius:20px; padding:32px 28px; box-shadow:0 20px 40px rgba(0,0,0,0.1); }
+  .auth-card-logo{ font-size:36px; text-align:center; margin-bottom:10px; }
+  .auth-sub{ text-align:center; font-size:12.5px; color:var(--ink-soft); margin:0 0 20px; line-height:1.65; }
+  .auth-error{ background:var(--seal-soft); color:var(--seal); border:1.5px solid var(--seal-ring); border-radius:10px; padding:10px 14px; font-size:12.5px; margin-bottom:14px; line-height:1.5; }
+  .auth-hint{ text-align:center; font-size:11.5px; color:var(--ink-soft); margin-top:12px; line-height:1.5; }
+  #auth-form-section label{ margin-top:14px; }
+  #auth-form-section label:first-of-type{ margin-top:0; }
+
+  /* 教師帳號管理 */
+  .teacher-admin-list{ display:flex; flex-direction:column; gap:10px; }
+  .teacher-admin-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:12px 14px; border:1.5px solid var(--grid-line); border-radius:12px; background:var(--surface-2); }
+  .ta-row-main{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ta-row-name{ font-weight:700; font-size:14px; color:var(--ink); }
+  .ta-row-username{ font-size:12px; color:var(--ink-soft); }
+  .ta-badge{ font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:99px; background:rgba(28,33,30,0.1); color:var(--ink-soft); }
+  .ta-badge-admin{ background:var(--seal-soft); color:var(--seal); }
+  .ta-badge-disabled{ background:rgba(28,33,30,0.14); color:var(--ink-soft); }
+  .ta-row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+  .teacher-admin-hint{ font-size:11.5px; color:var(--ink-soft); margin:6px 0 0; line-height:1.5; }
+
+  .topbar-teacher-cluster{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--ink-soft); padding:0 4px; }
+  .topbar-teacher-name{ white-space:nowrap; }
+
   /* 專案大廳 */
   .lobby-wrap{
     flex:1;min-height:0;overflow-y:auto;
@@ -285,6 +310,7 @@
   }
   .question-item-btn.active .q-index-badge{ background:var(--seal); border-color:var(--seal); color:#fff; }
   .q-item-title{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .q-weight-tag{ flex:none; font-size:10px; font-weight:700; color:var(--bamboo); background:rgba(76,122,94,0.12); border-radius:6px; padding:1px 5px; }
   .question-item-btn .q-action-btns{ pointer-events:auto; display:flex; gap:4px; flex:none; opacity:0.45; transition:opacity .12s ease; }
   .question-item-btn:hover .q-action-btns, .question-item-btn:focus-within .q-action-btns{ opacity:1; }
 
@@ -651,6 +677,10 @@
   .teacher-note-field label{color:var(--seal);}
   .teacher-note-field textarea{background:var(--surface);}
   .teacher-note-hint{font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.5;}
+  .q-weight-field{margin:16px 0 0;padding:12px 14px;border:1.5px solid var(--bamboo);border-radius:12px;background:rgba(76,122,94,0.06);}
+  .q-weight-field label{color:var(--bamboo);}
+  .q-weight-field input{background:var(--surface);}
+  .q-weight-hint{font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.5;}
   .row-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .pair-row, .choice-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
   .pair-row input, .choice-row input[type="text"]{flex:1;}
@@ -690,6 +720,44 @@
       <div class="topbar-actions" id="topbar-actions"></div>
     </div>
   </header>
+
+  <!-- 教師登入／建立管理員帳號 -->
+  <div class="auth-wrap" id="auth-view" style="display:none;">
+    <div class="auth-card">
+      <div class="auth-card-logo">🀄</div>
+
+      <div id="auth-connecting-section">
+        <p class="auth-hint" style="margin-top:0;">⏳ 正在連線雲端服務…Connecting to cloud service…</p>
+      </div>
+
+      <div id="auth-fail-section" style="display:none;">
+        <h2 style="text-align:center;margin:0 0 6px;font-size:20px;">無法連線雲端服務 Can't Reach Cloud Service</h2>
+        <p class="auth-sub">教師帳號與測驗庫需要連線到雲端服務才能使用。請檢查網路連線後重試，或先離線使用本機示範資料（不會同步帳號，僅限這台裝置）。<br>Teacher accounts need an internet connection to the cloud service. Check your connection and retry, or continue offline with local demo data for now (won't sync, this device only).</p>
+        <button type="button" class="btn btn-primary" id="btn-auth-retry" style="width:100%; justify-content:center; margin-top:6px; padding:12px;">🔄 重試 Retry</button>
+        <button type="button" class="btn" id="btn-auth-offline" style="width:100%; justify-content:center; margin-top:10px; padding:12px;">📴 離線使用 Continue Offline</button>
+      </div>
+
+      <div id="auth-form-section" style="display:none;">
+        <h2 id="auth-title" style="text-align:center;margin:0 0 6px;font-size:20px;">教師登入 Teacher Login</h2>
+        <p class="auth-sub" id="auth-sub"></p>
+        <div id="auth-error" class="auth-error" style="display:none;"></div>
+
+        <label for="auth-username">帳號 Username</label>
+        <input type="text" id="auth-username" autocomplete="username" placeholder="僅限英文字母、數字、底線 letters/numbers/underscore only">
+
+        <label for="auth-password">密碼 Password</label>
+        <input type="password" id="auth-password" autocomplete="current-password" placeholder="至少 6 碼 at least 6 characters">
+
+        <div id="auth-confirm-wrap" style="display:none;">
+          <label for="auth-password-confirm">再輸入一次密碼 Confirm Password</label>
+          <input type="password" id="auth-password-confirm" autocomplete="new-password">
+        </div>
+
+        <button type="button" class="btn btn-primary" id="btn-auth-submit" style="width:100%; justify-content:center; margin-top:14px; padding:12px;">登入 Log In</button>
+        <p class="auth-hint" id="auth-loading-hint" style="display:none;"></p>
+      </div>
+    </div>
+  </div>
 
   <!-- 專案大廳 -->
   <div class="lobby-wrap" id="lobby-view">
@@ -843,6 +911,46 @@
   </div>
 </dialog>
 
+<!-- 教師帳號管理彈窗（僅管理員看得到入口） -->
+<dialog class="dialog-modal" id="teacher-admin-dialog" style="width:min(640px,94vw);">
+  <div class="dialog-head">
+    <h2>👥 教師帳號管理 Manage Teacher Accounts</h2>
+  </div>
+  <div class="dialog-body">
+    <button type="button" class="btn btn-sm btn-primary" id="btn-add-teacher" style="margin-bottom:14px;">＋ 新增教師帳號 Add Teacher</button>
+    <div id="teacher-admin-list" class="teacher-admin-list"></div>
+  </div>
+  <div class="dialog-foot">
+    <button type="button" class="btn btn-primary" id="btn-close-teacher-admin">完成 Done</button>
+  </div>
+</dialog>
+
+<!-- 新增／編輯教師帳號彈窗 -->
+<dialog class="dialog-modal" id="teacher-account-dialog" style="max-width:420px;">
+  <form id="teacher-account-form">
+    <div class="dialog-head">
+      <h2 id="teacher-account-dialog-title">新增教師帳號</h2>
+    </div>
+    <div class="dialog-body">
+      <label for="ta-username">帳號 Username</label>
+      <input type="text" id="ta-username" placeholder="僅限英文字母、數字、底線 letters/numbers/underscore only">
+      <label for="ta-displayname">顯示名稱 Display Name</label>
+      <input type="text" id="ta-displayname" placeholder="例如：王老師">
+      <label for="ta-password" id="ta-password-label">密碼 Password</label>
+      <input type="password" id="ta-password" placeholder="至少 6 碼">
+      <p class="teacher-admin-hint" id="ta-password-hint" style="display:none;">💡 留空表示不修改目前密碼。Leave blank to keep the current password.</p>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;font-weight:600;color:var(--ink-soft);">
+        <input type="checkbox" id="ta-is-admin" style="width:auto;">
+        設為管理員 Admin（可管理其他教師帳號 can manage other teacher accounts）
+      </label>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" class="btn btn-ghost" id="btn-cancel-teacher-account">取消 Cancel</button>
+      <button type="submit" class="btn btn-primary">儲存 Save</button>
+    </div>
+  </form>
+</dialog>
+
 <!-- 學生姓名輸入彈窗 -->
 <dialog class="dialog-modal" id="student-name-dialog" style="max-width:380px;">
   <div class="dialog-head" style="text-align:center;">
@@ -897,6 +1005,12 @@
     <div class="dialog-body">
       <label for="f-title">小題名稱／標題（留空將自動編號）Question Title</label>
       <input type="text" id="f-title" placeholder="例如：第 1 題">
+
+      <div class="q-weight-field" id="q-weight-wrap">
+        <label for="f-weight" style="margin-top:0;">⚖️ 本題配分權重 Question Weight（預設 1，數字越大代表比重越高）</label>
+        <input type="number" id="f-weight" min="0.1" step="0.1" value="1" style="max-width:120px;">
+        <p class="q-weight-hint">💡 例如這一題比較重要，可以把權重設成 2，結算成績時這一題會佔兩倍比重；不需要調整的題目維持預設值 1 即可。寫字板不計分，沒有這個欄位。</p>
+      </div>
 
       <label>本題媒體（選填，圖片／音檔／影片）Question Media</label>
       <div id="q-media-list" class="media-edit-list"></div>
@@ -1009,7 +1123,7 @@
     window.db = dbMod.getDatabase(fbApp);
     window.ref = dbMod.ref; window.onValue = dbMod.onValue; window.set = dbMod.set;
     window.update = dbMod.update; window.onDisconnect = dbMod.onDisconnect;
-    window.serverTimestamp = dbMod.serverTimestamp;
+    window.serverTimestamp = dbMod.serverTimestamp; window.get = dbMod.get;
     window.auth = authMod.getAuth(fbApp);
     await new Promise(function(resolve, reject){
       authMod.onAuthStateChanged(window.auth, function(user){ if(user) resolve(user); });
@@ -1413,16 +1527,30 @@
     return data;
   }
 
-  function loadFS(){
+  function freshDefaultFS(){ return JSON.parse(JSON.stringify(DEFAULT_FS)); }
+
+  // 本機示範／離線備援資料（沒有登入教師帳號、或雲端服務連不上時使用，跟舊版行為一致）
+  function loadLocalOfflineFS(){
     try{
       var raw = localStorage.getItem(STORAGE_FS_KEY);
       if(raw){ var parsed = JSON.parse(raw); if(parsed && parsed.folders && parsed.projects) return migrateFS(parsed); }
     }catch(e){}
-    return JSON.parse(JSON.stringify(DEFAULT_FS));
+    return freshDefaultFS();
   }
 
-  var fsData = loadFS();
-  function saveFS(){ try{ localStorage.setItem(STORAGE_FS_KEY, JSON.stringify(fsData)); }catch(e){} }
+  // fsData／currentTeacher 在教師登入完成（或選擇離線使用）後才會被換成真正的資料，
+  // 一開始先給一個空殼避免任何畫面在登入完成前意外存取 fsData.folders / fsData.projects 時噴錯。
+  var fsData = { folders: {}, projects: {} };
+  var currentTeacher = null; // 登入中的教師帳號：{ id, username, displayName, isAdmin }
+  var isOfflineMode = false; // true＝連不上雲端服務、選擇離線使用本機示範資料（不會同步、也沒有帳號隔離）
+
+  function saveFS(){
+    if(currentTeacher){
+      try{ set(ref(db, "teacherLibraries/" + currentTeacher.id), fsData); }catch(e){}
+    } else {
+      try{ localStorage.setItem(STORAGE_FS_KEY, JSON.stringify(fsData)); }catch(e){}
+    }
+  }
 
   function isDescendantOf(folderId, ancestorId){
     if(!fsData.folders || !fsData.folders[folderId]) return false;
@@ -1575,18 +1703,20 @@
       qKeys.forEach(function(qId, idx){
         var q = sec.questions[qId];
         var progress = getProgress(qId);
+        var weight = (q.weight && q.weight > 0) ? q.weight : 1;
         var qRes = {
           id: q.id,
           secId: sec.id,
           title: q.title || (`第 ${idx + 1} 題`),
           isScoreable: true,
           score: 0,
+          weight: weight,
           status: "wrong",
           detail: ""
         };
 
         if(sec.type === "match"){
-          totalScoreable++;
+          totalScoreable += weight;
           var pairs = q.pairs || {}; var pKeys = Object.keys(pairs); var totalPairs = pKeys.length;
           if(currentClassMode === 'test'){
             var userPairs = progress.userPairs || {};
@@ -1595,35 +1725,35 @@
             qRes.score = totalPairs > 0 ? (correctCount / totalPairs) : 0;
             qRes.status = (correctCount === totalPairs) ? "correct" : (correctCount > 0 ? "partial" : "wrong");
             qRes.detail = `正確配對 Correct: ${correctCount}/${totalPairs}`;
-            totalEarned += qRes.score;
+            totalEarned += qRes.score * weight;
           } else {
             var matched = progress.matched || {}; var matchedCount = Object.keys(matched).filter(k => matched[k]).length;
             if(totalPairs > 0 && matchedCount === totalPairs){
-              qRes.score = 1; qRes.status = "correct"; qRes.detail = `全部配對成功 All Matched (${matchedCount}/${totalPairs})`; totalEarned += 1;
+              qRes.score = 1; qRes.status = "correct"; qRes.detail = `全部配對成功 All Matched (${matchedCount}/${totalPairs})`; totalEarned += weight;
             } else {
               qRes.score = totalPairs > 0 ? (matchedCount / totalPairs) : 0;
               qRes.status = matchedCount > 0 ? "partial" : "wrong";
-              qRes.detail = `配對進度 Progress: ${matchedCount}/${totalPairs}`; totalEarned += qRes.score;
+              qRes.detail = `配對進度 Progress: ${matchedCount}/${totalPairs}`; totalEarned += qRes.score * weight;
             }
           }
         } else if(sec.type === "choice"){
-          totalScoreable++;
+          totalScoreable += weight;
           var ansIds = (q.answerIds && q.answerIds.length) ? q.answerIds : (q.answerId ? [q.answerId] : []);
           var userPicks = progress.multiPicks ? Object.keys(progress.multiPicks).filter(k => progress.multiPicks[k]) : (progress.choicePick ? [progress.choicePick] : []);
           var sortedAns = ansIds.slice().sort().join(","); var sortedPicks = userPicks.slice().sort().join(",");
           if(sortedAns && sortedAns === sortedPicks){
-            qRes.score = 1; qRes.status = "correct"; qRes.detail = "答案正確 Correct"; totalEarned += 1;
+            qRes.score = 1; qRes.status = "correct"; qRes.detail = "答案正確 Correct"; totalEarned += weight;
           } else {
             qRes.score = 0; qRes.status = "wrong";
             var correctLabels = ansIds.map(id => (q.choices && q.choices[id]) ? q.choices[id].text : id).join(", ");
             qRes.detail = `未答對 Incorrect (正解 Answer: ${correctLabels || "無 None"})`;
           }
         } else if(sec.type === "reorder"){
-          totalScoreable++;
+          totalScoreable += weight;
           var correctWords = q.words || []; var userWords = progress.userWords || [];
           var isMatch = (userWords.length === correctWords.length && correctWords.length > 0) && userWords.every((w, i) => w === correctWords[i]);
           if(isMatch){
-            qRes.score = 1; qRes.status = "correct"; qRes.detail = "句子語序完全正確 Correct Order"; totalEarned += 1;
+            qRes.score = 1; qRes.status = "correct"; qRes.detail = "句子語序完全正確 Correct Order"; totalEarned += weight;
           } else {
             qRes.score = 0; qRes.status = "wrong"; qRes.detail = `語序未完成或有誤 Incorrect (正解 Answer: ${correctWords.join(" ")})`;
           }
@@ -2168,6 +2298,28 @@
   var topbarActions = document.getElementById("topbar-actions");
   function renderTopbar(){
     topbarActions.innerHTML = "";
+    if(activeProjectId){
+      var scoreBtn = document.createElement("button"); scoreBtn.className = "btn btn-sm btn-primary"; scoreBtn.textContent = "📊 結算成績 Grade";
+      scoreBtn.onclick = function(){ var report = calculateScoreReport(); showScoreModal(report); };
+      topbarActions.appendChild(scoreBtn);
+    }
+    if(!isStudent && currentTeacher){
+      var teacherCluster = document.createElement("div"); teacherCluster.className = "topbar-teacher-cluster";
+      teacherCluster.innerHTML = `<span class="topbar-teacher-name">👤 ${escapeHtml(currentTeacher.displayName)}</span>`;
+      topbarActions.appendChild(teacherCluster);
+      if(currentTeacher.isAdmin){
+        var manageBtn = document.createElement("button"); manageBtn.className = "btn btn-sm btn-ghost"; manageBtn.textContent = "👥 帳號管理 Manage Accounts";
+        manageBtn.onclick = openTeacherAdminDialog;
+        topbarActions.appendChild(manageBtn);
+      }
+      var logoutBtn = document.createElement("button"); logoutBtn.className = "btn btn-sm btn-ghost"; logoutBtn.textContent = "登出 Log Out";
+      logoutBtn.onclick = logoutTeacher;
+      topbarActions.appendChild(logoutBtn);
+    } else if(!isStudent && isOfflineMode){
+      var reconnectBtn = document.createElement("button"); reconnectBtn.className = "btn btn-sm btn-ghost"; reconnectBtn.textContent = "🔌 連線登入 Connect & Log In";
+      reconnectBtn.onclick = function(){ location.reload(); };
+      topbarActions.appendChild(reconnectBtn);
+    }
     if(!isStudent && activeProjectId && !inRoom()){
       var backBtn = document.createElement("button"); backBtn.className = "btn btn-sm btn-ghost"; backBtn.textContent = "◀ 課次大廳 Lobby"; backBtn.onclick = showLobby; topbarActions.appendChild(backBtn);
     }
@@ -2398,6 +2550,7 @@
                 <span class="drag-handle-icon" title="按住拖曳小題重排 Drag to reorder">⋮⋮</span>
                 <span class="q-index-badge">${idx + 1}</span>
                 <span class="q-item-title">${escapeHtml(q.title)}</span>
+                ${(sec.type !== "board" && q.weight && q.weight !== 1) ? `<span class="q-weight-tag" title="配分權重 Weight ×${q.weight}">×${q.weight}</span>` : ""}
               </span>
               <span class="q-action-btns">
                 <span class="row-del btn-edit-q" title="編輯 Edit" style="font-size:11px; font-weight:700; padding:2px 6px; color:var(--ink-soft); white-space:nowrap;">編輯</span>
@@ -2660,6 +2813,8 @@
     document.getElementById("editor-dialog-title").textContent = qId ? "編輯題目" : "新增題目";
     document.getElementById("f-title").value = q ? (q.title || "") : "";
     document.getElementById("f-teacher-note").value = q ? (q.teacherNote || "") : "";
+    document.getElementById("f-weight").value = (q && q.weight) ? q.weight : 1;
+    document.getElementById("q-weight-wrap").style.display = type === "board" ? "none" : "block";
     qMediaManager.setItems(q ? q.media : []);
 
     document.getElementById("match-fields").style.display = type === "match" ? "block" : "none";
@@ -2767,6 +2922,8 @@
 
     qObj.media = qMediaManager.getItems();
     qObj.teacherNote = document.getElementById("f-teacher-note").value.trim();
+    var weightVal = parseFloat(document.getElementById("f-weight").value);
+    qObj.weight = (isFinite(weightVal) && weightVal > 0) ? weightVal : 1;
     sec.questions[qId] = qObj;
     writeSections(secs, qId);
     closeModalDialog(editorDialog);
@@ -3097,10 +3254,10 @@
         }
         qId = oldQ ? oldQ.id : uid("q");
         var order = Object.keys(sec.questions).length;
-        if(type === "match") sec.questions[qId] = { id: qId, title: qTitle, order: order, leftLabel: (oldQ && oldQ.leftLabel) || "生詞", rightLabel: (oldQ && oldQ.rightLabel) || "意思", pairs: {}, media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "" };
-        else if(type === "choice") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt, choices: {}, answerIds: [], media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "" };
-        else if(type === "reorder") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt || "請將下列詞語重組為正確句子 Rearrange the words into a correct sentence", words: [], media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "" };
-        else if(type === "board") sec.questions[qId] = { id: qId, title: qTitle, order: order, desc: qPrompt || String(c1 || ""), bgImage: (oldQ && oldQ.bgImage) || "", gridType: (oldQ && oldQ.gridType) || "none", media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "" };
+        if(type === "match") sec.questions[qId] = { id: qId, title: qTitle, order: order, leftLabel: (oldQ && oldQ.leftLabel) || "生詞", rightLabel: (oldQ && oldQ.rightLabel) || "意思", pairs: {}, media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "", weight: (oldQ && oldQ.weight) || 1 };
+        else if(type === "choice") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt, choices: {}, answerIds: [], media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "", weight: (oldQ && oldQ.weight) || 1 };
+        else if(type === "reorder") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt || "請將下列詞語重組為正確句子 Rearrange the words into a correct sentence", words: [], media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "", weight: (oldQ && oldQ.weight) || 1 };
+        else if(type === "board") sec.questions[qId] = { id: qId, title: qTitle, order: order, desc: qPrompt || String(c1 || ""), bgImage: (oldQ && oldQ.bgImage) || "", gridType: (oldQ && oldQ.gridType) || "none", media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "", weight: (oldQ && oldQ.weight) || 1 };
       }
       var q = sec.questions[qId];
       if(type === "choice" || type === "reorder") q.prompt = qPrompt || q.prompt;
@@ -3230,15 +3387,6 @@
     head.innerHTML = `<div><h2 class="stage-title zh">${q.title}</h2><p class="stage-sub">${q.desc || sec.desc || "即時互動練習"}</p></div>`;
 
     var actWrap = document.createElement("div"); actWrap.className = "stage-actions";
-
-    var scoreBtn = document.createElement("button");
-    scoreBtn.className = "btn btn-sm btn-primary";
-    scoreBtn.textContent = "📊 結算成績 Grade";
-    scoreBtn.onclick = function(){
-      var report = calculateScoreReport();
-      showScoreModal(report);
-    };
-    actWrap.appendChild(scoreBtn);
 
     if(!isStudent){
       var resetBtn = document.createElement("button"); resetBtn.className = "btn btn-sm"; resetBtn.textContent = "🔄 重新開始 Restart";
@@ -4199,14 +4347,334 @@
     liveBoardRefresh = refreshFromProgress;
   }
 
+  /* ================== 教師帳號系統 Teacher Accounts ================== */
+  // 帳號存在 Firebase 的 teacherAccounts/{teacherId} 底下，teacherId 就是帳號名稱（小寫、僅限英數與底線，
+  // 一方面確保唯一、一方面不需要另外做一份「帳號→ID」索引）。密碼不會以明文存在任何地方（不會寫進這個檔案的原始碼，
+  // 也不會寫進資料庫），而是用 PBKDF2-SHA256（隨機 salt、10 萬次迭代）算出雜湊值後才儲存與比對，詳見下方 hashPassword()。
+  // 每位教師自己的資料夾／測驗庫存在 teacherLibraries/{teacherId}，教師之間完全獨立、互不可見。
+  var TEACHER_SESSION_KEY = "hanyu_mandamy_teacher_session";
+  var FIREBASE_WAIT_TIMEOUT_MS = 6000;
+  var PBKDF2_ITERATIONS = 100000;
+
+  function bytesToHex(bytes){
+    return Array.prototype.map.call(bytes, function(b){ return b.toString(16).padStart(2, "0"); }).join("");
+  }
+  function hexToBytes(hex){
+    var bytes = new Uint8Array(hex.length / 2);
+    for(var i = 0; i < bytes.length; i++){ bytes[i] = parseInt(hex.substr(i * 2, 2), 16); }
+    return bytes;
+  }
+  async function hashPassword(password, saltHex){
+    var enc = new TextEncoder();
+    var salt = saltHex ? hexToBytes(saltHex) : crypto.getRandomValues(new Uint8Array(16));
+    var keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+    var bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: salt, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" }, keyMaterial, 256);
+    return { saltHex: bytesToHex(salt), hashHex: bytesToHex(new Uint8Array(bits)), iterations: PBKDF2_ITERATIONS };
+  }
+  async function verifyPassword(password, saltHex, hashHex){
+    var result = await hashPassword(password, saltHex);
+    return result.hashHex === hashHex;
+  }
+  function sanitizeUsername(raw){
+    return String(raw || "").trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+  }
+
+  function waitForFirebase(){
+    return new Promise(function(resolve){
+      if(window.__firebaseReady){ resolve(true); return; }
+      var settled = false;
+      var to = setTimeout(function(){ if(!settled){ settled = true; resolve(false); } }, FIREBASE_WAIT_TIMEOUT_MS);
+      window.addEventListener("firebase-bridge-ready", function(){ if(!settled){ settled = true; clearTimeout(to); resolve(true); } }, { once: true });
+    });
+  }
+
+  async function fetchAllTeacherAccounts(){
+    var snap = await get(ref(db, "teacherAccounts"));
+    return snap.exists() ? snap.val() : {};
+  }
+  async function fetchTeacherAccount(teacherId){
+    var snap = await get(ref(db, "teacherAccounts/" + teacherId));
+    return snap.exists() ? snap.val() : null;
+  }
+  async function loadTeacherLibrary(teacherId){
+    var snap = await get(ref(db, "teacherLibraries/" + teacherId));
+    var data = snap.exists() ? snap.val() : null;
+    if(!data || !data.folders || !data.projects){
+      data = freshDefaultFS();
+      try{ await set(ref(db, "teacherLibraries/" + teacherId), data); }catch(e){}
+    }
+    return migrateFS(data);
+  }
+
+  var authView = document.getElementById("auth-view");
+  var authConnectingSection = document.getElementById("auth-connecting-section");
+  var authFailSection = document.getElementById("auth-fail-section");
+  var authFormSection = document.getElementById("auth-form-section");
+  var authTitle = document.getElementById("auth-title");
+  var authSub = document.getElementById("auth-sub");
+  var authError = document.getElementById("auth-error");
+  var authUsernameInput = document.getElementById("auth-username");
+  var authPasswordInput = document.getElementById("auth-password");
+  var authConfirmWrap = document.getElementById("auth-confirm-wrap");
+  var authConfirmInput = document.getElementById("auth-password-confirm");
+  var btnAuthSubmit = document.getElementById("btn-auth-submit");
+  var authLoadingHint = document.getElementById("auth-loading-hint");
+  var authMode = "login"; // "login" | "setup"
+
+  function showAuthStage(stage){
+    authView.style.display = "flex"; lobbyView.style.display = "none"; classroomView.style.display = "none";
+    authConnectingSection.style.display = stage === "connecting" ? "block" : "none";
+    authFailSection.style.display = stage === "fail" ? "block" : "none";
+    authFormSection.style.display = stage === "form" ? "block" : "none";
+  }
+  function showAuthError(msg){ authError.textContent = msg; authError.style.display = "block"; }
+  function clearAuthError(){ authError.style.display = "none"; authError.textContent = ""; }
+
+  function renderAuthView(mode){
+    authMode = mode;
+    showAuthStage("form");
+    clearAuthError();
+    if(mode === "setup"){
+      authTitle.textContent = "設定管理員帳號 Set Up Admin Account";
+      authSub.textContent = "這是第一次使用，請先建立管理員帳號（之後可以在裡面新增、管理其他老師的帳號）。Since this is the first time, set up an admin account first (you can add and manage other teachers from inside the app afterward).";
+      authConfirmWrap.style.display = "block";
+      btnAuthSubmit.textContent = "建立管理員帳號 Create Admin Account";
+      if(!authUsernameInput.value) authUsernameInput.value = "amy";
+    } else {
+      authTitle.textContent = "教師登入 Teacher Login";
+      authSub.textContent = "請輸入帳號密碼登入，管理你自己的測驗庫。Log in to manage your own test library.";
+      authConfirmWrap.style.display = "none";
+      btnAuthSubmit.textContent = "登入 Log In";
+    }
+    authLoadingHint.style.display = "none"; authLoadingHint.textContent = "";
+    authPasswordInput.value = ""; authConfirmInput.value = "";
+    setTimeout(function(){ authUsernameInput.focus(); }, 50);
+  }
+
+  async function completeLogin(account, opts){
+    currentTeacher = { id: account.id, username: account.username, displayName: account.displayName || account.username, isAdmin: !!account.isAdmin };
+    isOfflineMode = false;
+    try{ localStorage.setItem(TEACHER_SESSION_KEY, currentTeacher.id); }catch(e){}
+
+    var seeded = false;
+    if(opts && opts.seedFromLocal){
+      // 第一次設定管理員帳號時，如果這台瀏覽器本來就有舊版本機資料（老師這學期已經編好的測驗），
+      // 就直接把它當成管理員帳號的初始測驗庫，而不是給一份空白示範資料，避免老師的心血不見。
+      try{
+        var raw = localStorage.getItem(STORAGE_FS_KEY);
+        if(raw){
+          var parsed = JSON.parse(raw);
+          if(parsed && parsed.folders && parsed.projects && Object.keys(parsed.projects).length){
+            fsData = migrateFS(parsed);
+            await set(ref(db, "teacherLibraries/" + currentTeacher.id), fsData);
+            seeded = true;
+          }
+        }
+      }catch(e){}
+    }
+    if(!seeded) fsData = await loadTeacherLibrary(currentTeacher.id);
+
+    authView.style.display = "none";
+    enterAppAfterLogin();
+  }
+
+  async function doAuthSubmit(){
+    clearAuthError();
+    var username = sanitizeUsername(authUsernameInput.value);
+    var password = authPasswordInput.value;
+    if(!username || username.length < 3){ showAuthError("帳號至少需要 3 個字元，僅限英文字母、數字、底線。Username needs at least 3 characters (letters, numbers, underscore only)."); return; }
+    if(!password || password.length < 6){ showAuthError("密碼至少需要 6 個字元。Password needs at least 6 characters."); return; }
+
+    btnAuthSubmit.disabled = true; authLoadingHint.style.display = "block"; authLoadingHint.textContent = "⏳ 處理中…Processing…";
+    try{
+      if(authMode === "setup"){
+        if(password !== authConfirmInput.value){ showAuthError("兩次輸入的密碼不一致。Passwords do not match."); return; }
+        var existing = await fetchTeacherAccount(username);
+        if(existing){ showAuthError("這個帳號已經存在，請改用登入。This account already exists — please log in instead."); return; }
+        var h = await hashPassword(password);
+        var account = { id: username, username: username, displayName: username, isAdmin: true, disabled: false, createdAt: Date.now(), saltHex: h.saltHex, hashHex: h.hashHex, iterations: h.iterations };
+        await set(ref(db, "teacherAccounts/" + username), account);
+        await completeLogin(account, { seedFromLocal: true });
+      } else {
+        var acc = await fetchTeacherAccount(username);
+        if(!acc){ showAuthError("找不到這個帳號。Account not found."); return; }
+        if(acc.disabled){ showAuthError("這個帳號已被管理員停用，請聯絡管理員。This account has been disabled by an admin."); return; }
+        var ok = await verifyPassword(password, acc.saltHex, acc.hashHex);
+        if(!ok){ showAuthError("密碼錯誤。Incorrect password."); return; }
+        await completeLogin(acc, { seedFromLocal: false });
+      }
+    }catch(e){
+      showAuthError("發生錯誤，請確認網路連線後再試一次。Something went wrong — check your connection and try again.");
+    } finally {
+      btnAuthSubmit.disabled = false; authLoadingHint.style.display = "none";
+    }
+  }
+  btnAuthSubmit.onclick = doAuthSubmit;
+  [authUsernameInput, authPasswordInput, authConfirmInput].forEach(function(el){
+    el.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); doAuthSubmit(); } });
+  });
+  document.getElementById("btn-auth-retry").onclick = function(){ location.reload(); };
+  document.getElementById("btn-auth-offline").onclick = function(){
+    currentTeacher = null; isOfflineMode = true;
+    fsData = loadLocalOfflineFS();
+    authView.style.display = "none";
+    enterAppAfterLogin();
+  };
+
+  function logoutTeacher(){
+    currentTeacher = null; isOfflineMode = false;
+    try{ localStorage.removeItem(TEACHER_SESSION_KEY); }catch(e){}
+    fsData = { folders: {}, projects: {} };
+    activeProjectId = null; activeRoomId = null; roomData = null;
+    history.replaceState(null, "", location.pathname);
+    lobbyView.style.display = "none"; classroomView.style.display = "none";
+    renderTopbar();
+    renderAuthView("login");
+  }
+
+  /* ---- 教師帳號管理（僅管理員可開） ---- */
+  var teacherAdminDialog = document.getElementById("teacher-admin-dialog");
+  var teacherAdminListEl = document.getElementById("teacher-admin-list");
+  var teacherAccountDialog = document.getElementById("teacher-account-dialog");
+  var editingTeacherAccountId = null;
+
+  async function openTeacherAdminDialog(){
+    if(!currentTeacher || !currentTeacher.isAdmin) return;
+    safeShowModal(teacherAdminDialog);
+    await refreshTeacherAdminList();
+  }
+
+  async function refreshTeacherAdminList(){
+    teacherAdminListEl.innerHTML = '<p style="font-size:12.5px;color:var(--ink-soft);">載入中…Loading…</p>';
+    try{
+      var accounts = await fetchAllTeacherAccounts();
+      var ids = Object.keys(accounts).sort(function(a, b){ return (accounts[a].createdAt || 0) - (accounts[b].createdAt || 0); });
+      if(!ids.length){ teacherAdminListEl.innerHTML = '<p style="font-size:12.5px;color:var(--ink-soft);">目前沒有任何教師帳號。No teacher accounts yet.</p>'; return; }
+      teacherAdminListEl.innerHTML = "";
+      ids.forEach(function(id){
+        var acc = accounts[id];
+        var row = document.createElement("div"); row.className = "teacher-admin-row";
+        row.innerHTML = `
+          <div class="ta-row-main">
+            <span class="ta-row-name">${escapeHtml(acc.displayName || acc.username)}</span>
+            <span class="ta-row-username">@${escapeHtml(acc.username)}</span>
+            ${acc.isAdmin ? '<span class="ta-badge ta-badge-admin">管理員 Admin</span>' : ''}
+            ${acc.disabled ? '<span class="ta-badge ta-badge-disabled">已停用 Disabled</span>' : ''}
+            ${acc.id === currentTeacher.id ? '<span class="ta-badge">就是你 You</span>' : ''}
+          </div>
+          <div class="ta-row-actions">
+            <button type="button" class="btn btn-sm btn-ghost ta-edit">編輯 Edit</button>
+            <button type="button" class="btn btn-sm btn-ghost ta-toggle-disable">${acc.disabled ? "啟用 Enable" : "停用 Disable"}</button>
+            <button type="button" class="btn btn-sm btn-ghost ta-delete" style="color:var(--seal);">刪除 Delete</button>
+          </div>
+        `;
+        row.querySelector(".ta-edit").onclick = function(){ openTeacherAccountDialog(acc); };
+        row.querySelector(".ta-toggle-disable").onclick = async function(){
+          if(acc.id === currentTeacher.id && !acc.disabled){ alert("不能停用自己目前登入中的帳號！You can't disable the account you're currently logged in with."); return; }
+          await update(ref(db, "teacherAccounts/" + acc.id), { disabled: !acc.disabled });
+          refreshTeacherAdminList();
+        };
+        row.querySelector(".ta-delete").onclick = async function(){
+          if(acc.id === currentTeacher.id){ alert("不能刪除自己目前登入中的帳號！You can't delete the account you're currently logged in with."); return; }
+          var remainingAdmins = ids.filter(function(otherId){ return otherId !== acc.id && accounts[otherId].isAdmin && !accounts[otherId].disabled; });
+          if(acc.isAdmin && remainingAdmins.length === 0){ alert("至少要保留一位可用的管理員帳號！Keep at least one active admin account."); return; }
+          if(!confirm(`確定要刪除教師帳號「${acc.displayName || acc.username}」(@${acc.username})？這會一併刪除該老師的所有測驗資料，且無法復原！\nDelete this teacher account and ALL of their test data? This cannot be undone.`)) return;
+          await set(ref(db, "teacherAccounts/" + acc.id), null);
+          await set(ref(db, "teacherLibraries/" + acc.id), null);
+          refreshTeacherAdminList();
+        };
+        teacherAdminListEl.appendChild(row);
+      });
+    }catch(e){
+      teacherAdminListEl.innerHTML = '<p style="font-size:12.5px;color:var(--seal);">載入失敗，請檢查網路連線。Failed to load — check your connection.</p>';
+    }
+  }
+  document.getElementById("btn-close-teacher-admin").onclick = function(){ closeModalDialog(teacherAdminDialog); };
+  document.getElementById("btn-add-teacher").onclick = function(){ openTeacherAccountDialog(null); };
+
+  function openTeacherAccountDialog(acc){
+    editingTeacherAccountId = acc ? acc.id : null;
+    document.getElementById("teacher-account-dialog-title").textContent = acc ? "編輯教師帳號 Edit Teacher" : "新增教師帳號 Add Teacher";
+    var uInput = document.getElementById("ta-username");
+    uInput.value = acc ? acc.username : ""; uInput.disabled = !!acc;
+    document.getElementById("ta-displayname").value = acc ? (acc.displayName || "") : "";
+    document.getElementById("ta-password").value = "";
+    document.getElementById("ta-password").placeholder = acc ? "留空表示不修改 leave blank to keep current" : "至少 6 碼";
+    document.getElementById("ta-password-hint").style.display = acc ? "block" : "none";
+    document.getElementById("ta-is-admin").checked = acc ? !!acc.isAdmin : false;
+    safeShowModal(teacherAccountDialog);
+  }
+  document.getElementById("btn-cancel-teacher-account").onclick = function(){ closeModalDialog(teacherAccountDialog); };
+
+  document.getElementById("teacher-account-form").onsubmit = async function(e){
+    e.preventDefault();
+    var username = sanitizeUsername(document.getElementById("ta-username").value);
+    var displayName = document.getElementById("ta-displayname").value.trim();
+    var password = document.getElementById("ta-password").value;
+    var isAdmin = document.getElementById("ta-is-admin").checked;
+
+    if(!editingTeacherAccountId){
+      if(!username || username.length < 3){ alert("帳號至少需要 3 個字元，僅限英文字母、數字、底線。Username needs at least 3 characters."); return; }
+      if(!password || password.length < 6){ alert("密碼至少需要 6 個字元。Password needs at least 6 characters."); return; }
+      var existing = await fetchTeacherAccount(username);
+      if(existing){ alert("這個帳號已經存在！This account already exists."); return; }
+      var h = await hashPassword(password);
+      var account = { id: username, username: username, displayName: displayName || username, isAdmin: isAdmin, disabled: false, createdAt: Date.now(), saltHex: h.saltHex, hashHex: h.hashHex, iterations: h.iterations };
+      await set(ref(db, "teacherAccounts/" + username), account);
+    } else {
+      if(!isAdmin && editingTeacherAccountId === currentTeacher.id){ alert("不能取消自己目前登入帳號的管理員身分！You can't remove admin rights from the account you're logged in with."); return; }
+      var patch = { displayName: displayName || editingTeacherAccountId, isAdmin: isAdmin };
+      if(password){
+        if(password.length < 6){ alert("密碼至少需要 6 個字元。Password needs at least 6 characters."); return; }
+        var h2 = await hashPassword(password);
+        patch.saltHex = h2.saltHex; patch.hashHex = h2.hashHex; patch.iterations = h2.iterations;
+      }
+      await update(ref(db, "teacherAccounts/" + editingTeacherAccountId), patch);
+      if(editingTeacherAccountId === currentTeacher.id){ currentTeacher.displayName = patch.displayName; currentTeacher.isAdmin = patch.isAdmin; renderTopbar(); }
+    }
+    closeModalDialog(teacherAccountDialog);
+    refreshTeacherAdminList();
+  };
+
   /* ================== 啟動流程（大廳 / 學生加入房間） ================== */
   function joinAsStudent(){
     attachPresence(urlRoom, myId, myName);
     startRoom(urlRoom, "student");
   }
 
-  if(urlRoom){
-    if(isStudent){
+  function enterAppAfterLogin(){
+    if(urlRoom){ startRoom(urlRoom, "teacher"); } else { showLobby(); }
+  }
+
+  async function initTeacherAuthAndStart(){
+    showAuthStage("connecting");
+    var ready = await waitForFirebase();
+    if(!ready){ showAuthStage("fail"); return; }
+    try{
+      var accounts = await fetchAllTeacherAccounts();
+      var hasAnyAccount = accounts && Object.keys(accounts).length > 0;
+      if(!hasAnyAccount){ renderAuthView("setup"); return; }
+
+      var savedId = null;
+      try{ savedId = localStorage.getItem(TEACHER_SESSION_KEY); }catch(e){}
+      if(savedId && accounts[savedId] && !accounts[savedId].disabled){
+        var acc = accounts[savedId];
+        currentTeacher = { id: acc.id, username: acc.username, displayName: acc.displayName || acc.username, isAdmin: !!acc.isAdmin };
+        isOfflineMode = false;
+        fsData = await loadTeacherLibrary(currentTeacher.id);
+        authView.style.display = "none";
+        enterAppAfterLogin();
+        return;
+      }
+      renderAuthView("login");
+    }catch(e){
+      showAuthStage("fail");
+    }
+  }
+
+  if(isStudent){
+    // 學生完全不需要教師登入，跟原本的行為一致：有房間就直接加入，沒有房間（少見的手動改網址情況）就用本機示範資料看一下大廳。
+    if(urlRoom){
       if(!myName){
         safeShowModal(document.getElementById("student-name-dialog"));
         var submitNameBtn = document.getElementById("btn-submit-student-name");
@@ -4225,10 +4693,11 @@
         joinAsStudent();
       }
     } else {
-      startRoom(urlRoom, "teacher");
+      fsData = freshDefaultFS();
+      showLobby();
     }
   } else {
-    showLobby();
+    initTeacherAuthAndStart();
   }
 })();
 </script>
