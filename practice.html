@@ -677,21 +677,23 @@
   .teacher-note-field label{color:var(--seal);}
   .teacher-note-field textarea{background:var(--surface);}
   .teacher-note-hint{font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.5;}
-  .q-weight-field{margin:16px 0 0;padding:12px 14px;border:1.5px solid var(--bamboo);border-radius:12px;background:rgba(76,122,94,0.06);}
-  .q-weight-field label{color:var(--bamboo);}
-  .q-weight-field input{background:var(--surface);}
-  .q-weight-hint{font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.5;}
-  .q-weight-points-preview{font-size:13px;font-weight:700;color:var(--bamboo);margin:8px 0 0;}
-
-  /* 配分總覽 */
-  .weight-breakdown-list{ display:flex; flex-direction:column; gap:6px; max-height:50vh; overflow-y:auto; }
-  .weight-breakdown-sec-title{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:12px 0 2px; }
-  .weight-breakdown-sec-title:first-child{ margin-top:0; }
-  .weight-breakdown-row{ display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid var(--grid-line); border-radius:10px; background:var(--surface-2); font-size:13px; }
-  .weight-breakdown-row .wb-title{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink); }
-  .weight-breakdown-row .wb-weight{ flex:none; font-size:11.5px; color:var(--ink-soft); }
-  .weight-breakdown-row .wb-points{ flex:none; font-weight:700; color:var(--seal); min-width:52px; text-align:right; }
-  .weight-breakdown-total{ margin-top:14px; padding-top:14px; border-top:1.5px solid var(--grid-line); display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:15px; color:var(--ink); }
+  /* 配分總覽——內嵌在左側欄最下方的可編輯大表，取代原本一題一題填的模式 */
+  .weight-panel{ margin-top:2px; flex:none; padding:12px 12px 13px; border:1.5px solid var(--bamboo); border-radius:12px; background:rgba(76,122,94,0.06); }
+  .weight-panel-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .weight-panel-head-title{ font-size:12.5px; font-weight:700; color:var(--bamboo); }
+  .weight-panel-head-total{ font-size:13px; font-weight:700; color:var(--seal); flex:none; white-space:nowrap; }
+  .weight-panel-hint{ font-size:11px; color:var(--ink-soft); margin:5px 0 10px; line-height:1.5; }
+  .weight-panel-table{ width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+  .weight-panel-table th{ text-align:left; font-size:10px; font-weight:700; color:var(--ink-soft); padding:0 4px 5px; border-bottom:1px solid var(--grid-line); }
+  .weight-panel-table th:nth-child(2), .weight-panel-table th:nth-child(3){ text-align:center; }
+  .weight-panel-sec-row td{ padding:9px 4px 3px; font-size:11px; font-weight:700; color:var(--ink-soft); border-bottom:none; }
+  .weight-panel-sec-row:first-child td{ padding-top:3px; }
+  .weight-panel-qtitle{ padding:4px 4px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .weight-panel-wcell{ padding:4px; width:56px; text-align:center; }
+  .weight-panel-input{ width:48px; border:1.5px solid var(--grid-line); background:var(--surface); color:var(--ink); border-radius:6px; padding:3px 2px; font-size:12px; text-align:center; }
+  .weight-panel-input:focus{ outline:none; border-color:var(--bamboo); }
+  .weight-panel-pcell{ padding:4px 4px 4px 0; width:50px; text-align:right; font-weight:700; color:var(--seal); white-space:nowrap; }
+  .weight-panel-empty{ padding:8px 4px; font-size:11.5px; color:var(--ink-soft); }
   .row-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .pair-row, .choice-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
   .pair-row input, .choice-row input[type="text"]{flex:1;}
@@ -794,7 +796,6 @@
         <div class="bank-menu-wrap" id="bank-menu-wrap">
           <button type="button" class="btn btn-sm" id="btn-bank-menu" style="width:100%; justify-content:center; margin-top:8px; border:1.5px solid var(--bamboo); color:var(--bamboo); font-weight:700;">編輯題庫 Edit Questions</button>
           <div class="bank-menu-pop" id="bank-menu-pop">
-            <button type="button" class="bank-menu-item" id="btn-weight-breakdown">📊 配分總覽 Score Breakdown</button>
             <button type="button" class="bank-menu-item" id="btn-table-editor">表格編輯題庫 Edit as Table</button>
             <button type="button" class="bank-menu-item" id="btn-import-excel">匯入 Excel 題庫 Import Excel</button>
             <button type="button" class="bank-menu-item" id="btn-export-excel">匯出 Excel 題庫 Export to Excel</button>
@@ -804,6 +805,20 @@
         </div>
 
         <div class="section-list" id="section-tree-list"></div>
+
+        <!-- 配分總覽：可直接編輯的大表，固定在左側欄最下方，取代原本要開彈窗的模式 -->
+        <div class="weight-panel" id="weight-panel">
+          <div class="weight-panel-head">
+            <span class="weight-panel-head-title">📊 配分總覽 Score Breakdown</span>
+            <span class="weight-panel-head-total" id="weight-panel-head-total"></span>
+          </div>
+          <p class="weight-panel-hint">填「比重」就好，不用自己湊到剛好 100——系統會自動按比例換算成滿分 100 分。寫字板類型不計分，不列在下表。Weights auto-scale to 100 points total; board-type questions aren't scored.</p>
+          <table class="weight-panel-table">
+            <colgroup><col><col style="width:56px"><col style="width:50px"></colgroup>
+            <thead><tr><th>小題 Question</th><th>比重</th><th>分數</th></tr></thead>
+            <tbody id="weight-panel-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </aside>
 
@@ -1018,13 +1033,6 @@
       <label for="f-title">小題名稱／標題（留空將自動編號）Question Title</label>
       <input type="text" id="f-title" placeholder="例如：第 1 題">
 
-      <div class="q-weight-field" id="q-weight-wrap">
-        <label for="f-weight" style="margin-top:0;">⚖️ 本題配分比重 Question Weight（預設 1，數字越大代表比重越高）</label>
-        <input type="number" id="f-weight" min="0.1" step="0.1" value="1" style="max-width:120px;">
-        <p class="q-weight-points-preview" id="f-weight-points-preview"></p>
-        <p class="q-weight-hint">💡 這裡填的是「比重」，不用自己湊到剛好 100 分——系統會自動依照整份測驗所有題目的比重，按比例換算成滿分 100 分（上面會即時顯示換算後大約幾分）。想看整份測驗的配分總覽，可以到「編輯題庫」選單裡的「📊 配分總覽」。寫字板不計分，沒有這個欄位。</p>
-      </div>
-
       <label>本題媒體（選填，圖片／音檔／影片）Question Media</label>
       <div id="q-media-list" class="media-edit-list"></div>
       <input type="file" id="f-q-media-file" accept="image/*,audio/*,video/*" multiple style="display:none;">
@@ -1112,21 +1120,6 @@
   <div class="dialog-foot">
     <button type="button" class="btn btn-ghost" id="btn-cancel-table-editor">取消 Cancel</button>
     <button type="button" class="btn btn-primary" id="btn-apply-table-editor">✅ 套用變更 Apply Changes</button>
-  </div>
-</dialog>
-
-<!-- 配分總覽彈窗 -->
-<dialog class="dialog-modal" id="weight-breakdown-dialog" style="width:min(560px,94vw);">
-  <div class="dialog-head">
-    <h2>📊 配分總覽 Score Breakdown</h2>
-    <p style="font-size:12.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.6;">每題填的「配分比重」會自動依比例換算成滿分 100 分，不用自己湊到剛好 100。Each question's weight is automatically scaled so the whole test always totals 100 points.</p>
-  </div>
-  <div class="dialog-body">
-    <div id="weight-breakdown-list" class="weight-breakdown-list"></div>
-    <div class="weight-breakdown-total" id="weight-breakdown-total"></div>
-  </div>
-  <div class="dialog-foot">
-    <button type="button" class="btn btn-primary" id="btn-close-weight-breakdown">完成 Done</button>
   </div>
 </dialog>
 
@@ -1709,7 +1702,7 @@
         var q = sec.questions[qId];
         var w = (q.weight && q.weight > 0) ? q.weight : 1;
         totalWeight += w;
-        items.push({ secTitle: sec.title, qId: qId, qTitle: q.title || "", weight: w });
+        items.push({ secId: secId, secTitle: sec.title, qId: qId, qTitle: q.title || "", weight: w });
       });
     });
     items.forEach(function(it){ it.points = totalWeight > 0 ? (it.weight / totalWeight * 100) : 0; });
@@ -2650,6 +2643,8 @@
       }
       sectionTreeListEl.appendChild(block);
     });
+
+    renderWeightPanel();
   }
 
   /* ================== 新增／編輯大題彈窗 ================== */
@@ -2842,9 +2837,6 @@
     document.getElementById("editor-dialog-title").textContent = qId ? "編輯題目" : "新增題目";
     document.getElementById("f-title").value = q ? (q.title || "") : "";
     document.getElementById("f-teacher-note").value = q ? (q.teacherNote || "") : "";
-    document.getElementById("f-weight").value = (q && q.weight) ? q.weight : 1;
-    document.getElementById("q-weight-wrap").style.display = type === "board" ? "none" : "block";
-    updateWeightPointsPreview();
     qMediaManager.setItems(q ? q.media : []);
 
     document.getElementById("match-fields").style.display = type === "match" ? "block" : "none";
@@ -2877,23 +2869,6 @@
 
     safeShowModal(editorDialog);
   }
-
-  function updateWeightPointsPreview(){
-    var previewEl = document.getElementById("f-weight-points-preview");
-    if(!previewEl) return;
-    var typedVal = parseFloat(document.getElementById("f-weight").value);
-    var thisWeight = (isFinite(typedVal) && typedVal > 0) ? typedVal : 1;
-    var breakdown = computeWeightBreakdown();
-    var otherTotal = 0;
-    breakdown.items.forEach(function(it){
-      if(editingQuestionId && it.qId === editingQuestionId) return; // 換算時排除這一題自己原本存的權重，改用目前正在打的值
-      otherTotal += it.weight;
-    });
-    var grandTotal = otherTotal + thisWeight;
-    var points = grandTotal > 0 ? (thisWeight / grandTotal * 100) : 0;
-    previewEl.textContent = "＝ 換算後約 " + points.toFixed(1) + " 分（滿分 100，會隨整份測驗的其他題目配分自動調整）";
-  }
-  document.getElementById("f-weight").addEventListener("input", updateWeightPointsPreview);
 
   document.getElementById("add-pair").onclick = function(){ pairRowsEl.appendChild(makePairRow("", "")); };
   document.getElementById("add-mc-opt").onclick = function(){ choiceOptRowsEl.appendChild(makeChoiceRow("", false)); };
@@ -2969,8 +2944,8 @@
 
     qObj.media = qMediaManager.getItems();
     qObj.teacherNote = document.getElementById("f-teacher-note").value.trim();
-    var weightVal = parseFloat(document.getElementById("f-weight").value);
-    qObj.weight = (isFinite(weightVal) && weightVal > 0) ? weightVal : 1;
+    // 配分比重改到左側欄最下方的「配分總覽」大表統一編輯，這裡維持原本存的比重（新題目預設 1）。
+    qObj.weight = (existing && existing.weight && existing.weight > 0) ? existing.weight : 1;
     sec.questions[qId] = qObj;
     writeSections(secs, qId);
     closeModalDialog(editorDialog);
@@ -3186,37 +3161,71 @@
   var btnTableEditor = document.getElementById("btn-table-editor");
   if(btnTableEditor) btnTableEditor.onclick = openTableEditor;
 
-  /* ---- 配分總覽彈窗 ---- */
-  var weightBreakdownDialog = document.getElementById("weight-breakdown-dialog");
-  function openWeightBreakdownDialog(){
-    var listEl = document.getElementById("weight-breakdown-list");
-    var totalEl = document.getElementById("weight-breakdown-total");
+  /* ---- 配分總覽：固定在左側欄最下方的可編輯大表 ----
+     直接把整份測驗目前所有大題／小題攤開成一個表格，比重欄位可以直接在表格裡改，
+     不用再一題一題打開編輯彈窗。打字時只在畫面上即時換算分數（不會每個按鍵都寫回資料/雲端），
+     真正存檔（並同步給雲端房間裡的學生）是在欄位失焦（change）的時候才發生。 */
+  function renderWeightPanel(){
+    var tbody = document.getElementById("weight-panel-tbody");
+    var totalEl = document.getElementById("weight-panel-head-total");
+    if(!tbody) return;
     var breakdown = computeWeightBreakdown();
+    tbody.innerHTML = "";
     if(!breakdown.items.length){
-      listEl.innerHTML = '<p style="font-size:12.5px;color:var(--ink-soft);">目前沒有可計分的題目（寫字板不計分）。No scoreable questions yet.</p>';
-      totalEl.innerHTML = "";
-    } else {
-      var html = ""; var lastSec = null;
-      breakdown.items.forEach(function(it){
-        if(it.secTitle !== lastSec){ html += `<div class="weight-breakdown-sec-title">${escapeHtml(it.secTitle)}</div>`; lastSec = it.secTitle; }
-        html += `
-          <div class="weight-breakdown-row">
-            <span class="wb-title" title="${escapeHtml(it.qTitle)}">${escapeHtml(it.qTitle)}</span>
-            <span class="wb-weight">權重 ×${it.weight}</span>
-            <span class="wb-points">${it.points.toFixed(1)} 分</span>
-          </div>`;
-      });
-      listEl.innerHTML = html;
-      var sumPoints = breakdown.items.reduce(function(s, it){ return s + it.points; }, 0);
-      totalEl.innerHTML = `<span>總分 Total</span><span>${sumPoints.toFixed(1)} 分</span>`;
+      tbody.innerHTML = '<tr><td colspan="3" class="weight-panel-empty">目前沒有可計分的題目 No scoreable questions yet</td></tr>';
+      if(totalEl) totalEl.textContent = "";
+      return;
     }
-    safeShowModal(weightBreakdownDialog);
-  }
-  var btnWeightBreakdown = document.getElementById("btn-weight-breakdown");
-  if(btnWeightBreakdown) btnWeightBreakdown.onclick = openWeightBreakdownDialog;
-  document.getElementById("btn-close-weight-breakdown").onclick = function(){ closeModalDialog(weightBreakdownDialog); };
+    var rows = [];
+    var lastSec = null;
+    breakdown.items.forEach(function(it){
+      if(it.secTitle !== lastSec){
+        var secRow = document.createElement("tr"); secRow.className = "weight-panel-sec-row";
+        secRow.innerHTML = '<td colspan="3">' + escapeHtml(it.secTitle) + '</td>';
+        tbody.appendChild(secRow);
+        lastSec = it.secTitle;
+      }
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td class="weight-panel-qtitle" title="' + escapeHtml(it.qTitle) + '">' + escapeHtml(it.qTitle) + '</td>' +
+        '<td class="weight-panel-wcell"><input type="number" class="weight-panel-input" min="0.1" step="0.1" value="' + it.weight + '"></td>' +
+        '<td class="weight-panel-pcell">' + it.points.toFixed(1) + ' 分</td>';
+      tbody.appendChild(tr);
+      var input = tr.querySelector(".weight-panel-input");
+      var pointsEl = tr.querySelector(".weight-panel-pcell");
+      rows.push({ secId: it.secId, qId: it.qId, input: input, pointsEl: pointsEl });
+      input.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); input.blur(); } });
+      input.addEventListener("input", recomputeLocal);
+      input.addEventListener("change", function(){
+        var v = parseFloat(input.value);
+        var newW = (isFinite(v) && v > 0) ? v : 1;
+        input.value = newW;
+        var freshSecs = getSections();
+        var freshSec = freshSecs[it.secId];
+        if(freshSec && freshSec.questions && freshSec.questions[it.qId]){
+          freshSec.questions[it.qId].weight = newW;
+          writeSections(freshSecs);
+        }
+      });
+    });
 
-  // 「編輯題庫」選單：把表格編輯／匯入／匯出／範本 4 個入口收進一個按鈕點開的選單，平常不佔側欄版面。
+    function recomputeLocal(){
+      var weights = rows.map(function(r){
+        var v = parseFloat(r.input.value);
+        return (isFinite(v) && v > 0) ? v : 0;
+      });
+      var total = weights.reduce(function(s, w){ return s + w; }, 0);
+      rows.forEach(function(r, i){
+        var pts = total > 0 ? (weights[i] / total * 100) : 0;
+        r.pointsEl.textContent = pts.toFixed(1) + " 分";
+      });
+    }
+
+    var sumPoints = breakdown.items.reduce(function(s, it){ return s + it.points; }, 0);
+    if(totalEl) totalEl.textContent = sumPoints.toFixed(1) + " 分";
+  }
+
+  // 「編輯題庫」選單：把表格編輯／匯入／匯出／範本 3 個入口收進一個按鈕點開的選單，平常不佔側欄版面。
   var btnBankMenu = document.getElementById("btn-bank-menu");
   var bankMenuPop = document.getElementById("bank-menu-pop");
   function closeBankMenu(){ if(bankMenuPop) bankMenuPop.classList.remove("open"); }
