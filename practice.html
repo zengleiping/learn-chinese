@@ -1144,9 +1144,12 @@
 <script type="module">
 (async function(){
   try{
-    var appMod = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js");
-    var dbMod = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js");
-    var authMod = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js");
+    var mods = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js"),
+      import("https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js")
+    ]);
+    var appMod = mods[0], dbMod = mods[1], authMod = mods[2];
     var fbApp = appMod.initializeApp(window.FIREBASE_CONFIG);
     window.db = dbMod.getDatabase(fbApp);
     window.ref = dbMod.ref; window.onValue = dbMod.onValue; window.set = dbMod.set;
@@ -1193,32 +1196,6 @@
     } catch(e){}
     dlg.removeAttribute("open");
   }
-
-  /* ================== 自動去除 logo.png 白色背景 ================== */
-  function autoTransparentLogo(){
-    var img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = function(){
-      try {
-        var canvas = document.createElement("canvas");
-        canvas.width = img.width; canvas.height = img.height;
-        var ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0);
-        var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        var d = imgData.data;
-        for(var i = 0; i < d.length; i += 4){
-          if(d[i] > 238 && d[i+1] > 238 && d[i+2] > 238){ d[i+3] = 0; }
-        }
-        ctx.putImageData(imgData, 0, 0);
-        var transparentDataUrl = canvas.toDataURL("image/png");
-        var logoImgEl = document.getElementById("brand-logo-img");
-        if(logoImgEl) logoImgEl.src = transparentDataUrl;
-        var faviconEl = document.getElementById("dynamic-favicon");
-        if(faviconEl) faviconEl.href = transparentDataUrl;
-      } catch(e){}
-    };
-    img.src = "logo.png";
-  }
-  window.addEventListener("load", autoTransparentLogo);
 
   /* ================== 畫面縮放控制引擎 ================== */
   var currentZoomRatio = parseFloat(localStorage.getItem("hanyu_zoom_ratio")) || 1.0;
@@ -4453,7 +4430,9 @@
   // 也不會寫進資料庫），而是用 PBKDF2-SHA256（隨機 salt、10 萬次迭代）算出雜湊值後才儲存與比對，詳見下方 hashPassword()。
   // 每位教師自己的資料夾／測驗庫存在 teacherLibraries/{teacherId}，教師之間完全獨立、互不可見。
   var TEACHER_SESSION_KEY = "hanyu_mandamy_teacher_session";
-  var FIREBASE_WAIT_TIMEOUT_MS = 6000;
+  // 第一次冷啟動（瀏覽器要重新載入 SDK、打開本機的登入狀態儲存空間）偶爾會比預期久，
+  // 拉長一點逾時時間，比較不會在連線其實快連上了、只是慢半拍的情況下就顯示連不上。
+  var FIREBASE_WAIT_TIMEOUT_MS = 12000;
   var PBKDF2_ITERATIONS = 100000;
 
   function bytesToHex(bytes){
@@ -4749,7 +4728,20 @@
   async function initTeacherAuthAndStart(){
     showAuthStage("connecting");
     var ready = await waitForFirebase();
-    if(!ready){ showAuthStage("fail"); return; }
+    if(!ready){
+      showAuthStage("fail");
+      // 逾時不代表永遠連不上，很可能只是比預期慢——背景繼續留意連線狀態，
+      // 如果老師還停在這個「連不上」畫面（還沒按離線使用、也還沒登入），連線一旦真的連上了就自動重試一次，
+      // 不用要求老師自己按重試或重新整理頁面。
+      if(window.__firebaseReady){ initTeacherAuthAndStart(); return; }
+      window.addEventListener("firebase-bridge-ready", function onLateFirebaseReady(){
+        window.removeEventListener("firebase-bridge-ready", onLateFirebaseReady);
+        if(authView.style.display !== "none" && authFailSection.style.display !== "none"){
+          initTeacherAuthAndStart();
+        }
+      }, { once: true });
+      return;
+    }
     try{
       var accounts = await fetchAllTeacherAccounts();
       var hasAnyAccount = accounts && Object.keys(accounts).length > 0;
