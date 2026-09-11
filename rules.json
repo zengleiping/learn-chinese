@@ -5,6 +5,16 @@
         ".read": "auth != null",
         ".write": "auth != null"
       }
+    },
+    "teacherAccounts": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "teacherLibraries": {
+      "$teacherId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
     }
   }
 }
