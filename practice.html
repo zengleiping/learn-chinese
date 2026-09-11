@@ -395,6 +395,16 @@
   .stage-sub{font-size:13.5px;color:var(--ink-soft);margin:0;}
   .stage-actions{display:flex;gap:10px;}
 
+  .teacher-note-block{
+    display:flex; gap:10px; align-items:flex-start;
+    background:repeating-linear-gradient(135deg, rgba(178,59,50,0.06), rgba(178,59,50,0.06) 10px, rgba(178,59,50,0.1) 10px, rgba(178,59,50,0.1) 20px);
+    border:1.5px dashed var(--seal); border-radius:14px; padding:12px 16px; margin-bottom:18px;
+  }
+  .teacher-note-block .tn-icon{font-size:18px; line-height:1.3; flex-shrink:0;}
+  .teacher-note-block .tn-body{flex:1; min-width:0;}
+  .teacher-note-block .tn-label{font-size:11.5px; font-weight:700; color:var(--seal); margin-bottom:4px; letter-spacing:0.3px;}
+  .teacher-note-block .tn-text{font-size:14px; color:var(--ink); white-space:pre-wrap; line-height:1.6; word-break:break-word;}
+
   .stage-media-wrap{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
   .media-block{background:var(--surface-2);border:1.5px solid rgba(28,33,30,0.1);border-radius:14px;padding:10px 14px;}
   .media-block-label{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:8px;}
@@ -637,6 +647,10 @@
   .type-toggle button.active{border-color:var(--seal);color:var(--seal);background:var(--seal-soft);}
   label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin:14px 0 6px;}
   input[type="text"], textarea, select{width:100%;border:1.5px solid var(--grid-line);background:var(--surface-2);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:14px;}
+  .teacher-note-field{margin-top:16px;padding:12px 14px;border:1.5px dashed var(--seal);border-radius:12px;background:rgba(178,59,50,0.05);}
+  .teacher-note-field label{color:var(--seal);}
+  .teacher-note-field textarea{background:var(--surface);}
+  .teacher-note-hint{font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.5;}
   .row-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .pair-row, .choice-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
   .pair-row input, .choice-row input[type="text"]{flex:1;}
@@ -888,6 +902,12 @@
       <div id="q-media-list" class="media-edit-list"></div>
       <input type="file" id="f-q-media-file" accept="image/*,audio/*,video/*" multiple style="display:none;">
       <button type="button" class="btn btn-sm" id="btn-add-q-media">＋ 新增媒體 Add Media</button>
+
+      <div class="teacher-note-field">
+        <label style="margin-top:0;">🔒 老師備注（僅老師可見，學生看不到）Teacher Notes (teacher only, hidden from students)</label>
+        <textarea id="f-teacher-note" rows="3" placeholder="例如：聽力題腳本、答案解析、上課提示……學生端絕對不會顯示這裡的內容"></textarea>
+        <p class="teacher-note-hint">💡 這段文字只會顯示在老師畫面（上課／備課／房間內皆同），學生端永遠不會渲染這段內容。</p>
+      </div>
 
       <div id="match-fields">
         <div class="row-two">
@@ -2639,6 +2659,7 @@
 
     document.getElementById("editor-dialog-title").textContent = qId ? "編輯題目" : "新增題目";
     document.getElementById("f-title").value = q ? (q.title || "") : "";
+    document.getElementById("f-teacher-note").value = q ? (q.teacherNote || "") : "";
     qMediaManager.setItems(q ? q.media : []);
 
     document.getElementById("match-fields").style.display = type === "match" ? "block" : "none";
@@ -2745,6 +2766,7 @@
     }
 
     qObj.media = qMediaManager.getItems();
+    qObj.teacherNote = document.getElementById("f-teacher-note").value.trim();
     sec.questions[qId] = qObj;
     writeSections(secs, qId);
     closeModalDialog(editorDialog);
@@ -3075,10 +3097,10 @@
         }
         qId = oldQ ? oldQ.id : uid("q");
         var order = Object.keys(sec.questions).length;
-        if(type === "match") sec.questions[qId] = { id: qId, title: qTitle, order: order, leftLabel: (oldQ && oldQ.leftLabel) || "生詞", rightLabel: (oldQ && oldQ.rightLabel) || "意思", pairs: {}, media: (oldQ && oldQ.media) || [] };
-        else if(type === "choice") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt, choices: {}, answerIds: [], media: (oldQ && oldQ.media) || [] };
-        else if(type === "reorder") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt || "請將下列詞語重組為正確句子 Rearrange the words into a correct sentence", words: [], media: (oldQ && oldQ.media) || [] };
-        else if(type === "board") sec.questions[qId] = { id: qId, title: qTitle, order: order, desc: qPrompt || String(c1 || ""), bgImage: (oldQ && oldQ.bgImage) || "", gridType: (oldQ && oldQ.gridType) || "none", media: (oldQ && oldQ.media) || [] };
+        if(type === "match") sec.questions[qId] = { id: qId, title: qTitle, order: order, leftLabel: (oldQ && oldQ.leftLabel) || "生詞", rightLabel: (oldQ && oldQ.rightLabel) || "意思", pairs: {}, media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "" };
+        else if(type === "choice") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt, choices: {}, answerIds: [], media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "" };
+        else if(type === "reorder") sec.questions[qId] = { id: qId, title: qTitle, order: order, prompt: qPrompt || "請將下列詞語重組為正確句子 Rearrange the words into a correct sentence", words: [], media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "" };
+        else if(type === "board") sec.questions[qId] = { id: qId, title: qTitle, order: order, desc: qPrompt || String(c1 || ""), bgImage: (oldQ && oldQ.bgImage) || "", gridType: (oldQ && oldQ.gridType) || "none", media: (oldQ && oldQ.media) || [], teacherNote: (oldQ && oldQ.teacherNote) || "" };
       }
       var q = sec.questions[qId];
       if(type === "choice" || type === "reorder") q.prompt = qPrompt || q.prompt;
@@ -3178,7 +3200,7 @@
     var sec = currentInfo.section; var q = currentInfo.question;
     var allList = getAllQuestionsList(); var currentIndex = allList.findIndex(function(it){ return it.question.id === q.id; });
     var mediaFingerprint = (sec.media || []).map(function(m){ return m.id; }).join(",") + "|" + (q.media || []).map(function(m){ return m.id; }).join(",");
-    var stageSignature = JSON.stringify([q.id, sec.title, sec.desc || "", q.title, q.desc || "", currentIndex, allList.length, currentClassMode, !!isStudent, mediaFingerprint]);
+    var stageSignature = JSON.stringify([q.id, sec.title, sec.desc || "", q.title, q.desc || "", currentIndex, allList.length, currentClassMode, !!isStudent, mediaFingerprint, q.teacherNote || ""]);
 
     if(sec.type === "board" && liveBoardQId === q.id && stageSignature === lastStageSignature && liveBoardRefresh && liveBoardRefresh()){
       return; // 局部刷新成功：只更新畫布內容（筆畫／文字／格線／底圖），不重建整個舞台
@@ -3229,6 +3251,17 @@
     }
     head.appendChild(actWrap);
     stageEl.appendChild(head);
+
+    if(!isStudent && q.teacherNote && q.teacherNote.trim()){
+      var noteBlock = document.createElement("div"); noteBlock.className = "teacher-note-block";
+      var tnIcon = document.createElement("div"); tnIcon.className = "tn-icon"; tnIcon.textContent = "🔒";
+      var tnBody = document.createElement("div"); tnBody.className = "tn-body";
+      var tnLabel = document.createElement("div"); tnLabel.className = "tn-label"; tnLabel.textContent = "老師備注（僅老師可見）Teacher Notes — only visible to you";
+      var tnText = document.createElement("div"); tnText.className = "tn-text"; tnText.textContent = q.teacherNote;
+      tnBody.appendChild(tnLabel); tnBody.appendChild(tnText);
+      noteBlock.appendChild(tnIcon); noteBlock.appendChild(tnBody);
+      stageEl.appendChild(noteBlock);
+    }
 
     var mediaBlock = renderMediaBlock(sec, q);
     if(mediaBlock) stageEl.appendChild(mediaBlock);
