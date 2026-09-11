@@ -390,8 +390,11 @@
     display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 8px;
     background:var(--surface-2); border:1.5px solid rgba(28,33,30,0.16);
     border-radius:14px; box-shadow:var(--shadow); flex-shrink:0; width:76px;
-    max-height:calc(100vh - 150px); overflow-y:auto; overflow-x:hidden;
   }
+  /* 這裡故意不設 overflow-y/max-height：畫筆／打字的顏色選盤要用 position:absolute 浮出工具列外側，
+     只要工具列本身有 overflow-y:auto（不管是 auto 還是 hidden，只要不是 visible），瀏覽器就會連 overflow-x
+     一起強制變成會裁切的值，色盤就會被裁掉看不見。真的遇到螢幕太矮工具列放不下時，改交給外層 .stage-wrap
+     自己的 overflow-y:auto 去捲動（跟頁面其他地方一致），不要在工具列這一層自己裁切。 */
   :root:not([data-theme="light"]) .draw-toolbar-vertical{ border-color:rgba(255,255,255,0.16); }
   .tool-btn-v-wrap{ position:relative; width:100%; flex-shrink:0; }
   .tool-btn-v{
@@ -467,12 +470,14 @@
 
   .movable-text{
     position:absolute;pointer-events:auto;font-family:"LXGW WenKai TC",serif; font-weight:700;line-height:1;color:var(--ink);user-select:none; padding:0 !important;border:1.5px dashed transparent;border-radius:4px;white-space:nowrap; cursor:grab;transform:translate(-50%, -50%); background: transparent !important; width: max-content; max-width: max-content; transition:border-color .15s ease;
+    touch-action:none; /* 觸控拖曳文字方塊時，不要被瀏覽器當成捲動/縮放手勢 */
   }
   .movable-text:hover, .movable-text.active{ border:1.5px dashed #1E88E5 !important; background: transparent !important; box-shadow: none !important; cursor:move !important; }
   .movable-text.active{ border-color:var(--seal) !important; cursor:grabbing !important; }
 
   .resize-handle{
     display:none;position:absolute;right:-7px;bottom:-7px;width:13px;height:13px; background:#1E88E5;border:2px solid #FFFFFF;border-radius:50%; cursor:nwse-resize !important;box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:10;
+    touch-action:none;
   }
   .movable-text:hover .resize-handle, .movable-text.active .resize-handle{ display:block; }
 
@@ -3234,9 +3239,13 @@
           <div class="resize-handle" title="按住拖動縮放字體"></div>
         `;
 
+        // 改用 Pointer Events（統一處理滑鼠／觸控／觸控筆，包含 iPad 手指與 Apple Pencil），
+        // 並在按下時用 setPointerCapture 把後續的移動/放開事件牢牢鎖定在這個元素上，
+        // 避免手指快速移動時「跑出」元素範圍，被瀏覽器誤判成滑動手勢而中斷拖曳。
         var handle = div.querySelector(".resize-handle");
-        handle.onmousedown = function(e){
+        handle.onpointerdown = function(e){
           e.stopPropagation(); e.preventDefault();
+          try{ handle.setPointerCapture(e.pointerId); }catch(err){}
           var startSize = t.fontSize || 36;
           var centerRect = div.getBoundingClientRect();
           var centerX = centerRect.left + centerRect.width / 2;
@@ -3253,16 +3262,18 @@
           }
 
           function onResizeUp(){
-            window.removeEventListener("mousemove", onResizeMove);
-            window.removeEventListener("mouseup", onResizeUp);
+            handle.removeEventListener("pointermove", onResizeMove);
+            handle.removeEventListener("pointerup", onResizeUp);
+            handle.removeEventListener("pointercancel", onResizeUp);
             writeProgress(q.id, { texts: texts });
           }
 
-          window.addEventListener("mousemove", onResizeMove);
-          window.addEventListener("mouseup", onResizeUp);
+          handle.addEventListener("pointermove", onResizeMove);
+          handle.addEventListener("pointerup", onResizeUp);
+          handle.addEventListener("pointercancel", onResizeUp);
         };
 
-        div.onmousedown = function(e){
+        div.onpointerdown = function(e){
           e.stopPropagation();
 
           if(boardState.tool === "stroke-eraser"){
@@ -3271,6 +3282,7 @@
             return;
           }
 
+          try{ div.setPointerCapture(e.pointerId); }catch(err){}
           activeSelectedTextId = t.id;
           div.classList.add("active");
           if(fontSelect) fontSelect.value = String(t.fontSize || 36);
@@ -3290,13 +3302,15 @@
 
           function onUp(){
             div.classList.remove("active");
-            window.removeEventListener("mousemove", onMove);
-            window.removeEventListener("mouseup", onUp);
+            div.removeEventListener("pointermove", onMove);
+            div.removeEventListener("pointerup", onUp);
+            div.removeEventListener("pointercancel", onUp);
             writeProgress(q.id, { texts: texts });
           }
 
-          window.addEventListener("mousemove", onMove);
-          window.addEventListener("mouseup", onUp);
+          div.addEventListener("pointermove", onMove);
+          div.addEventListener("pointerup", onUp);
+          div.addEventListener("pointercancel", onUp);
         };
 
         textLayer.appendChild(div);
@@ -3328,9 +3342,13 @@
       return false;
     }
 
-    canvas.onmousedown = function(e){
+    // 畫布同樣改用 Pointer Events：iPad 上不管是手指觸控還是 Apple Pencil，都會統一走這一套事件，
+    // 不再只認滑鼠事件。按下時用 setPointerCapture 鎖定畫筆事件在 canvas 上，移動再快、再貼近邊緣，
+    // 都不會被系統手勢（例如捲動／縮放）打斷這一筆的繪製。
+    canvas.onpointerdown = function(e){
       if(!canInteract()) return;
-      e.preventDefault(); // 避免瀏覽器預設的 mousedown 行為把新建立的文字輸入框焦點搶走
+      e.preventDefault(); // 避免瀏覽器預設行為把新建立的文字輸入框焦點搶走，觸控時也能避免出現選取/放大鏡等系統手勢
+      try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
       var p = getPos(e);
       activeSelectedTextId = null;
 
@@ -3359,7 +3377,7 @@
       currentPath = [p];
     };
 
-    window.onmousemove = function(e){
+    canvas.onpointermove = function(e){
       if(!isDrawing) return;
       var p = getPos(e);
       currentPath.push(p);
@@ -3385,7 +3403,7 @@
       ctx.restore();
     };
 
-    window.onmouseup = function(){
+    function endDrawing(){
       if(!isDrawing) return;
       isDrawing = false;
       if(currentPath.length >= 2){
@@ -3399,7 +3417,9 @@
         writeProgress(q.id, { strokes: strokes });
       }
       currentPath = [];
-    };
+    }
+    canvas.onpointerup = endDrawing;
+    canvas.onpointercancel = endDrawing;
 
     var fontSelect = vToolbar.querySelector(".board-font-select");
     if(fontSelect){
