@@ -170,7 +170,18 @@
   }
   .layout.sidebar-collapsed .sidebar{ padding:16px 6px; align-items:center; overflow:visible; }
   .btn-new{width:100%;justify-content:center;padding:11px 16px; font-weight:700;}
-  .sidebar-excel-group{display:flex;flex-direction:column;gap:6px;margin-bottom:4px;}
+  .bank-menu-wrap{position:relative;margin-bottom:4px;}
+  .bank-menu-pop{
+    display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:60;
+    background:var(--surface); border:1.5px solid var(--grid-line); border-radius:12px;
+    box-shadow:0 10px 26px rgba(0,0,0,0.15); padding:6px; flex-direction:column; gap:2px;
+  }
+  .bank-menu-pop.open{display:flex;}
+  .bank-menu-item{
+    text-align:left; padding:9px 12px; border-radius:8px; border:none; background:transparent;
+    color:var(--ink); font-size:12.5px; font-weight:600; cursor:pointer; width:100%;
+  }
+  .bank-menu-item:hover{background:var(--surface-2);}
   .sidebar-inner{display:flex;flex-direction:column;gap:10px;min-width:0;}
   .layout.sidebar-collapsed .sidebar-inner{display:none;}
 
@@ -228,10 +239,10 @@
   }
   .section-q-count{ font-size:11px; color:var(--ink-soft); white-space:nowrap; }
   .section-head-actions{
-    display:flex; align-items:center; gap:2px; flex:none;
+    display:flex; align-items:center; gap:6px; width:100%; justify-content:flex-end;
     opacity:0.45; transition:opacity .15s ease;
   }
-  .section-head-actions button{ pointer-events:auto; }
+  .section-head-actions button{ pointer-events:auto; white-space:nowrap; padding:5px 10px; font-size:11.5px; }
   .section-block:hover .section-head-actions, .section-block:focus-within .section-head-actions{ opacity:1; }
 
   .section-body{
@@ -686,13 +697,14 @@
       <button type="button" class="sidebar-collapse-btn" id="btn-toggle-sidebar" title="收合／展開左側欄 Collapse/Expand"><span class="sidebar-collapse-icon">◀</span><span class="sidebar-collapse-label">收合欄位 Collapse</span></button>
       <div class="sidebar-inner" id="sidebar-inner">
         <button class="btn btn-primary btn-new" id="btn-new-section" type="button">＋ 新增大題 Add Section</button>
-        <button type="button" class="btn btn-sm" id="btn-table-editor" style="width:100%; justify-content:center; margin-top:8px; border:1.5px solid var(--bamboo); color:var(--bamboo); font-weight:700;">📝 表格編輯題庫 Edit as Table</button>
 
-        <div class="sidebar-excel-group">
-          <button type="button" class="btn btn-sm" id="btn-import-excel" style="width:100%; justify-content:center;">📊 匯入 Excel 題庫 Import Excel</button>
-          <div style="display:flex; gap:6px;">
-            <button type="button" class="btn btn-sm btn-ghost" id="btn-dl-template" style="flex:1; justify-content:center; border:1px solid var(--grid-line);" title="下載填題格式檔 Download Template">📥 範本 Template</button>
-            <button type="button" class="btn btn-sm btn-ghost" id="btn-export-excel" style="flex:1; justify-content:center; border:1px solid var(--grid-line);" title="匯出目前題庫成Excel Export to Excel">📤 匯出 Export</button>
+        <div class="bank-menu-wrap" id="bank-menu-wrap">
+          <button type="button" class="btn btn-sm" id="btn-bank-menu" style="width:100%; justify-content:center; margin-top:8px; border:1.5px solid var(--bamboo); color:var(--bamboo); font-weight:700;">編輯題庫 Edit Questions</button>
+          <div class="bank-menu-pop" id="bank-menu-pop">
+            <button type="button" class="bank-menu-item" id="btn-table-editor">表格編輯題庫 Edit as Table</button>
+            <button type="button" class="bank-menu-item" id="btn-import-excel">匯入 Excel 題庫 Import Excel</button>
+            <button type="button" class="bank-menu-item" id="btn-export-excel">匯出 Excel 題庫 Export to Excel</button>
+            <button type="button" class="bank-menu-item" id="btn-dl-template">下載範本檔 Download Template</button>
           </div>
           <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display:none;">
         </div>
@@ -2326,15 +2338,15 @@
             <span class="section-head-collapse-icon">${isCollapsed ? '▶' : '▼'}</span>
             <span class="section-head-title-text">${escapeHtml(sec.title)}</span>
           </div>
-          <div class="section-head-actions">
-            <button type="button" class="btn btn-sm btn-ghost btn-edit-sec" title="編輯大題（標題／說明／媒體）Edit Section" style="padding:2px 6px; color:var(--ink-soft);">✏️</button>
-            <button type="button" class="btn btn-sm btn-ghost btn-add-subq" title="新增小題 Add Question" style="padding:2px 6px; font-weight:700; color:var(--seal);">＋</button>
-            <button type="button" class="btn btn-sm btn-ghost btn-del-sec" title="刪除大題 Delete Section" style="padding:2px 6px; color:var(--ink-soft);">🗑️</button>
-          </div>
         </div>
         <div class="section-head-meta">
           <span class="badge">${typeMeta.label}</span>
           <span class="section-q-count">共 ${qKeys.length} 小題 ${qKeys.length} ${qKeys.length === 1 ? 'Question' : 'Questions'}</span>
+        </div>
+        <div class="section-head-actions">
+          <button type="button" class="btn btn-sm btn-ghost btn-edit-sec" title="編輯大題（標題／說明／媒體）Edit Section" style="color:var(--ink-soft);">編輯</button>
+          <button type="button" class="btn btn-sm btn-ghost btn-add-subq" title="新增小題 Add Question" style="color:var(--seal);">新增小題</button>
+          <button type="button" class="btn btn-sm btn-ghost btn-del-sec" title="刪除大題 Delete Section" style="color:var(--ink-soft);">刪除</button>
         </div>
       `;
 
@@ -2368,8 +2380,8 @@
                 <span class="q-item-title">${escapeHtml(q.title)}</span>
               </span>
               <span class="q-action-btns">
-                <span class="row-del btn-edit-q" title="編輯 Edit" style="font-size:12px; padding:2px 4px; color:var(--ink-soft);">✏️</span>
-                <span class="row-del btn-del-q" title="刪除 Delete" style="font-size:12px; padding:2px 4px;">✕</span>
+                <span class="row-del btn-edit-q" title="編輯 Edit" style="font-size:11px; font-weight:700; padding:2px 6px; color:var(--ink-soft); white-space:nowrap;">編輯</span>
+                <span class="row-del btn-del-q" title="刪除 Delete" style="font-size:11px; font-weight:700; padding:2px 6px; white-space:nowrap;">刪除</span>
               </span>
             `;
 
@@ -2947,6 +2959,14 @@
 
   var btnTableEditor = document.getElementById("btn-table-editor");
   if(btnTableEditor) btnTableEditor.onclick = openTableEditor;
+
+  // 「編輯題庫」選單：把表格編輯／匯入／匯出／範本 4 個入口收進一個按鈕點開的選單，平常不佔側欄版面。
+  var btnBankMenu = document.getElementById("btn-bank-menu");
+  var bankMenuPop = document.getElementById("bank-menu-pop");
+  function closeBankMenu(){ if(bankMenuPop) bankMenuPop.classList.remove("open"); }
+  if(btnBankMenu) btnBankMenu.onclick = function(e){ e.stopPropagation(); if(bankMenuPop) bankMenuPop.classList.toggle("open"); };
+  if(bankMenuPop) bankMenuPop.addEventListener("click", function(e){ if(e.target.closest(".bank-menu-item")) closeBankMenu(); });
+  document.addEventListener("click", function(e){ if(bankMenuPop && bankMenuPop.classList.contains("open") && !e.target.closest("#bank-menu-wrap")) closeBankMenu(); });
 
   var btnAddTableRow = document.getElementById("btn-add-table-row");
   if(btnAddTableRow) btnAddTableRow.onclick = function(){
