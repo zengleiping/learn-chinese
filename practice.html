@@ -4760,6 +4760,7 @@
       }
       renderAuthView("login");
     }catch(e){
+      console.error("讀取教師帳號資料失敗（常見原因：Firebase 資料庫規則沒有開放 teacherAccounts／teacherLibraries 這兩個路徑，只給了 rooms/{roomId}）：", e);
       showAuthStage("fail");
     }
   }
