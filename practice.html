@@ -2351,7 +2351,7 @@
       cloudVocabLessons = bank.courseData;
       renderVocabImportForm();
     }catch(e){
-      vocabImportBody.innerHTML = '<p style="font-size:13.5px; color:var(--wrong);">連線失敗，請檢查網路連線後再試一次。</p>';
+      vocabImportBody.innerHTML = '<p style="font-size:13.5px; color:var(--wrong);">連線失敗，請檢查網路連線後再試一次。' + (e && e.message ? "（" + escapeHtml(e.message) + "）" : "") + '</p>';
     }
   }
 
