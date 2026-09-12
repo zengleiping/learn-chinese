@@ -15,6 +15,12 @@
         ".read": "auth != null",
         ".write": "auth != null"
       }
+    },
+    "teacherVocabBanks": {
+      "$teacherId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
     }
   }
 }
