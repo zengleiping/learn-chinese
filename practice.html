@@ -69,6 +69,9 @@
   .ta-badge-disabled{ background:rgba(28,33,30,0.14); color:var(--ink-soft); }
   .ta-row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
 
+  .topbar-teacher-cluster{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--ink-soft); padding:0 4px; }
+  .topbar-teacher-name{ white-space:nowrap; }
+
   .lobby-wrap{ flex:1;min-height:0;overflow-y:auto; padding:44px clamp(20px, 5vw, 64px); max-width:1200px;margin:0 auto;width:100%; }
   .lobby-header{ display:flex;align-items:flex-end;justify-content:space-between; margin-bottom:24px;gap:16px;flex-wrap:wrap;border-bottom:1.5px solid var(--grid-line);padding-bottom:20px; }
   .lobby-header h2{margin:0;font-size:22px;font-weight:700;}
@@ -160,6 +163,14 @@
   .zoom-floating-btn:hover{background:var(--seal); color:#fff; border-color:var(--seal);}
   .zoom-floating-value{ font-size:12px; font-weight:700; padding:0 8px; color:var(--ink); font-variant-numeric:tabular-nums; cursor:pointer; user-select:none; }
 
+  .timer-floating-widget{ position:relative; display:flex; align-items:center; gap:8px; background:var(--surface); border:1.5px solid var(--grid-line); border-radius:99px; padding:6px 8px 6px 16px; transition: border-color .2s ease, background .2s ease; }
+  .timer-icon{font-size:15px;}
+  .timer-display{font-size:16px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; letter-spacing:0.5px;}
+  .timer-status-tag{font-size:12px; font-weight:700; color:var(--ink-soft); background:var(--surface-2); padding:3px 9px; border-radius:99px;}
+  .timer-btn-group{display:flex; gap:6px; position:relative;}
+  .timer-ctrl-btn{ width:34px; height:34px; border-radius:50%; border:1px solid var(--grid-line); background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; color:var(--ink); transition:all .12s ease; }
+  .timer-ctrl-btn:hover{background:var(--seal); color:#fff; border-color:var(--seal);}
+
   .stage-header-nav{ display:flex;align-items:center;justify-content:space-between; margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--grid-line);gap:12px;flex-wrap:wrap; }
   .nav-page-group{display:flex;align-items:center;gap:8px;}
   .stage-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
@@ -236,8 +247,36 @@
     </div>
   </header>
 
+  <!-- 教師登入／帳號設定畫面 -->
+  <div class="auth-wrap" id="auth-view" style="display:none;">
+    <div class="auth-card">
+      <div id="auth-connecting-section">
+        <p class="auth-hint" style="margin-top:0;">⏳ 正在連線雲端服務…Connecting to cloud service…</p>
+      </div>
+      <div id="auth-fail-section" style="display:none;">
+        <h2 style="text-align:center;margin:0 0 6px;font-size:20px;">無法連線雲端服務</h2>
+        <button type="button" class="btn btn-primary" id="btn-auth-retry" style="width:100%; justify-content:center; margin-top:6px; padding:12px;">🔄 重試 Retry</button>
+        <button type="button" class="btn" id="btn-auth-offline" style="width:100%; justify-content:center; margin-top:10px; padding:12px;">📴 離線使用 Continue Offline</button>
+      </div>
+      <div id="auth-form-section" style="display:none;">
+        <h2 id="auth-title" style="text-align:center;margin:0 0 6px;font-size:20px;">教師登入 Teacher Login</h2>
+        <p class="auth-sub" id="auth-sub"></p>
+        <div id="auth-error" class="auth-error" style="display:none;"></div>
+        <label for="auth-username">帳號 Username</label>
+        <input type="text" id="auth-username" autocomplete="username">
+        <label for="auth-password">密碼 Password</label>
+        <input type="password" id="auth-password" autocomplete="current-password">
+        <div id="auth-confirm-wrap" style="display:none;">
+          <label for="auth-password-confirm">再輸入一次密碼 Confirm Password</label>
+          <input type="password" id="auth-password-confirm" autocomplete="new-password">
+        </div>
+        <button type="button" class="btn btn-primary" id="btn-auth-submit" style="width:100%; justify-content:center; margin-top:14px; padding:12px;">登入 Log In</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 專案大廳 -->
-  <div class="lobby-wrap" id="lobby-view">
+  <div class="lobby-wrap" id="lobby-view" style="display:none;">
     <div class="lobby-header">
       <h2>專案課次大廳 Course Lobby</h2>
       <div class="lobby-header-btns">
@@ -247,7 +286,6 @@
         <button type="button" class="btn btn-primary" id="btn-create-project">＋ 新增測驗 Add Test</button>
       </div>
     </div>
-
     <div class="breadcrumb-bar" id="breadcrumb-bar"></div>
     <div class="project-grid" id="project-grid"></div>
   </div>
@@ -255,19 +293,18 @@
   <!-- 教學主舞台 -->
   <div class="layout" id="classroom-view" style="display:none;">
     <aside class="sidebar" id="sidebar">
-      <button type="button" class="sidebar-collapse-btn" id="btn-toggle-sidebar" title="收合／展開左側欄 Collapse/Expand"><span class="sidebar-collapse-icon">◀</span><span class="sidebar-collapse-label">收合欄位 Collapse</span></button>
+      <button type="button" class="sidebar-collapse-btn" id="btn-toggle-sidebar" title="收合／展開左側欄"><span class="sidebar-collapse-icon">◀</span><span class="sidebar-collapse-label">收合欄位</span></button>
       <div class="sidebar-inner" id="sidebar-inner">
         <button class="btn btn-primary btn-new" id="btn-new-section" type="button">＋ 新增大題 Add Section</button>
         <div class="section-list" id="section-tree-list"></div>
       </div>
     </aside>
-
     <main class="stage-wrap">
       <div class="stage" id="stage"></div>
       <div class="zoom-floating-widget" id="zoom-widget">
-        <button type="button" class="zoom-floating-btn" id="btn-zoom-out" title="縮小畫面 (Zoom Out)">−</button>
-        <span class="zoom-floating-value" id="zoom-percent-text" title="點擊重置為 100% Reset to 100%">100%</span>
-        <button type="button" class="zoom-floating-btn" id="btn-zoom-in" title="放大畫面 (Zoom In)">+</button>
+        <button type="button" class="zoom-floating-btn" id="btn-zoom-out" title="縮小畫面">−</button>
+        <span class="zoom-floating-value" id="zoom-percent-text" title="點擊重置為 100%">100%</span>
+        <button type="button" class="zoom-floating-btn" id="btn-zoom-in" title="放大畫面">+</button>
       </div>
     </main>
   </div>
@@ -275,12 +312,8 @@
 
 <!-- 從生詞雲端匯入彈窗 -->
 <dialog class="dialog-modal" id="vocab-import-dialog">
-  <div class="dialog-head">
-    <h2>☁️ 從生詞雲端匯入 Import from Cloud Vocab</h2>
-  </div>
-  <div class="dialog-body" id="vocab-import-body">
-    <p style="font-size:13.5px; color:var(--ink-soft);">⏳ 正在讀取雲端生詞…</p>
-  </div>
+  <div class="dialog-head"><h2>☁️ 從生詞雲端匯入 Import from Cloud Vocab</h2></div>
+  <div class="dialog-body" id="vocab-import-body"><p style="font-size:13.5px; color:var(--ink-soft);">⏳ 正在讀取雲端生詞…</p></div>
   <div class="dialog-foot">
     <button type="button" class="btn btn-ghost" id="btn-cancel-vocab-import">取消 Cancel</button>
     <button type="button" class="btn btn-primary" id="btn-confirm-vocab-import" style="display:none;">建立測驗 Create Test</button>
@@ -293,7 +326,7 @@
     <div class="dialog-head"><h2 id="folder-dialog-title">新增資料夾</h2></div>
     <div class="dialog-body">
       <label for="f-folder-title">資料夾名稱</label>
-      <input type="text" id="f-folder-title" placeholder="例如：《學華語向前走》 或 第一冊" required>
+      <input type="text" id="f-folder-title" placeholder="例如：《學華語向前走》" required>
       <label for="f-folder-parent">所屬上層資料夾</label>
       <select id="f-folder-parent"></select>
       <label for="f-folder-desc">說明備註（選填）</label>
@@ -325,7 +358,32 @@
   </form>
 </dialog>
 
-<!-- 大題手動新增／編輯彈窗 -->
+<!-- 設定彈窗 -->
+<dialog class="dialog-modal" id="settings-dialog">
+  <div class="dialog-head"><h2>⚙️ 課堂環境與模式設定</h2></div>
+  <div class="dialog-body">
+    <label>🎯 課堂互動模式</label>
+    <div style="display:flex; gap:8px; margin-top:6px;">
+      <button type="button" class="btn btn-sm btn-mode-toggle" data-mode="practice" style="flex:1; justify-content:center;">🟢 練習模式 Practice</button>
+      <button type="button" class="btn btn-sm btn-mode-toggle" data-mode="test" style="flex:1; justify-content:center;">🔴 測驗模式 Test</button>
+    </div>
+    <label style="margin-top:18px;">🔊 作答音效風格</label>
+    <select id="setting-sound-style" style="width:100%;padding:9px;border-radius:8px;border:1.5px solid var(--grid-line);font-size:14px;background:var(--surface-2);color:var(--ink);">
+      <option value="magic">🌟 奇幻魔法 (Magic Sparkle / 推薦)</option>
+      <option value="arcade">🎮 復古電玩 (8-Bit Arcade)</option>
+      <option value="gameshow">🏆 益智電視節目 (TV Quiz Show)</option>
+      <option value="cartoon">🎺 歡樂卡通 (Cartoon Fun)</option>
+      <option value="bell">🔔 清脆水晶鐘 (Crystal Chimes)</option>
+      <option value="mute">🔇 靜音模式 (Mute)</option>
+    </select>
+    <button type="button" class="btn btn-sm btn-primary" id="btn-test-sound" style="margin-top:10px; width:100%; justify-content:center;">🎵 試聽音效 Test Sound</button>
+  </div>
+  <div class="dialog-foot">
+    <button type="button" class="btn btn-primary" id="btn-close-settings">完成 Done</button>
+  </div>
+</dialog>
+
+<!-- 大題新增／編輯彈窗 -->
 <dialog class="dialog-modal" id="section-dialog">
   <form id="section-form">
     <div class="dialog-head"><h2 id="section-dialog-title">新增試卷大題</h2></div>
@@ -458,6 +516,57 @@
     window.dispatchEvent(new Event("resize"));
   }
 
+  /* ================== 音效引擎 ================== */
+  var audioCtx = null;
+  var currentSoundStyle = localStorage.getItem("hanyu_sound_style") || "magic";
+
+  function getAudioContext(){
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  window.addEventListener("touchstart", function(){ getAudioContext(); }, { once:true });
+  window.addEventListener("click", function(){ getAudioContext(); }, { once:true });
+
+  function playTone(style, isCorrect){
+    if(style === "mute") return;
+    try{
+      var ctx = getAudioContext();
+      if(ctx.state === 'suspended') ctx.resume();
+      var now = ctx.currentTime;
+
+      if(isCorrect){
+        if(style === "magic"){
+          [1046.5, 1318.5, 1567.98, 1975.5, 2093].forEach(function(freq, idx){
+            var osc = ctx.createOscillator(), g = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, now + idx * 0.055);
+            g.gain.setValueAtTime(0.18, now + idx * 0.055);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.35);
+            osc.connect(g); g.connect(ctx.destination);
+            osc.start(now + idx * 0.055); osc.stop(now + idx * 0.055 + 0.35);
+          });
+        } else {
+          var osc1 = ctx.createOscillator(), gain1 = ctx.createGain();
+          osc1.type = "sine"; osc1.frequency.setValueAtTime(1318.5, now);
+          gain1.gain.setValueAtTime(0.2, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc1.connect(gain1); gain1.connect(ctx.destination); osc1.start(now); osc1.stop(now + 0.4);
+        }
+      } else {
+        var mOsc = ctx.createOscillator(), mG = ctx.createGain();
+        mOsc.type = "sine";
+        mOsc.frequency.setValueAtTime(320, now);
+        mOsc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
+        mG.gain.setValueAtTime(0.26, now);
+        mG.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        mOsc.connect(mG); mG.connect(ctx.destination);
+        mOsc.start(now); mOsc.stop(now + 0.35);
+      }
+    }catch(e){}
+  }
+  function playCorrectSound(){ if(currentClassMode !== 'test') playTone(currentSoundStyle, true); }
+  function playWrongSound(){ if(currentClassMode !== 'test') playTone(currentSoundStyle, false); }
+
   var STORAGE_FS_KEY = "hanyu-mandamy-v11";
   var uid = function(p){ return p + "_" + Math.random().toString(36).slice(2,9); };
 
@@ -508,15 +617,13 @@
     }
   };
 
-  function migrateFS(data){
-    if(!data || !data.projects) return data;
-    return data;
-  }
+  function migrateFS(data){ return data; }
   function freshDefaultFS(){ return JSON.parse(JSON.stringify(DEFAULT_FS)); }
 
   var fsData = { initialized: true, folders: {}, projects: {} };
-  var currentTeacher = { id: "amy" }; // 修正：預設定義教師身分，避免雲端匯入讀取時崩潰
+  var currentTeacher = null;
   var isOfflineMode = false;
+  var currentClassMode = localStorage.getItem("hanyu_class_mode") || "practice";
 
   function saveFS(){
     if(!fsData) fsData = { folders: {}, projects: {} };
@@ -529,20 +636,16 @@
   }
 
   async function loadTeacherLibrary(teacherId){
-    try {
-      var snap = await get(ref(db, "teacherLibraries/" + teacherId));
-      var data = snap.exists() ? snap.val() : null;
-      if(!data || (!data.initialized && !data.folders && !data.projects)){
-        data = freshDefaultFS();
-        try{ await set(ref(db, "teacherLibraries/" + teacherId), data); }catch(e){}
-      } else {
-        if(!data.folders) data.folders = {};
-        if(!data.projects) data.projects = {};
-      }
-      return migrateFS(data);
-    } catch(e) {
-      return loadLocalOfflineFS();
+    var snap = await get(ref(db, "teacherLibraries/" + teacherId));
+    var data = snap.exists() ? snap.val() : null;
+    if(!data || (!data.initialized && !data.folders && !data.projects)){
+      data = freshDefaultFS();
+      try{ await set(ref(db, "teacherLibraries/" + teacherId), data); }catch(e){}
+    } else {
+      if(!data.folders) data.folders = {};
+      if(!data.projects) data.projects = {};
     }
+    return migrateFS(data);
   }
 
   function loadLocalOfflineFS(){
@@ -649,7 +752,7 @@
     else { Object.assign(getProgress(qId), patch); saveFS(); renderStage(); }
   }
 
-  /* ================== 核心功能：從生詞雲端自動匯入（已新增「生詞 ↔ 注音」選項，且 CHUNK = 5） ================== */
+  /* ================== 雲端生詞匯入（支援生詞↔注音、CHUNK = 5） ================== */
   var vocabImportDialog = document.getElementById("vocab-import-dialog");
   var vocabImportBody = document.getElementById("vocab-import-body");
   var btnConfirmVocabImport = document.getElementById("btn-confirm-vocab-import");
@@ -670,7 +773,7 @@
       cloudVocabLessons = bank.courseData;
       renderVocabImportForm();
     }catch(e){
-      vocabImportBody.innerHTML = '<p style="font-size:13.5px; color:var(--seal);">連線失敗，請檢查網路連線。' + (e && e.message ? "（" + escapeHtml(e.message) + "）" : "") + '</p>';
+      vocabImportBody.innerHTML = '<p style="font-size:13.5px; color:var(--seal);">連線失敗，請檢查網路連線。</p>';
     }
   }
 
@@ -699,7 +802,7 @@
   }
 
   function buildProjectFromVocabPairs(title, folderId, pairs){
-    var CHUNK = 5; // 限制每個小題最多 5 組
+    var CHUNK = 5; // 限制每個小題最多 5 組配對，防止畫面被吃掉
     var secId = uid("sec");
     var questions = {};
     for(var i = 0; i < pairs.length; i += CHUNK){
@@ -915,6 +1018,11 @@
       var startBtn = document.createElement("button"); startBtn.className = "btn btn-primary"; startBtn.textContent = "🔗 開新房間 Start Room";
       startBtn.onclick = createRoom; topbarActions.appendChild(startBtn);
     }
+    if(!isStudent){
+      var setBtn = document.createElement("button"); setBtn.className = "btn btn-sm btn-ghost"; setBtn.textContent = "⚙️ 設定";
+      setBtn.onclick = function(){ safeShowModal(document.getElementById("settings-dialog")); };
+      topbarActions.appendChild(setBtn);
+    }
   }
 
   async function createRoom(){
@@ -1029,7 +1137,7 @@
     closeModalDialog(sectionDialog);
   };
 
-  /* ================== 小題編輯與自訂儲存（含 > 5 組提醒） ================== */
+  /* ================== 小題編輯（含 > 5 組提醒） ================== */
   var editorDialog = document.getElementById("editor-dialog");
   var pairRowsEl = document.getElementById("pair-rows");
   var choiceOptRowsEl = document.getElementById("choice-opt-rows");
@@ -1132,6 +1240,32 @@
     closeModalDialog(editorDialog);
   };
 
+  /* ================== 設定彈窗按鈕 ================== */
+  var settingsDialog = document.getElementById("settings-dialog");
+  var btnCloseSettings = document.getElementById("btn-close-settings");
+  if(btnCloseSettings) btnCloseSettings.onclick = function(){ closeModalDialog(settingsDialog); };
+
+  document.querySelectorAll(".btn-mode-toggle").forEach(function(b){
+    b.onclick = function(){
+      currentClassMode = b.dataset.mode;
+      localStorage.setItem("hanyu_class_mode", currentClassMode);
+      if(activeProjectId || inRoom()) renderStage();
+    };
+  });
+
+  var soundStyleSelect = document.getElementById("setting-sound-style");
+  if(soundStyleSelect){
+    soundStyleSelect.value = currentSoundStyle;
+    soundStyleSelect.onchange = function(){
+      currentSoundStyle = soundStyleSelect.value;
+      localStorage.setItem("hanyu_sound_style", currentSoundStyle);
+    };
+  }
+  var btnTestSound = document.getElementById("btn-test-sound");
+  if(btnTestSound){
+    btnTestSound.onclick = function(){ playTone(currentSoundStyle, true); };
+  }
+
   /* ================== 主舞台渲染 ================== */
   var stageEl = document.getElementById("stage");
   function renderStage(){
@@ -1194,8 +1328,10 @@
       var rightPid = side === "right" ? pid : selection.pid;
       if(leftPid === rightPid){
         matched[leftPid] = true;
+        playCorrectSound();
         writeProgress(q.id, { matched: matched, selection: null });
       } else {
+        playWrongSound();
         writeProgress(q.id, { selection: null });
       }
     }
@@ -1262,6 +1398,7 @@
       btn.innerHTML = `<span class="mc-opt-prefix">${letters[idx] || (idx+1)}</span><span>${c.text}</span>`;
       btn.onclick = function(){
         multiPicks[cid] = !multiPicks[cid];
+        if(correctIds.indexOf(cid) !== -1) playCorrectSound(); else playWrongSound();
         writeProgress(q.id, { multiPicks: multiPicks });
       };
       cBox.appendChild(btn);
@@ -1299,6 +1436,10 @@
       var chip = document.createElement("div"); chip.className = "reorder-chip"; chip.textContent = w;
       chip.onclick = function(){
         poolWords.splice(idx, 1); userWords.push(w);
+        if(userWords.length === correctWords.length){
+          var isMatch = userWords.every((val, i) => val === correctWords[i]);
+          if(isMatch) playCorrectSound(); else playWrongSound();
+        }
         writeProgress(q.id, { userWords: userWords, poolWords: poolWords });
       };
       poolZone.appendChild(chip);
@@ -1319,7 +1460,7 @@
     });
 
     if(ready){
-      fsData = await loadTeacherLibrary(currentTeacher.id);
+      fsData = await loadTeacherLibrary("amy");
     } else {
       fsData = loadLocalOfflineFS();
     }
