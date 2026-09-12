@@ -12,17 +12,17 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root{
-    --paper:#FAF8F5;
+    --paper:#FAF7F2;
     --surface:#FFFFFF;
-    --surface-2:#F2EFE9;
-    --ink:#1C211E;
-    --ink-soft:#5A635E;
-    --grid-line:rgba(28,33,30,0.07);
-    --seal:#A83232;
-    --seal-soft:#FDF2F2;
-    --seal-ring:rgba(168,50,50,0.25);
-    --bamboo:#2D5A27;
-    --bamboo-soft:#EBF2EA;
+    --surface-2:#F2EAE0;
+    --ink:#2B2320;
+    --ink-soft:#6B5F55;
+    --grid-line:rgba(43,35,32,0.08);
+    --seal:#E8825A;
+    --seal-soft:#FBE8DE;
+    --seal-ring:rgba(232,130,90,0.42);
+    --bamboo:#4C8577;
+    --bamboo-soft:#E3F0EC;
     --shadow: 0 10px 30px -10px rgba(28,33,30,0.06), 0 1px 3px rgba(28,33,30,0.02);
     color-scheme: light dark;
   }
@@ -774,6 +774,8 @@
     <div class="lobby-header">
       <h2>專案課次大廳 Course Lobby</h2>
       <div class="lobby-header-btns">
+        <a class="btn" href="https://zengleiping.github.io/mandamyclass/" target="_blank" rel="noopener" style="text-decoration:none;">🎮 課堂遊戲 Class Games</a>
+        <button type="button" class="btn" id="btn-import-vocab-cloud" style="border:1.5px solid var(--seal); color:var(--seal); font-weight:700;">☁️ 從生詞雲端匯入</button>
         <button type="button" class="btn" id="btn-create-folder" style="border:1.5px solid var(--bamboo); color:var(--bamboo); font-weight:700;">＋ 新增資料夾 Add Folder</button>
         <button type="button" class="btn btn-primary" id="btn-create-project">＋ 新增測驗 Add Test</button>
       </div>
@@ -818,6 +820,20 @@
     </main>
   </div>
 </div>
+
+<!-- 從生詞雲端匯入彈窗（讀取 mandamyclass 上傳到 teacherVocabBanks/{teacherId} 的生詞） -->
+<dialog class="dialog-modal" id="vocab-import-dialog">
+  <div class="dialog-head">
+    <h2>☁️ 從生詞雲端匯入 Import from Cloud Vocab</h2>
+  </div>
+  <div class="dialog-body" id="vocab-import-body">
+    <p style="font-size:13.5px; color:var(--ink-soft);">⏳ 正在讀取雲端生詞…</p>
+  </div>
+  <div class="dialog-foot">
+    <button type="button" class="btn btn-ghost" id="btn-cancel-vocab-import">取消 Cancel</button>
+    <button type="button" class="btn btn-primary" id="btn-confirm-vocab-import" style="display:none;">建立測驗 Create Test</button>
+  </div>
+</dialog>
 
 <!-- 資料夾 編輯／新增彈窗 -->
 <dialog class="dialog-modal" id="folder-dialog">
@@ -898,8 +914,8 @@
 
     <label style="margin-top:18px;">🖌️ 按鈕與標記重點色</label>
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
-      <button type="button" class="btn btn-sm btn-theme-accent" data-accent="seal" style="background:#B23B32; color:#fff;">朱砂紅 Red</button>
-      <button type="button" class="btn btn-sm btn-theme-accent" data-accent="bamboo" style="background:#4C7A5E; color:#fff;">竹葉綠 Green</button>
+      <button type="button" class="btn btn-sm btn-theme-accent" data-accent="seal" style="background:#E8825A; color:#fff;">蜜桃橘 Peach</button>
+      <button type="button" class="btn btn-sm btn-theme-accent" data-accent="bamboo" style="background:#4C8577; color:#fff;">竹葉綠 Green</button>
       <button type="button" class="btn btn-sm btn-theme-accent" data-accent="blue" style="background:#1E88E5; color:#fff;">青空藍 Blue</button>
       <button type="button" class="btn btn-sm btn-theme-accent" data-accent="amber" style="background:#E65100; color:#fff;">暖琥珀 Amber</button>
     </div>
@@ -1220,22 +1236,22 @@
     var root = document.documentElement;
 
     if(bgMode === "dark"){
-      root.style.setProperty("--paper", "#191C1B"); root.style.setProperty("--surface", "#242826");
-      root.style.setProperty("--surface-2", "#2E3330"); root.style.setProperty("--ink", "#E5EAE6");
-      root.style.setProperty("--ink-soft", "#9BA79F"); root.style.setProperty("--grid-line", "rgba(255,255,255,0.14)");
+      root.style.setProperty("--paper", "#221C17"); root.style.setProperty("--surface", "#2C2520");
+      root.style.setProperty("--surface-2", "#332A23"); root.style.setProperty("--ink", "#F3ECE2");
+      root.style.setProperty("--ink-soft", "#C6B9A8"); root.style.setProperty("--grid-line", "rgba(243,236,226,0.14)");
     } else if(bgMode === "eyecare"){
       root.style.setProperty("--paper", "#E8EFE6"); root.style.setProperty("--surface", "#F3F7F1");
       root.style.setProperty("--surface-2", "#DCE6D9"); root.style.setProperty("--ink", "#243328");
       root.style.setProperty("--ink-soft", "#5C6B60"); root.style.setProperty("--grid-line", "rgba(36,51,40,0.12)");
     } else {
-      root.style.setProperty("--paper", "#FAF8F5"); root.style.setProperty("--surface", "#FFFFFF");
-      root.style.setProperty("--surface-2", "#F2EFE9"); root.style.setProperty("--ink", "#1C211E");
-      root.style.setProperty("--ink-soft", "#5A635E"); root.style.setProperty("--grid-line", "rgba(28,33,30,0.07)");
+      root.style.setProperty("--paper", "#FAF7F2"); root.style.setProperty("--surface", "#FFFFFF");
+      root.style.setProperty("--surface-2", "#F2EAE0"); root.style.setProperty("--ink", "#2B2320");
+      root.style.setProperty("--ink-soft", "#6B5F55"); root.style.setProperty("--grid-line", "rgba(43,35,32,0.08)");
     }
 
     if(accentColor === "bamboo"){
-      root.style.setProperty("--seal", "#4C7A5E"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#223229" : "#DEEBE3");
-      root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(123,178,148,0.55)" : "rgba(76,122,94,0.42)");
+      root.style.setProperty("--seal", "#4C8577"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#243A34" : "#E3F0EC");
+      root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(127,176,160,0.55)" : "rgba(76,133,119,0.42)");
     } else if(accentColor === "blue"){
       root.style.setProperty("--seal", "#1E88E5"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#1A2E40" : "#E3F2FD");
       root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(66,165,245,0.55)" : "rgba(30,136,229,0.42)");
@@ -1243,8 +1259,8 @@
       root.style.setProperty("--seal", "#E65100"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#382414" : "#FFE0B2");
       root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(255,152,0,0.55)" : "rgba(230,81,0,0.42)");
     } else {
-      root.style.setProperty("--seal", "#B23B32"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#3D2624" : "#F5DFDB");
-      root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(226,105,92,0.55)" : "rgba(178,59,50,0.42)");
+      root.style.setProperty("--seal", "#E8825A"); root.style.setProperty("--seal-soft", bgMode === "dark" ? "#3A2A20" : "#FBE8DE");
+      root.style.setProperty("--seal-ring", bgMode === "dark" ? "rgba(240,153,106,0.55)" : "rgba(232,130,90,0.42)");
     }
 
     localStorage.setItem("hanyu_theme_bg", bgMode);
@@ -2317,6 +2333,100 @@
     }
     saveFS(); closeModalDialog(projectDialog); renderLobbyGrid();
   };
+
+  /* ================== 從生詞雲端匯入（跟 mandamyclass 共用 teacherVocabBanks/{teacherId}） ================== */
+  var vocabImportDialog = document.getElementById("vocab-import-dialog");
+  var vocabImportBody = document.getElementById("vocab-import-body");
+  var btnConfirmVocabImport = document.getElementById("btn-confirm-vocab-import");
+  var cloudVocabLessons = null; // 讀取成功後快取這次的 courseData 陣列
+
+  async function openVocabImportDialog(){
+    vocabImportBody.innerHTML = '<p style="font-size:13.5px; color:var(--ink-soft);">⏳ 正在讀取雲端生詞…</p>';
+    btnConfirmVocabImport.style.display = "none";
+    safeShowModal(vocabImportDialog);
+    try{
+      var snap = await get(ref(db, "teacherVocabBanks/" + currentTeacher.id));
+      var bank = snap.exists() ? snap.val() : null;
+      if(!bank || !Array.isArray(bank.courseData) || !bank.courseData.length){
+        vocabImportBody.innerHTML = '<p style="font-size:13.5px; color:var(--wrong);">雲端目前還沒有生詞資料。請先到「🎮 課堂遊戲 Class Games」(mandamyclass)，按右上角「☁️ 生詞雲端同步」→「上傳目前生詞到雲端」，再回來這裡匯入。</p>';
+        return;
+      }
+      cloudVocabLessons = bank.courseData;
+      renderVocabImportForm();
+    }catch(e){
+      vocabImportBody.innerHTML = '<p style="font-size:13.5px; color:var(--wrong);">連線失敗，請檢查網路連線後再試一次。</p>';
+    }
+  }
+
+  function renderVocabImportForm(){
+    var lessonsHtml = cloudVocabLessons.map(function(l, idx){
+      var count = (l.vocab || []).length;
+      var label = "第 " + escapeHtml(String(l.lesson)) + " 課" + (l.title ? "：" + escapeHtml(l.title) : "") + "（" + count + " 個生詞）";
+      return '<label style="display:flex; align-items:center; gap:8px; padding:5px 0; font-size:13.5px;"><input type="checkbox" class="vocab-import-lesson-chk" value="' + idx + '" checked>' + label + '</label>';
+    }).join("");
+    vocabImportBody.innerHTML = ''
+      + '<label for="vocab-import-title">測驗名稱 Test Name</label>'
+      + '<input type="text" id="vocab-import-title" value="生詞雲端匯入測驗">'
+      + '<label for="vocab-import-folder">收納在資料夾</label>'
+      + '<select id="vocab-import-folder"></select>'
+      + '<label for="vocab-import-pairtype">配對內容 Pair Type</label>'
+      + '<select id="vocab-import-pairtype">'
+      + '<option value="en">生詞 ↔ 英文翻譯</option>'
+      + '<option value="pinyin">生詞 ↔ 拼音</option>'
+      + '<option value="th">生詞 ↔ 泰文翻譯</option>'
+      + '</select>'
+      + '<label style="margin-top:10px; display:block;">選擇要匯入的課次 Lessons</label>'
+      + '<div style="max-height:180px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:6px 10px; margin-bottom:4px;">' + lessonsHtml + '</div>';
+    populateFolderSelect(document.getElementById("vocab-import-folder"), currentFolderId || null, null);
+    btnConfirmVocabImport.style.display = "";
+  }
+
+  function buildProjectFromVocabPairs(title, folderId, pairs){
+    var CHUNK = 10;
+    var secId = uid("sec");
+    var questions = {};
+    for(var i = 0; i < pairs.length; i += CHUNK){
+      var qId = uid("q");
+      var chunk = pairs.slice(i, i + CHUNK);
+      var pairsObj = {};
+      chunk.forEach(function(pr, j){ var pid = "p" + (j + 1); pairsObj[pid] = { id: pid, left: pr.left, right: pr.right }; });
+      var qOrder = Math.floor(i / CHUNK);
+      questions[qId] = { id: qId, title: "第 " + (qOrder + 1) + " 題：生詞配對", order: qOrder, leftLabel: "生詞", rightLabel: "對應內容", pairs: pairsObj };
+    }
+    return {
+      id: uid("proj"), folderId: folderId || null, title: title, desc: "從「曼米中文 Mandamy」生詞雲端自動匯入",
+      currentQId: Object.keys(questions)[0],
+      sections: { [secId]: { id: secId, title: "生詞配對（雲端匯入）", type: "match", order: 0, collapsed: false, questions: questions } }
+    };
+  }
+
+  document.getElementById("btn-import-vocab-cloud").addEventListener("click", openVocabImportDialog);
+  document.getElementById("btn-cancel-vocab-import").addEventListener("click", function(){ closeModalDialog(vocabImportDialog); });
+  btnConfirmVocabImport.addEventListener("click", function(){
+    var title = document.getElementById("vocab-import-title").value.trim() || "生詞雲端匯入測驗";
+    var folderId = document.getElementById("vocab-import-folder").value || null;
+    var pairType = document.getElementById("vocab-import-pairtype").value;
+    var checkedEls = Array.prototype.slice.call(document.querySelectorAll(".vocab-import-lesson-chk:checked"));
+    if(!checkedEls.length){ alert("請至少選擇一課"); return; }
+    var checkedIdx = checkedEls.map(function(el){ return parseInt(el.value, 10); });
+
+    var pairs = [];
+    checkedIdx.forEach(function(idx){
+      var lesson = cloudVocabLessons[idx];
+      (lesson.vocab || []).forEach(function(v){
+        var left = v["生詞"];
+        var right = pairType === "en" ? v["英文翻譯"] : (pairType === "pinyin" ? v["拼音"] : v["泰文翻譯"]);
+        if(left && right) pairs.push({ left: left, right: right });
+      });
+    });
+    if(!pairs.length){ alert("選取的課次沒有可用的配對內容（可能缺少對應欄位）"); return; }
+
+    var newProj = buildProjectFromVocabPairs(title, folderId, pairs);
+    fsData.projects[newProj.id] = newProj;
+    saveFS();
+    closeModalDialog(vocabImportDialog);
+    renderLobbyGrid();
+  });
 
   /* 頂部控制列 */
   var topbarActions = document.getElementById("topbar-actions");
